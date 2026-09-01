@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRACE-X — AI Criminal Network Intelligence & Evidence Fusion System</title>
+    <!-- CSS & Fonts -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Vis.js Graph Canvas Library -->
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">X</div>
+            <div>
+                <div class="brand-text">TRACE-X</div>
+                <div class="sih-badge">SIH26189 // CYBER INTELLIGENCE</div>
+            </div>
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active" data-tab="overview"><span class="nav-icon">📊</span> Overview</li>
+            <li class="nav-item" data-tab="investigations"><span class="nav-icon">📁</span> Investigations</li>
+            <li class="nav-item" data-tab="evidence"><span class="nav-icon">📑</span> Evidence Center</li>
+            <li class="nav-item" data-tab="graph"><span class="nav-icon">🕸️</span> Network Graph</li>
+            <li class="nav-item" data-tab="timeline"><span class="nav-icon">⏱️</span> Multi-Domain Timeline</li>
+            <li class="nav-item" data-tab="communications"><span class="nav-icon">📞</span> Communications</li>
+            <li class="nav-item" data-tab="financial"><span class="nav-icon">💳</span> Financial Intelligence</li>
+            <li class="nav-item" data-tab="blockchain"><span class="nav-icon">⛓️</span> Blockchain Workspace</li>
+            <li class="nav-item" data-tab="osint"><span class="nav-icon">🌐</span> OSINT Workspace</li>
+            <li class="nav-item" data-tab="dvr"><span class="nav-icon">📹</span> DVR/NVR Forensics</li>
+            <li class="nav-item" data-tab="analytics"><span class="nav-icon">🧠</span> Analytics & XAI</li>
+            <li class="nav-item" data-tab="fusion"><span class="nav-icon">🔗</span> Evidence Fusion & Leads</li>
+            <li class="nav-item" data-tab="audit"><span class="nav-icon">🛡️</span> Audit & Chain of Custody</li>
+            <li class="nav-item" data-tab="reports"><span class="nav-icon">📄</span> Reports & Settings</li>
+        </ul>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+        
+        <!-- Top Header Bar -->
+        <header class="top-header">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="global-search-input" class="search-input" placeholder="Global Search (Person, Phone, Acc, Wallet, Vehicle, Case)...">
+            </div>
+            <div class="header-actions">
+                <div class="case-selector" id="header-active-case">ACTIVE CASE: TRACE-2026-017</div>
+                <div class="user-badge">
+                    <div class="avatar">VR</div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-main);">Ins. Vikramaditya Rao</div>
+                        <div style="font-size: 10px;">Level 3 Lead Investigator</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Legal Disclaimer Banner -->
+        <div class="disclaimer-banner">
+            <div><strong>⚖️ LEGAL DISCLAIMER:</strong> TRACE-X provides analytical decision support. Investigative findings represent evidence-supported associations requiring human verification and appropriate legal authorization. The system never automatically declares guilt or criminality.</div>
+            <span class="badge badge-verified">SIH 2026 PROTOTYPE</span>
+        </div>
+
+        <!-- Main Content Area with 14 Views -->
+        <main class="content-area">
+
+            <!-- 1. OVERVIEW VIEW -->
+            <section id="view-overview" class="tab-view active">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Investigation Overview</h2>
+                <div class="grid-stats">
+                    <div class="stat-card">
+                        <div class="stat-title">Active Cases</div>
+                        <div class="stat-val" id="stat-active-cases">2</div>
+                        <div class="stat-sub">Case TRACE-2026-017 Selected</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Evidence Items</div>
+                        <div class="stat-val" id="stat-evidence">6</div>
+                        <div class="stat-sub">100% Hash Verified</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Entities Extracted</div>
+                        <div class="stat-val" id="stat-entities">59</div>
+                        <div class="stat-sub">Persons, Wallets, Vehicles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Relationships</div>
+                        <div class="stat-val" id="stat-relationships">49</div>
+                        <div class="stat-sub">Multi-Domain Links</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Suspicious Patterns</div>
+                        <div class="stat-val" id="stat-anomalies">3</div>
+                        <div class="stat-sub">Hawala & Burst Flags</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">High-Priority Leads</div>
+                        <div class="stat-val" id="stat-leads">1</div>
+                        <div class="stat-sub">Multi-Hop Chain Discovered</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="card">
+                        <div class="card-title">Recent Investigative Activity Feed</div>
+                        <div id="activity-feed">Loading recent activity...</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Real-Time Threat Alert Panel</div>
+                        <div id="alert-panel">Loading alerts...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. INVESTIGATIONS WORKSPACE -->
+            <section id="view-investigations" class="tab-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 style="font-size: 20px; font-weight: 800;">Investigation Workspace</h2>
+                    <button class="btn" onclick="openCreateCaseModal()">👤+ Add New Case</button>
+                </div>
+                <div id="investigations-list">Loading cases...</div>
+            </section>
+
+            <!-- 3. EVIDENCE CENTER -->
+            <section id="view-evidence" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Evidence Ingestion & Chain of Custody</h2>
+                <div class="card">
+                    <div class="card-title">Authorized Evidence Registry</div>
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Evidence ID</th>
+                                <th>Type</th>
+                                <th>Title</th>
+                                <th>Source</th>
+                                <th>SHA-256 Hash</th>
+                                <th>Integrity</th>
+                                <th>Provenance / Custody</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evidence-tbody">
+                            <tr><td colspan="7">Loading evidence items...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4. NETWORK GRAPH -->
+            <section id="view-graph" class="tab-view">
+                <div class="card-title" style="margin-bottom: 12px;">
+                    <span>Interactive Knowledge Network Canvas (Vis.js Physics Engine)</span>
+                    <div>
+                        <span class="badge badge-verified">16 Entity Classes</span>
+                        <span class="badge badge-verified">15 Relation Types</span>
+                    </div>
+                </div>
+                <div id="graph-canvas"></div>
+                <div id="entity-drawer" class="card" style="display: none; margin-top: 16px; border-left: 4px solid var(--accent-cyan);">
+                    <h3>Entity Details: <span id="drawer-entity-name" style="color: var(--accent-cyan);"></span></h3>
+                    <div style="font-size: 12px; margin-top: 6px; display: flex; gap: 16px;">
+                        <div>Type: <strong id="drawer-entity-type"></strong></div>
+                        <div>Threat Score: <strong id="drawer-entity-risk" style="color: var(--status-red);"></strong></div>
+                        <div>Status: <strong id="drawer-entity-status"></strong></div>
+                    </div>
+                    <p id="drawer-entity-details" style="font-size: 12px; color: var(--text-muted); margin-top: 8px;"></p>
+                </div>
+            </section>
+
+            <!-- 5. MULTI-DOMAIN TIMELINE -->
+            <section id="view-timeline" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Multi-Domain Chronological Timeline</h2>
+                <div class="card">
+                    <div class="card-title">Chronological Event Stream (Correlation Window: ±24 Hours around Incident #1042)</div>
+                    <div id="timeline-container" class="timeline-list">Loading timeline...</div>
+                </div>
+            </section>
+
+            <!-- 6. COMMUNICATIONS -->
+            <section id="view-communications" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Communication Intelligence (CDR Analytics)</h2>
+                <div class="card">
+                    <div class="card-title">Flagged Pre-Incident Communication Bursts</div>
+                    <div id="comm-flagged-list">Loading CDR intelligence...</div>
+                </div>
+            </section>
+
+            <!-- 7. FINANCIAL INTELLIGENCE -->
+            <section id="view-financial" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Financial Intelligence & Hawala Risk Indicators</h2>
+                <div class="card">
+                    <div class="card-title">High-Velocity Transaction Chains & Informal Value Transfer Anomalies</div>
+                    <div id="fin-list">Loading financial records...</div>
+                </div>
+            </section>
+
+            <!-- 8. BLOCKCHAIN WORKSPACE -->
+            <section id="view-blockchain" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Blockchain Intelligence & Wallet Analytics</h2>
+                <div class="card">
+                    <div class="card-title">On-Chain Token Flows & Crypto Off-Ramp Alerts</div>
+                    <div id="blk-list">Loading on-chain data...</div>
+                </div>
+            </section>
+
+            <!-- 9. OSINT WORKSPACE -->
+            <section id="view-osint" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">OSINT Workspace (Public Intel Correlation)</h2>
+                <div class="card">
+                    <div class="card-title">Correlated Handles, Darkweb Pastes & Public Web Records</div>
+                    <div id="osint-list">Loading OSINT findings...</div>
+                </div>
+            </section>
+
+            <!-- 10. DVR/NVR FORENSICS -->
+            <section id="view-dvr" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">DVR/NVR Forensic Video Analysis</h2>
+                <div class="card">
+                    <div class="card-title">ANPR License Plate Detections & Frame Carving Logs</div>
+                    <div id="dvr-list">Loading DVR logs...</div>
+                </div>
+            </section>
+
+            <!-- 11. ANALYTICS & XAI -->
+            <section id="view-analytics" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Graph Analytics & Influential Entity Ranking</h2>
+                <div class="card">
+                    <div class="card-title">Network Centrality Metrics (Degree, Betweenness, PageRank)</div>
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Entity Label</th>
+                                <th>Type</th>
+                                <th>Degree Centrality</th>
+                                <th>Betweenness</th>
+                                <th>PageRank</th>
+                                <th>Network Assessment</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analytics-tbody">
+                            <tr><td colspan="6">Loading graph metrics...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 12. EVIDENCE FUSION & LEADS -->
+            <section id="view-fusion" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Evidence Fusion & Explainable AI Lead Generator</h2>
+                <div class="card">
+                    <div class="card-title">Multi-Domain Evidence Chain Synthesis</div>
+                    <div id="fusion-chain-container">Loading Evidence Fusion Engine...</div>
+                </div>
+            </section>
+
+            <!-- 13. AUDIT & CHAIN OF CUSTODY -->
+            <section id="view-audit" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Cryptographic Chain of Custody & Tamper Auditor</h2>
+                <div class="card">
+                    <div class="card-title">
+                        <span>SHA-256 Immutable Evidence Block Explorer</span>
+                        <span id="blockchain-status" class="badge badge-verified">Checking Blockchain Integrity...</span>
+                    </div>
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Block #</th>
+                                <th>Timestamp</th>
+                                <th>Action Type</th>
+                                <th>Actor</th>
+                                <th>SHA-256 Hash</th>
+                                <th>SIH Tamper Test</th>
+                            </tr>
+                        </thead>
+                        <tbody id="audit-tbody">
+                            <tr><td colspan="6">Loading blockchain ledger...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 14. REPORTS & SETTINGS -->
+            <section id="view-reports" class="tab-view">
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Investigation Reports & Export</h2>
+                <div class="card">
+                    <div class="card-title">
+                        <span>Official TRACE-X Investigation Report Preview</span>
+                        <button class="btn" onclick="window.print()">🖨️ Print / Export PDF Report</button>
+                    </div>
+                    <iframe id="report-preview-frame" style="width: 100%; height: 600px; border: 1px solid var(--border-color); background: #ffffff; border-radius: 6px;"></iframe>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MATCHED UI HIGH-FIDELITY CREATE NEW CASE MODAL -->
+    <div id="create-case-modal" class="modal-overlay">
+        <div class="modal-card">
+            
+            <div class="modal-header">
+                <div class="modal-header-title">
+                    <div class="modal-header-icon">👤+</div>
+                    <span>Add New Investigation Case</span>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeCreateCaseModal()">✕</button>
+            </div>
+
+            <form id="create-case-form" onsubmit="submitNewCase(event)">
+                
+                <div class="form-group">
+                    <label class="form-label">CASE FULL TITLE <span class="req">*</span></label>
+                    <input type="text" id="case-input-title" required class="form-field-input" placeholder="e.g. Operation Cipher Net / SIM Swapping Inquiry">
+                </div>
+
+                <div class="form-grid-2">
+                    <div>
+                        <label class="form-label">PRIMARY SUBJECT <span class="req">*</span></label>
+                        <input type="text" id="case-input-subject" required class="form-field-input" placeholder="e.g. Rahul Sharma">
+                    </div>
+                    <div>
+                        <label class="form-label">PRIORITY LEVEL <span class="req">*</span></label>
+                        <select id="case-input-priority" class="form-field-input">
+                            <option value="HIGH">HIGH PRIORITY</option>
+                            <option value="MEDIUM">MEDIUM PRIORITY</option>
+                            <option value="LOW">LOW PRIORITY</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">LEAD INVESTIGATOR <span class="req">*</span></label>
+                    <input type="text" id="case-input-investigator" required class="form-field-input" value="Ins. Vikramaditya Rao (#INV-7092)">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">INVESTIGATING AGENCY <span class="req">*</span></label>
+                    <input type="text" id="case-input-agency" required class="form-field-input" value="Special Cyber Crime & Intelligence Cell (SCCIC)">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">CASE SCOPE & DESCRIPTION <span class="req">*</span></label>
+                    <textarea id="case-input-desc" required rows="3" class="form-field-input" placeholder="Enter key crime report facts, FIR identifiers, and preliminary leads..."></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-pill-cancel" onclick="closeCreateCaseModal()">CANCEL</button>
+                    <button type="submit" class="btn-pill-submit">REGISTER CASE</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- JS Application Controller -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
