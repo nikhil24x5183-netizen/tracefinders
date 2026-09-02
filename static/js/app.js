@@ -26,7 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function toggleTheme() {
-    // Standard institutional workstation operates in dark mode
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.innerText = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
     if (currentGraphData) renderGraphWithLayout(currentGraphLayout);
 }
 
@@ -130,8 +133,8 @@ async function loadOverviewData() {
         const actList = document.getElementById('activity-feed');
         if (actList && data.investigation_activity) {
             actList.innerHTML = data.investigation_activity.map(act => `
-                <div style="padding: 10px 0; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; font-size: 12px;">
-                    <span><strong style="color: var(--text-main); font-family: monospace;">[${act.time}]</strong> ${act.event}</span>
+                <div style="padding: 12px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; font-size: 13px;">
+                    <span>⚡ <strong style="color: var(--text-main);">[${act.time}]</strong> ${act.event}</span>
                     <span class="badge badge-verified">${act.domain}</span>
                 </div>
             `).join('');
@@ -154,7 +157,7 @@ async function loadInvestigationsData() {
             const secondaries = c.secondary_suspects || [];
 
             return `
-                <div class="card" style="border-left: 3px solid var(--accent-gold);">
+                <div class="card" style="border-left: 4px solid var(--accent-blue);">
                     <div class="card-title">
                         <span>${c.id}: ${c.title} (${c.location})</span>
                         <span class="badge badge-verified">${c.status}</span>
@@ -163,26 +166,26 @@ async function loadInvestigationsData() {
                     <div class="suspect-card" onclick="openPersonDrawer('${primary.id}')" style="cursor: pointer;">
                         <img src="${primary.photo_url}" class="suspect-avatar">
                         <div>
-                            <div style="font-size: 15px; font-weight: 700; color: var(--text-main);">${primary.name} <span class="badge badge-high" style="font-size: 10px;">Primary Subject</span></div>
-                            <div style="font-size: 12px; color: var(--text-muted); margin: 3px 0;">Age: <strong>${primary.age}</strong> | City: <strong>${primary.city}</strong> | Occupation: <strong>${primary.occupation}</strong></div>
-                            <div style="font-size: 12px; color: var(--accent-gold); font-family: monospace;">TEL: ${primary.phone} | MAIL: ${primary.email}</div>
+                            <div style="font-size: 16px; font-weight: 800; color: var(--text-main);">${primary.name} <span class="badge badge-high" style="font-size: 10px;">Primary Subject</span></div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin: 4px 0;">Age: <strong>${primary.age}</strong> | City: <strong>${primary.city}</strong> | Occupation: <strong>${primary.occupation}</strong></div>
+                            <div style="font-size: 13px; color: var(--accent-blue);">📞 ${primary.phone} | ✉️ ${primary.email}</div>
                         </div>
                     </div>
 
-                    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 12px 0 8px 0; letter-spacing: 0.5px;">Connected Subjects & Associates (${secondaries.length}):</div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 12px;">
+                    <div style="font-size: 12px; font-weight: 800; color: var(--accent-blue); text-transform: uppercase; margin: 12px 0 8px 0;">👥 Connected Subjects & Associates (${secondaries.length}):</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 12px;">
                         ${secondaries.map(sec => `
-                            <div style="padding: 8px 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px; display: flex; gap: 10px; align-items: center; cursor: pointer;" onclick="changeActivePerson('${sec.id}')">
-                                <img src="${sec.photo_url}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover;">
+                            <div style="padding: 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; display: flex; gap: 10px; align-items: center; cursor: pointer;" onclick="changeActivePerson('${sec.id}')">
+                                <img src="${sec.photo_url}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
                                 <div>
-                                    <div style="font-size: 12px; font-weight: 700; color: var(--text-main);">${sec.name}</div>
-                                    <div style="font-size: 11px; color: var(--accent-gold);">${sec.role}</div>
+                                    <div style="font-size: 13px; font-weight: 700; color: var(--text-main);">${sec.name}</div>
+                                    <div style="font-size: 11px; color: var(--accent-blue);">${sec.role}</div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
 
-                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">${c.description}</p>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">${c.description}</p>
                 </div>
             `;
         }).join('');
@@ -203,12 +206,12 @@ async function loadPersonsViewData() {
 
         container.innerHTML = `
             <div class="card">
-                <div style="display: flex; gap: 20px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 16px; margin-bottom: 16px;">
-                    <img src="${p.photo_url}" style="width: 84px; height: 84px; border-radius: 8px; object-fit: cover; border: 2px solid var(--accent-gold);">
+                <div style="display: flex; gap: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px;">
+                    <img src="${p.photo_url}" style="width: 100px; height: 100px; border-radius: 14px; object-fit: cover; border: 3px solid var(--accent-blue);">
                     <div>
-                        <div style="font-size: 20px; font-weight: 700; color: var(--text-main);">${p.name}</div>
-                        <div style="font-size: 13px; font-weight: 600; color: var(--accent-gold); margin: 3px 0;">Role: ${p.role} (ID: ${p.id})</div>
-                        <div style="font-size: 12px; color: var(--text-muted); display: flex; gap: 16px; margin-top: 6px;">
+                        <div style="font-size: 24px; font-weight: 800; color: var(--text-main);">${p.name}</div>
+                        <div style="font-size: 15px; font-weight: 700; color: var(--accent-blue); margin: 4px 0;">Role: ${p.role} (ID: ${p.id})</div>
+                        <div style="font-size: 13px; color: var(--text-muted); display: flex; gap: 20px; margin-top: 8px;">
                             <div>Case: <strong style="color: var(--text-main);">${currentCaseId}</strong></div>
                             <div>Status: <span class="badge badge-high">${p.status}</span></div>
                             <div>Last Updated: <strong style="color: var(--text-main);">${p.last_updated}</strong></div>
@@ -216,47 +219,47 @@ async function loadPersonsViewData() {
                     </div>
                 </div>
 
-                <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px;">Structured Person Identifiers</div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; font-size: 12px;">
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px;">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">FULL NAME</div>
-                        <div style="font-weight: 700; color: var(--text-main); font-size: 13px;">${p.name}</div>
+                <h4 style="font-size: 15px; color: var(--accent-blue); margin-bottom: 12px;">STRUCTURED IDENTIFIERS (Click identifier to navigate):</h4>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; font-size: 13px;">
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">FULL NAME</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${p.name}</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px;">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">KNOWN ALIASES</div>
-                        <div style="font-weight: 700; color: var(--accent-gold); font-size: 13px;">${p.alias}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">KNOWN ALIASES</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">${p.alias}</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px;">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">AGE & GENDER</div>
-                        <div style="font-weight: 700; color: var(--text-main); font-size: 13px;">${p.age} (${p.gender})</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">AGE & GENDER</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${p.age} (${p.gender})</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px;">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">OCCUPATION</div>
-                        <div style="font-weight: 700; color: var(--text-main); font-size: 13px;">${p.occupation}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">OCCUPATION</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${p.occupation}</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px;">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">ORGANIZATION</div>
-                        <div style="font-weight: 700; color: var(--text-main); font-size: 13px;">${p.organization}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">ORGANIZATION</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${p.organization}</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('communications')">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">PHONE NUMBER</div>
-                        <div style="font-weight: 700; color: var(--accent-gold); font-size: 13px; font-family: monospace;">${p.phone}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;" onclick="switchTab('communications')">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">PHONE ➔ COMMUNICATION ANALYSIS</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">📞 ${p.phone}</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px;">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">EMAIL ADDRESS</div>
-                        <div style="font-weight: 700; color: var(--text-main); font-size: 13px; font-family: monospace;">${p.email}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">EMAIL</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">✉️ ${p.email}</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('dvr')">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">REGISTERED VEHICLE</div>
-                        <div style="font-weight: 700; color: var(--accent-gold); font-size: 13px; font-family: monospace;">${p.vehicle}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;" onclick="switchTab('dvr')">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">VEHICLE ➔ VEHICLE INTELLIGENCE</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">🚘 ${p.vehicle}</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('osint')">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">PUBLIC USERNAME</div>
-                        <div style="font-weight: 700; color: var(--accent-gold); font-size: 13px; font-family: monospace;">${p.social_usernames ? p.social_usernames.twitter || '@user' : '@user'}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;" onclick="switchTab('osint')">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">PUBLIC USERNAME ➔ PUBLIC-SOURCE INTEL</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">🌐 ${p.social_usernames ? p.social_usernames.twitter || '@user' : '@user'}</div>
                     </div>
-                    <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; grid-column: span 3;" onclick="switchTab('blockchain')">
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">BLOCKCHAIN WALLET ADDRESS</div>
-                        <div style="font-weight: 700; color: var(--accent-gold); font-size: 13px; font-family: monospace;">${p.wallet_address}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;" onclick="switchTab('blockchain')">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">WALLET ➔ BLOCKCHAIN ANALYSIS</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">⛓️ ${p.wallet_address}</div>
                     </div>
                 </div>
             </div>
@@ -278,38 +281,38 @@ async function loadFusionData() {
         const xai = data.explainable_ai || {};
 
         container.innerHTML = `
-            <div style="margin-bottom: 20px;">
-                <div style="font-size: 12px; font-weight: 700; color: var(--accent-gold); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
-                    Multi-Hop Cross-Domain Correlated Evidence Chain (${data.person_name})
+            <div style="margin-bottom: 24px;">
+                <div style="font-size: 14px; font-weight: 800; color: var(--accent-blue); margin-bottom: 12px; text-transform: uppercase;">
+                    🔗 Multi-Hop Cross-Domain Correlated Evidence Chain (${data.person_name})
                 </div>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
                     ${chain.map((c, idx) => `
-                        <div style="padding: 12px; background: #101317; border: 1px solid var(--border-color); border-top: 3px solid var(--accent-gold); border-radius: 6px; min-width: 160px; flex: 1;">
-                            <div style="font-size: 10px; color: var(--text-subtle); font-weight: 700; font-family: monospace;">STEP 0${c.step} // ${c.domain}</div>
-                            <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 3px 0;">${c.label}</div>
-                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">${c.detail}</div>
+                        <div style="padding: 14px; background: var(--bg-card-hover); border: 1.5px solid var(--border-color); border-top: 3px solid var(--accent-blue); border-radius: 10px; min-width: 180px; flex: 1;">
+                            <div style="font-size: 10px; color: var(--text-muted); font-weight: 800; font-family: monospace;">STEP 0${c.step} // ${c.domain}</div>
+                            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin: 4px 0;">${c.label}</div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">${c.detail}</div>
                             <button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;" onclick="openEvidenceDetailModal('${c.badge}')">Ref: ${c.badge}</button>
                         </div>
-                        ${idx < chain.length - 1 ? '<div style="font-size: 16px; color: var(--accent-gold); font-weight: 700;">➔</div>' : ''}
+                        ${idx < chain.length - 1 ? '<div style="font-size: 18px; color: var(--accent-blue); font-weight: 800;">➔</div>' : ''}
                     `).join('')}
                 </div>
             </div>
 
             <div class="xai-box">
-                <div style="font-size: 13px; font-weight: 700; color: var(--accent-gold); margin-bottom: 8px;">
-                    EXPLAINABLE AI (XAI) INTELLIGENCE ASSESSMENT
+                <div style="font-size: 15px; font-weight: 800; color: var(--accent-blue); margin-bottom: 10px;">
+                    🧠 EXPLAINABLE AI (XAI) INTELLIGENCE ASSESSMENT
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px; margin-bottom: 10px;">
-                    <div>Confidence Score: <span class="badge badge-verified" style="font-size: 11px;">${xai.confidence_score}</span></div>
-                    <div>Status: <span class="badge badge-medium" style="font-size: 11px;">${xai.action_status}</span></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; margin-bottom: 12px;">
+                    <div>Confidence Score: <span class="badge badge-verified" style="font-size: 12px;">${xai.confidence_score}</span></div>
+                    <div>Status: <span class="badge badge-medium" style="font-size: 12px;">${xai.action_status}</span></div>
                 </div>
-                <div style="font-size: 12px; color: var(--text-main); margin-bottom: 6px;">
+                <div style="font-size: 13px; color: var(--text-main); margin-bottom: 8px;">
                     <strong>CORRELATION RATIONALE:</strong> ${xai.what}
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
                     <strong>FLAGGING RATIONALE:</strong> ${xai.why}
                 </div>
-                <div style="font-size: 11px; color: var(--status-amber);">
+                <div style="font-size: 12px; color: var(--status-amber);">
                     <strong>ALTERNATIVE HYPOTHESIS:</strong> ${xai.alternative_explanation}
                 </div>
             </div>
@@ -319,7 +322,7 @@ async function loadFusionData() {
     }
 }
 
-// 5. LINK ANALYSIS KNOWLEDGE GRAPH (REQUIREMENT 13 — INSTITUTIONAL PALETTE)
+// 5. LINK ANALYSIS KNOWLEDGE GRAPH
 async function loadGraphData() {
     try {
         const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
@@ -386,25 +389,22 @@ function renderGraphWithLayout(layoutType) {
     const container = document.getElementById('graph-canvas');
     if (!container) return;
 
-    // INSTITUTIONAL GRAPH COLOR SYSTEM (REQUIREMENT 13)
+    const isDark = document.body.classList.contains('dark-mode');
+
     const visNodes = currentGraphData.nodes.map(n => {
-        let nodeColor = { background: '#1E242B', border: '#475569' };
-        
+        let nodeColor = { background: '#2563eb', border: '#1d4ed8' };
         if (n.id === currentPersonId) {
-            // Selected Root Person: Antique Gold Accent
-            nodeColor = { background: '#252119', border: '#B59A62' };
+            nodeColor = { background: '#dc2626', border: '#b91c1c' };
         } else if (n.type === 'PHONE') {
-            nodeColor = { background: '#192534', border: '#3B82F6' };
+            nodeColor = { background: '#0284c7', border: '#0369a1' };
         } else if (n.type === 'VEHICLE') {
-            nodeColor = { background: '#2E2718', border: '#D97706' };
+            nodeColor = { background: '#d97706', border: '#b45309' };
         } else if (n.type === 'BANK_ACCOUNT') {
-            nodeColor = { background: '#162C20', border: '#22C55E' };
+            nodeColor = { background: '#16a34a', border: '#15803d' };
         } else if (n.type === 'WALLET') {
-            nodeColor = { background: '#2A1F3B', border: '#A855F7' };
+            nodeColor = { background: '#7c3aed', border: '#6d28d9' };
         } else if (n.type === 'ORGANIZATION') {
-            nodeColor = { background: '#1F242B', border: '#64748B' };
-        } else if (n.type === 'EVIDENCE') {
-            nodeColor = { background: '#162C20', border: '#38A169' };
+            nodeColor = { background: '#475569', border: '#334155' };
         }
 
         return {
@@ -412,7 +412,7 @@ function renderGraphWithLayout(layoutType) {
             label: `${n.label}\n[${n.type}]`,
             shape: n.type === 'PERSON' ? 'dot' : 'square',
             color: nodeColor,
-            font: { color: '#E7E9EC', size: 12, strokeWidth: 2, strokeColor: '#0B0D0F', face: 'Inter' },
+            font: { color: isDark ? '#f8fafc' : '#0f172a', size: 13, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff', face: 'Inter' },
             level: n.tree_level !== undefined ? n.tree_level : 1,
             nodeType: n.type,
             personId: n.personId
@@ -425,8 +425,8 @@ function renderGraphWithLayout(layoutType) {
         to: e.target,
         label: e.relation,
         arrows: 'to',
-        color: { color: '#59616A', highlight: '#B59A62' },
-        font: { color: '#9CA3AA', size: 10, strokeWidth: 2, strokeColor: '#0B0D0F' },
+        color: { color: isDark ? '#60a5fa' : '#2563eb' },
+        font: { color: isDark ? '#94a3b8' : '#475569', size: 11, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff' },
         length: 100,
         evidenceId: e.evidence_id
     }));
@@ -506,7 +506,7 @@ function renderGraphWithLayout(layoutType) {
     });
 }
 
-// 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENT 19)
+// 10. CCTV / DVR FORENSICS WORKSPACE
 async function loadDVRData() {
     try {
         const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
@@ -534,8 +534,8 @@ async function loadDVRData() {
         const camList = document.getElementById('dvr-camera-list');
         if (camList && allCameraInventoryData) {
             camList.innerHTML = allCameraInventoryData.map(c => `
-                <div style="padding: 6px 10px; background: #101317; border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 4px; cursor: pointer;" onclick="openCameraDetailModal('${c.id}')">
-                    <strong style="color: var(--accent-gold); font-family: monospace;">${c.id}</strong>: ${c.name} (${c.location})
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 6px; cursor: pointer;" onclick="openCameraDetailModal('${c.id}')">
+                    <strong style="color: var(--accent-blue);">${c.id}</strong>: ${c.name} (${c.location})
                 </div>
             `).join('');
         }
@@ -558,25 +558,25 @@ function renderCameraInventoryGrid(cameras) {
         <div class="camera-card-full">
             <div class="camera-card-thumb">
                 <img src="${c.image_url}" alt="${c.name} Stream">
-                <div style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.85); color: #fff; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 10px; font-weight: 700;">● ${c.id}</div>
-                <div style="position: absolute; top: 6px; right: 6px; background: ${c.status === 'Active Recording' ? 'rgba(56,161,105,0.9)' : 'rgba(217,119,6,0.9)'}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700;">● ${c.status.toUpperCase()}</div>
-                <div style="position: absolute; bottom: 6px; left: 6px; background: rgba(0,0,0,0.8); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 9px;">${c.location}</div>
+                <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.8); color: #fff; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-size: 11px; font-weight: 800;">● ${c.id}</div>
+                <div style="position: absolute; top: 8px; right: 8px; background: ${c.status === 'Active Recording' ? 'rgba(22,163,74,0.9)' : 'rgba(217,119,6,0.9)'}; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800;">● ${c.status.toUpperCase()}</div>
+                <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px;">${c.location}</div>
             </div>
-            <div style="padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="padding: 14px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">${c.name}</div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
-                        <div>Location: <strong>${c.location}</strong></div>
-                        <div>Window: <strong>${c.recording_window}</strong> (${c.date})</div>
-                        <div>Last Event: <strong style="color: var(--accent-gold);">${c.last_event_time}</strong></div>
+                    <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">${c.name}</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+                        <div>📍 Location: <strong>${c.location}</strong></div>
+                        <div>⏱️ Window: <strong>${c.recording_window}</strong> (${c.date})</div>
+                        <div>🕒 Last Event: <strong style="color: var(--accent-blue);">${c.last_event_time}</strong></div>
                     </div>
-                    <div style="display: flex; gap: 10px; background: #101317; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-color); font-size: 10px; margin-bottom: 10px;">
-                        <div>EVENTS: <strong style="color: var(--text-main); font-size: 12px;">${c.events_count}</strong></div>
-                        <div>EVIDENCE: <strong style="color: var(--status-green); font-size: 12px;">${c.evidence_links}</strong></div>
-                        <div>PERSONS: <strong style="color: var(--accent-gold); font-size: 12px;">${c.associated_persons_count}</strong></div>
+                    <div style="display: flex; gap: 12px; background: var(--bg-card-hover); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 11px; margin-bottom: 12px;">
+                        <div>EVENTS: <strong style="color: var(--accent-blue); font-size: 13px;">${c.events_count}</strong></div>
+                        <div>EVIDENCE: <strong style="color: var(--status-green); font-size: 13px;">${c.evidence_links}</strong></div>
+                        <div>PERSONS: <strong style="color: var(--text-main); font-size: 13px;">${c.associated_persons_count}</strong></div>
                     </div>
                 </div>
-                <button class="btn btn-secondary" style="width: 100%; font-size: 11px; padding: 6px;" onclick="openCameraDetailModal('${c.id}')">INSPECT CAMERA</button>
+                <button class="btn" style="width: 100%; font-size: 12px; padding: 8px;" onclick="openCameraDetailModal('${c.id}')">🔍 OPEN CAMERA</button>
             </div>
         </div>
     `).join('');
@@ -612,7 +612,7 @@ function renderAllCameraEventsTable(events) {
 
     tbody.innerHTML = events.map(e => `
         <tr>
-            <td><strong style="color: var(--accent-gold); font-family: monospace;">${e.time}</strong></td>
+            <td><strong style="color: var(--accent-blue); font-family: monospace;">${e.time}</strong></td>
             <td><span class="badge badge-verified">${e.camera_id}</span></td>
             <td><strong>${e.event}</strong></td>
             <td>${e.person}</td>
@@ -634,16 +634,16 @@ function openCameraDetailModal(camId) {
     document.getElementById('cam-modal-name').innerText = `${cam.name} (${cam.location})`;
 
     document.getElementById('cam-modal-body').innerHTML = `
-        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <div style="background: #000; border-radius: 8px; overflow: hidden; aspect-ratio: 16/9; position: relative;">
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div style="background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; position: relative;">
                 <img src="${cam.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
-                <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.85); color: #38a169; padding: 3px 6px; border-radius: 4px; font-family: monospace; font-size: 10px;">● LIVE STREAM | ${cam.id} | ${cam.date}</div>
+                <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #10b981; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 11px;">● LIVE STREAM | ${cam.id} | ${cam.date}</div>
             </div>
             
-            <div style="background: #101317; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; font-size: 12px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; font-size: 13px; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <div style="font-size: 11px; font-weight: 700; color: var(--accent-gold); margin-bottom: 6px; text-transform: uppercase;">Camera Metadata Specifications</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <div style="font-size: 12px; font-weight: 800; color: var(--accent-blue); margin-bottom: 8px;">CAMERA METADATA SPECIFICATIONS</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                         <div>Status: <span class="badge ${cam.status === 'Active Recording' ? 'badge-verified' : 'badge-medium'}">${cam.status}</span></div>
                         <div>Resolution: <strong>${cam.resolution}</strong></div>
                         <div>Camera Type: <strong>${cam.camera_type}</strong></div>
@@ -651,44 +651,44 @@ function openCameraDetailModal(camId) {
                         <div>Storage NVR: <strong>${cam.storage}</strong></div>
                         <div>Retention: <strong>${cam.retention}</strong></div>
                         <div>Window: <strong>${cam.recording_window}</strong></div>
-                        <div>Last Activity: <strong style="color: var(--accent-gold);">${cam.last_event_time}</strong></div>
+                        <div>Last Activity: <strong style="color: var(--accent-blue);">${cam.last_event_time}</strong></div>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; background: var(--bg-card); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 10px;">
-                    <div>TOTAL EVENTS: <strong style="font-size: 13px; color: var(--text-main);">${cam.events_count}</strong></div>
-                    <div>EVIDENCE LINKS: <strong style="font-size: 13px; color: var(--status-green);">${cam.evidence_links}</strong></div>
-                    <div>PERSONS: <strong style="font-size: 13px; color: var(--accent-gold);">${cam.associated_persons_count}</strong></div>
+                <div style="display: flex; gap: 12px; background: var(--bg-card); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 12px;">
+                    <div>TOTAL EVENTS: <strong style="font-size: 14px; color: var(--accent-blue);">${cam.events_count}</strong></div>
+                    <div>EVIDENCE LINKS: <strong style="font-size: 14px; color: var(--status-green);">${cam.evidence_links}</strong></div>
+                    <div>PERSONS: <strong style="font-size: 14px; color: var(--text-main);">${cam.associated_persons_count}</strong></div>
                 </div>
             </div>
         </div>
 
-        <div style="font-size: 12px; font-weight: 700; color: var(--accent-gold); margin-bottom: 8px; text-transform: uppercase;">24-Hour Recording Event Markers (18 Aug 2026):</div>
-        <div style="background: #101317; padding: 14px; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-subtle); font-weight: 700; font-family: monospace; margin-bottom: 6px;">
+        <h4 style="font-size: 15px; color: var(--accent-blue); margin-bottom: 10px;">⏱️ 24-HOUR RECORDING EVENT MARKER TIMELINE (18 AUG 2026):</h4>
+        <div style="background: var(--bg-card-hover); padding: 16px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-weight: 800; font-family: monospace; margin-bottom: 8px;">
                 <span>00:00 IST</span><span>06:00 IST</span><span>12:00 IST</span><span>18:00 IST</span><span>23:59 IST</span>
             </div>
-            <div style="height: 6px; background: var(--border-color); border-radius: 3px; position: relative; margin-bottom: 14px;">
-                <div style="position: absolute; left: 34%; top: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer;" title="08:14 Person Detection"></div>
-                <div style="position: absolute; left: 52%; top: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-gold); cursor: pointer;" title="12:43 Vehicle Detection"></div>
-                <div style="position: absolute; left: 77%; top: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="18:32 Person Entry"></div>
-                <div style="position: absolute; left: 83%; top: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="20:01 Meeting Event"></div>
-                <div style="position: absolute; left: 85%; top: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="20:26 Vehicle Departure"></div>
+            <div style="height: 8px; background: var(--border-color); border-radius: 4px; position: relative; margin-bottom: 16px;">
+                <div style="position: absolute; left: 34%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-blue); cursor: pointer;" title="08:14 Person Detection"></div>
+                <div style="position: absolute; left: 52%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-blue); cursor: pointer;" title="12:43 Vehicle Detection"></div>
+                <div style="position: absolute; left: 77%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="18:32 Person Entry"></div>
+                <div style="position: absolute; left: 83%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="20:01 Meeting Event"></div>
+                <div style="position: absolute; left: 85%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="20:26 Vehicle Departure"></div>
             </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <button class="btn btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">08:14 Person Detection</button>
-                <button class="btn btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">12:43 Vehicle Detection</button>
-                <button class="btn btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">18:32 Person Entry</button>
-                <button class="btn btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">20:01 Meeting Event</button>
-                <button class="btn btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('EV-CCTV-033')">20:26 Vehicle Departure</button>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">⏱️ 08:14 Person Detection</button>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">⏱️ 12:43 Vehicle Detection</button>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">⏱️ 18:32 Person Entry</button>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">⏱️ 20:01 Meeting Event</button>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-033')">⏱️ 20:26 Vehicle Departure</button>
             </div>
         </div>
 
-        <div style="display: flex; gap: 8px; justify-content: flex-end;">
-            <button class="btn btn-secondary" onclick="alert('Viewing full raw stream playback for ${cam.id}...')">PLAY RECORDINGS</button>
-            <button class="btn btn-secondary" onclick="alert('Filtering all events for ${cam.id}...')">VIEW EVENTS</button>
-            <button class="btn btn-secondary" onclick="openEvidenceDetailModal('EV-CCTV-031'); closeCameraDetailModal();">VIEW EVIDENCE</button>
-            <button class="btn" onclick="switchTab('timeline'); closeCameraDetailModal();">VIEW TIMELINE</button>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="alert('Viewing full raw stream playback for ${cam.id}...')">▶ VIEW RECORDINGS</button>
+            <button class="btn btn-secondary" onclick="alert('Filtering all events for ${cam.id}...')">📋 VIEW EVENTS</button>
+            <button class="btn btn-secondary" onclick="openEvidenceDetailModal('EV-CCTV-031'); closeCameraDetailModal();">📄 VIEW EVIDENCE</button>
+            <button class="btn" onclick="switchTab('timeline'); closeCameraDetailModal();">⏱️ VIEW TIMELINE</button>
         </div>
     `;
 
@@ -707,7 +707,7 @@ function renderDVRVideoGrid(videos) {
     if (videos.length === 0) {
         const selectP = document.getElementById('select-change-person');
         const pName = selectP ? selectP.options[selectP.selectedIndex].text.split('(')[0].replace(/^[🔴🔵🟢🟡🟣⚠️]\s*/, '').trim() : 'selected person';
-        videoGrid.innerHTML = `<div style="font-size: 12px; color: var(--text-muted); padding: 14px; grid-column: span 3; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px;">No associated surveillance clips logged for ${pName} on this camera. (Full camera inventory remains active above).</div>`;
+        videoGrid.innerHTML = `<div style="font-size: 13px; color: var(--text-muted); padding: 16px; grid-column: span 3; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px;">No associated surveillance clips logged for ${pName} on this camera. (Full camera inventory remains active above).</div>`;
         return;
     }
 
@@ -715,14 +715,14 @@ function renderDVRVideoGrid(videos) {
         <div class="dvr-card-compact ${currentSelectedDVR && currentSelectedDVR.id === v.id ? 'selected' : ''}" onclick="selectDVRVideoByIdx(${idx})">
             <div class="dvr-card-thumb">
                 <img src="${v.video_thumbnail}" alt="CCTV Thumbnail">
-                <div style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.8); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-family: monospace;">● ${v.camera_id}</div>
-                <div style="position: absolute; bottom: 6px; right: 6px; background: rgba(181,154,98,0.9); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">${v.timestamp.split(' ')[2] || ''}</div>
+                <div style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-family: monospace;">● ${v.camera_id}</div>
+                <div style="position: absolute; bottom: 6px; right: 6px; background: rgba(37,99,235,0.9); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">${v.timestamp.split(' ')[2] || ''}</div>
             </div>
             <div style="padding: 10px;">
-                <div style="font-size: 12px; font-weight: 700; color: var(--text-main);">${v.event_title}</div>
-                <div style="font-size: 11px; color: var(--accent-gold); font-weight: 600; margin: 2px 0;">LOC: ${v.location}</div>
-                <div style="font-size: 10px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-                    <span>Ref: <strong style="color: var(--text-main); font-family: monospace;">${v.evidence_id}</strong></span>
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">${v.event_title}</div>
+                <div style="font-size: 11px; color: var(--accent-blue); font-weight: 700; margin: 2px 0;">📍 ${v.location}</div>
+                <div style="font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                    <span>Ref: <strong style="color: var(--text-main);">${v.evidence_id}</strong></span>
                     <span class="badge ${v.status === 'VERIFIED' ? 'badge-verified' : 'badge-medium'}">${v.status}</span>
                 </div>
             </div>
@@ -745,13 +745,13 @@ function selectDVRVideo(v) {
     const detailsPanel = document.getElementById('dvr-selected-details-panel');
     if (detailsPanel) {
         detailsPanel.innerHTML = `
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                 <div>Event: <strong style="color: var(--text-main);">${v.event_title}</strong></div>
-                <div>Camera: <strong style="color: var(--accent-gold);">${v.camera_name}</strong></div>
+                <div>Camera: <strong style="color: var(--accent-blue);">${v.camera_name}</strong></div>
                 <div>Timestamp: <strong>${v.timestamp}</strong></div>
                 <div>Location: <strong>${v.location}</strong></div>
                 <div>Persons: <strong style="color: var(--text-main);">${v.suspects_identified.join(', ')}</strong></div>
-                <div>Vehicle: <strong style="color: var(--accent-gold); font-family: monospace;">${v.associated_vehicle}</strong></div>
+                <div>Vehicle: <strong style="color: var(--accent-blue);">${v.associated_vehicle}</strong></div>
             </div>
             <div>Description: ${v.description}</div>
         `;
@@ -760,9 +760,9 @@ function selectDVRVideo(v) {
     const linkedBtns = document.getElementById('dvr-linked-evidence-btns');
     if (linkedBtns) {
         linkedBtns.innerHTML = (v.linked_evidence || [v.evidence_id]).map(evId => `
-            <button class="btn btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${evId}')">Ref: ${evId}</button>
+            <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('${evId}')">Ref: ${evId}</button>
         `).join('') + `
-            <button class="btn" style="font-size: 10px; padding: 3px 8px;" onclick="switchTab('graph')">VIEW GRAPH</button>
+            <button class="btn" style="font-size: 11px; padding: 4px 10px;" onclick="switchTab('graph')">VIEW GRAPH</button>
         `;
     }
 
@@ -771,18 +771,18 @@ function selectDVRVideo(v) {
         relEntities.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 ${v.suspects_identified.map(pName => `
-                    <div style="padding: 6px 8px; background: #101317; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;" onclick="switchTab('persons')">
-                        PERSON: <strong style="color: var(--accent-gold);">${pName}</strong>
+                    <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('persons')">
+                        👤 PERSON: <strong style="color: var(--accent-blue);">${pName}</strong>
                     </div>
                 `).join('')}
-                <div style="padding: 6px 8px; background: #101317; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;" onclick="switchTab('dvr')">
-                    VEHICLE: <strong style="color: var(--accent-gold); font-family: monospace;">${v.associated_vehicle}</strong>
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('dvr')">
+                    🚘 VEHICLE: <strong style="color: var(--accent-blue);">${v.associated_vehicle}</strong>
                 </div>
-                <div style="padding: 6px 8px; background: #101317; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;" onclick="switchTab('communications')">
-                    COMMUNICATION: <strong style="color: var(--accent-gold); font-family: monospace;">${v.comm_ref || 'COM-001'}</strong>
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('communications')">
+                    📞 COMMUNICATION: <strong style="color: var(--accent-blue);">${v.comm_ref || 'COM-001'}</strong>
                 </div>
-                <div style="padding: 6px 8px; background: #101317; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;" onclick="switchTab('financial')">
-                    FINANCIAL EVENT: <strong style="color: var(--accent-gold); font-family: monospace;">${v.fin_ref || 'TXN-88421'}</strong>
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('financial')">
+                    💳 FINANCIAL EVENT: <strong style="color: var(--accent-blue);">${v.fin_ref || 'TXN-88421'}</strong>
                 </div>
             </div>
         `;
@@ -790,7 +790,7 @@ function selectDVRVideo(v) {
 }
 
 function togglePlay() {
-    alert("CCTV Replay initiated for selected surveillance stream segment.");
+    alert("▶ CCTV Replay initiated for selected surveillance stream segment.");
 }
 
 // 6. COMMUNICATION ANALYSIS
@@ -812,10 +812,10 @@ async function loadCommunicationsData() {
         const tree = document.getElementById('comm-contact-tree');
         if (tree && data.contacts) {
             tree.innerHTML = data.contacts.map(c => `
-                <div style="padding: 10px; background: #101317; border: 1px solid var(--border-color); border-left: 3px solid var(--accent-gold); border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-blue); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong style="font-size: 13px; color: var(--text-main);">${c.name}</strong> (${c.role})
-                        <div style="font-size: 11px; color: var(--accent-gold); font-family: monospace;">TEL: ${c.phone}</div>
+                        <strong style="font-size: 14px; color: var(--text-main);">${c.name}</strong> (${c.role})
+                        <div style="font-size: 12px; color: var(--accent-blue);">📞 ${c.phone}</div>
                     </div>
                     <span class="badge badge-verified">${c.calls} Calls Logged</span>
                 </div>
@@ -831,7 +831,7 @@ async function loadCommunicationsData() {
                     <td><strong>${t.contact}</strong></td>
                     <td><span class="badge ${t.direction === 'Outgoing' ? 'badge-verified' : 'badge-medium'}">${t.direction}</span></td>
                     <td>${t.duration}</td>
-                    <td><button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</button></td>
+                    <td><button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</button></td>
                 </tr>
             `).join('');
         }
@@ -849,9 +849,9 @@ async function loadFinancialData() {
         const grid = document.getElementById('fin-accounts-grid');
         if (grid) {
             grid.innerHTML = `
-                <div style="padding: 14px; background: #101317; border: 1px solid var(--border-color); border-radius: 8px;">
-                    <div style="font-size: 13px; font-weight: 700; color: var(--status-green); font-family: monospace;">Account: ${data.account}</div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Current Balance: <strong style="color: var(--text-main); font-family: monospace;">${data.balance}</strong></div>
+                <div style="padding: 16px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 10px;">
+                    <div style="font-size: 15px; font-weight: 800; color: var(--status-green);">Account: ${data.account}</div>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Current Balance: <strong style="color: var(--text-main);">${data.balance}</strong></div>
                 </div>
             `;
         }
@@ -862,12 +862,12 @@ async function loadFinancialData() {
                 <tr>
                     <td>${t.date}</td>
                     <td>${t.time}</td>
-                    <td><strong style="color: ${t.direction === 'OUT' ? '#be123c' : '#38a169'}; font-size: 13px; font-family: monospace;">${t.amount}</strong></td>
+                    <td><strong style="color: ${t.direction === 'OUT' ? '#dc2626' : '#16a34a'}; font-size: 14px;">${t.amount}</strong></td>
                     <td><span class="badge ${t.direction === 'OUT' ? 'badge-high' : 'badge-verified'}">${t.direction}</span></td>
-                    <td style="font-family: monospace;">${t.account}</td>
+                    <td>${t.account}</td>
                     <td><strong>${t.counterparty}</strong></td>
-                    <td><code style="color: var(--accent-gold); font-family: monospace;">${t.reference}</code></td>
-                    <td><button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</button></td>
+                    <td><code style="color: var(--accent-blue);">${t.reference}</code></td>
+                    <td><button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</button></td>
                 </tr>
             `).join('');
         }
@@ -887,8 +887,8 @@ async function loadBlockchainData() {
         const summary = document.getElementById('blk-summary');
         if (summary) {
             summary.innerHTML = `
-                <div style="font-size: 13px; font-weight: 700; color: var(--accent-gold); font-family: monospace;">Wallet Address: ${data.address} (Ref: ${data.associated_evidence})</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Balance: <strong style="color: var(--text-main); font-family: monospace;">${data.balance}</strong> | Total Observed Transactions: ${data.incoming + data.outgoing}</div>
+                <div style="font-size: 15px; font-weight: 800; color: var(--status-amber);">Wallet Address: ${data.address} (Ref: ${data.associated_evidence})</div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Balance: <strong>${data.balance}</strong> | Total Observed Transactions: ${data.incoming + data.outgoing}</div>
             `;
         }
 
@@ -896,12 +896,12 @@ async function loadBlockchainData() {
         if (tbody && data.transactions) {
             tbody.innerHTML = data.transactions.map(t => `
                 <tr>
-                    <td><code style="color: var(--accent-gold); font-family: monospace;">${t.hash}</code></td>
-                    <td style="font-family: monospace;">${t.from_addr}</td>
-                    <td style="font-family: monospace;">${t.to_addr}</td>
-                    <td><strong style="font-size: 13px; font-family: monospace;">${t.value}</strong></td>
+                    <td><code style="color: var(--status-amber);">${t.hash}</code></td>
+                    <td>${t.from_addr}</td>
+                    <td>${t.to_addr}</td>
+                    <td><strong style="font-size: 14px;">${t.value}</strong></td>
                     <td>${t.time}</td>
-                    <td><button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</button></td>
+                    <td><button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</button></td>
                 </tr>
             `).join('');
         }
@@ -923,13 +923,13 @@ async function loadOSINTData() {
         const list = document.getElementById('osint-list');
         if (list && data.records) {
             list.innerHTML = data.records.map(o => `
-                <div style="padding: 12px; background: #101317; border: 1px solid var(--border-color); border-left: 3px solid var(--accent-gold); border-radius: 6px; margin-bottom: 8px;">
+                <div style="padding: 14px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-purple); border-radius: 8px; margin-bottom: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 13px; font-weight: 700; color: var(--text-main);">RECORD ${o.id}: ${o.value}</span>
+                        <span style="font-size: 14px; font-weight: 800; color: var(--text-main);">SOURCE RECORD ${o.id}: ${o.value}</span>
                         <span class="badge badge-verified">Confidence: ${o.confidence}</span>
                     </div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Subject: <strong>${o.subject}</strong> | Source: ${o.source} | Observed: ${o.last_observed} | Entity: <strong>${o.entity}</strong> | Location: ${o.location}</div>
-                    <button class="btn btn-secondary" style="margin-top: 6px; font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${o.evidence_id}')">View Evidence: ${o.evidence_id}</button>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Subject: <strong>${o.subject}</strong> | Source: ${o.source} | Observed: ${o.last_observed} | Entity: <strong>${o.entity}</strong> | Location: ${o.location}</div>
+                    <button class="btn btn-secondary" style="margin-top: 8px; font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('${o.evidence_id}')">View Evidence: ${o.evidence_id}</button>
                 </div>
             `).join('');
         }
@@ -952,9 +952,9 @@ async function loadTimelineData() {
         if (container && data.events) {
             container.innerHTML = data.events.map(ev => `
                 <div class="timeline-item" style="cursor: pointer;" onclick="openEvidenceDetailModal('${ev.evidence_id}')">
-                    <div style="font-size: 10px; color: var(--accent-gold); font-weight: 700; font-family: monospace;">[${ev.domain}] ${ev.timestamp}</div>
-                    <div style="font-size: 13px; font-weight: 700; color: var(--text-main); margin: 2px 0;">${ev.title}</div>
-                    <div style="font-size: 11px; color: var(--text-muted);">Person: <strong>${ev.person}</strong> | Location: ${ev.location} | Details: ${ev.details}</div>
+                    <div style="font-size: 11px; color: var(--accent-blue); font-weight: 700;">[${ev.domain}] ${ev.timestamp}</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 4px 0;">${ev.title}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Person: <strong>${ev.person}</strong> | Location: ${ev.location} | Details: ${ev.details}</div>
                 </div>
             `).join('');
         }
@@ -974,19 +974,19 @@ async function loadEntityResolutionData() {
         const cand = data.person;
 
         container.innerHTML = `
-            <div style="padding: 16px; background: #101317; border: 1px solid var(--border-color); border-radius: 8px; max-width: 600px;">
-                <div style="font-size: 14px; font-weight: 700; color: var(--status-amber); margin-bottom: 8px;">POTENTIAL MATCH: ${cand.name} (Candidate ID: ${cand.id})</div>
-                <div style="font-size: 12px; color: var(--text-main); margin-bottom: 4px;">Possible match to Primary Subject: <strong>Arjun Sharma (P-001)</strong></div>
-                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">
+            <div style="padding: 20px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 12px; max-width: 650px;">
+                <div style="font-size: 16px; font-weight: 800; color: var(--status-amber); margin-bottom: 10px;">POTENTIAL MATCH: ${cand.name} (Candidate ID: ${cand.id})</div>
+                <div style="font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Possible match to Primary Subject: <strong>Arjun Sharma (P-001)</strong></div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
                     <div>Signals: <strong>Name similarity</strong>, <strong>Location overlap</strong></div>
                     <div>Match Confidence Score: <span class="badge badge-medium">43%</span></div>
                     <div>Status: <strong style="color: var(--status-amber);">${cand.status}</strong></div>
                 </div>
-                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 14px;">${cand.notes}</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">${cand.notes}</p>
 
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn" style="border-color: #38a169;" onclick="actionEntityResolution('CONFIRM')">CONFIRM MATCH</button>
-                    <button class="btn" style="border-color: #be123c;" onclick="actionEntityResolution('REJECT')">REJECT MATCH</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" style="background: #16a34a;" onclick="actionEntityResolution('CONFIRM')">CONFIRM MATCH</button>
+                    <button class="btn" style="background: #dc2626;" onclick="actionEntityResolution('REJECT')">REJECT MATCH</button>
                     <button class="btn btn-secondary" onclick="actionEntityResolution('REVIEW')">MARK FOR REVIEW</button>
                 </div>
             </div>
@@ -997,7 +997,7 @@ async function loadEntityResolutionData() {
 }
 
 async function actionEntityResolution(action) {
-    alert(`Entity Resolution Action Executed: Candidate match P-006 actioned as ${action}.`);
+    alert(`✅ Entity Resolution Action Executed: Candidate match P-006 actioned as ${action}.`);
     loadEntityResolutionData();
 }
 
@@ -1078,25 +1078,25 @@ async function openEvidenceDetailModal(evidenceId) {
         const e = await res.json();
 
         document.getElementById('evidence-modal-body').innerHTML = `
-            <div style="padding: 14px; background: #101317; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 14px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-size: 14px; font-weight: 700; color: var(--accent-gold); font-family: monospace;">EVIDENCE RECORD ${e.id}</span>
+            <div style="padding: 16px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 16px; font-weight: 800; color: var(--accent-blue);">EVIDENCE RECORD ${e.id}</span>
                     <span class="badge badge-verified">${e.evidence_type}</span>
                 </div>
-                <div style="font-size: 11px; color: var(--text-muted); display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                    <div>CASE: <strong style="color: var(--text-main); font-family: monospace;">${e.case_id}</strong></div>
-                    <div>PERSON ID: <strong style="color: var(--text-main); font-family: monospace;">${e.personId}</strong></div>
+                <div style="font-size: 13px; color: var(--text-muted); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>CASE: <strong style="color: var(--text-main);">${e.case_id}</strong></div>
+                    <div>PERSON ID: <strong style="color: var(--text-main);">${e.personId}</strong></div>
                     <div>SOURCE: <strong>${e.source}</strong></div>
                     <div>ACQUISITION DATE: <strong>${e.acquisition_date}</strong></div>
                     <div>HASH INTEGRITY: <span class="badge badge-verified">SHA-256 Verified</span></div>
                 </div>
-                <p style="font-size: 12px; color: var(--text-main);"><strong>ANALYTICAL EXTRACTION:</strong> ${e.analyst_notes}</p>
+                <p style="font-size: 13px; color: var(--text-main);"><strong>ANALYTICAL EXTRACTION:</strong> ${e.analyst_notes}</p>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                <button class="btn btn-secondary" onclick="alert('Viewing raw payload for ${e.id}...')">VIEW ORIGINAL</button>
-                <button class="btn btn-secondary" onclick="switchTab('graph'); closeEvidenceDetailModal();">VIEW RELATIONSHIP</button>
-                <button class="btn btn-secondary" onclick="switchTab('timeline'); closeEvidenceDetailModal();">VIEW TIMELINE</button>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                <button class="btn btn-secondary" onclick="alert('Viewing raw payload for ${e.id}...')">📄 VIEW ORIGINAL</button>
+                <button class="btn btn-secondary" onclick="switchTab('graph'); closeEvidenceDetailModal();">🕸️ VIEW RELATIONSHIP</button>
+                <button class="btn btn-secondary" onclick="switchTab('timeline'); closeEvidenceDetailModal();">⏱️ VIEW TIMELINE</button>
             </div>
         `;
     } catch (err) {
@@ -1138,22 +1138,22 @@ async function switchDrawerTab(tabName) {
             <div class="suspect-card">
                 <img src="${p.photo_url}" class="suspect-avatar">
                 <div>
-                    <div style="font-size: 15px; font-weight: 700; color: var(--text-main);">${p.name}</div>
-                    <div style="font-size: 12px; color: var(--accent-gold); font-weight: 600;">Role: ${p.role}</div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Age: ${p.age} | City: ${p.city}</div>
+                    <div style="font-size: 16px; font-weight: 800; color: var(--text-main);">${p.name}</div>
+                    <div style="font-size: 13px; color: var(--accent-blue); font-weight: 700;">Role: ${p.role}</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Age: ${p.age} | City: ${p.city}</div>
                 </div>
             </div>
 
-            <div style="font-size: 12px; color: var(--text-muted); margin: 14px 0; display: flex; flex-direction: column; gap: 6px;">
-                <div><strong>PHONE:</strong> <span style="color: var(--accent-gold); font-family: monospace; cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('communications'); closePersonDrawer();">${p.phone}</span></div>
-                <div><strong>EMAIL:</strong> <span style="font-family: monospace;">${p.email}</span></div>
-                <div><strong>VEHICLE:</strong> <span style="color: var(--accent-gold); font-family: monospace; cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('dvr'); closePersonDrawer();">${p.vehicle}</span></div>
-                <div><strong>PUBLIC USERNAME:</strong> <span style="color: var(--accent-gold); font-family: monospace; cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('osint'); closePersonDrawer();">${p.social_usernames ? p.social_usernames.twitter || '@user' : '@user'}</span></div>
-                <div><strong>WALLET:</strong> <span style="color: var(--accent-gold); font-family: monospace; cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('blockchain'); closePersonDrawer();">${p.wallet_address}</span></div>
+            <div style="font-size: 13px; color: var(--text-muted); margin: 16px 0; display: flex; flex-direction: flex-column; gap: 6px;">
+                <div><strong>PHONE:</strong> <span style="color: var(--accent-blue); cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('communications'); closePersonDrawer();">${p.phone}</span></div>
+                <div><strong>EMAIL:</strong> ${p.email}</div>
+                <div><strong>VEHICLE:</strong> <span style="color: var(--accent-blue); cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('dvr'); closePersonDrawer();">${p.vehicle}</span></div>
+                <div><strong>PUBLIC USERNAME:</strong> <span style="color: var(--accent-blue); cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('osint'); closePersonDrawer();">${p.social_usernames ? p.social_usernames.twitter || '@user' : '@user'}</span></div>
+                <div><strong>WALLET:</strong> <span style="color: var(--accent-blue); cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('blockchain'); closePersonDrawer();">${p.wallet_address}</span></div>
                 <div><strong>NOTES:</strong> ${p.notes}</div>
             </div>
             
-            <button class="btn" style="width: 100%; margin-top: 8px;" onclick="changeActivePerson('${p.id}'); closePersonDrawer();">SWITCH WORKSTATION CONTEXT TO ${p.name.toUpperCase()}</button>
+            <button class="btn" style="width: 100%; margin-top: 10px;" onclick="changeActivePerson('${p.id}'); closePersonDrawer();">SWITCH WORKSTATION CONTEXT TO ${p.name.toUpperCase()}</button>
         `;
     } catch (err) {
         console.error(err);
@@ -1192,7 +1192,7 @@ function goToWizardStep(step) {
 
 async function submitWizardForm(e) {
     e.preventDefault();
-    alert('Case Created Successfully!');
+    alert('✅ Case Created Successfully!');
     closeAddCaseWizard();
 }
 
@@ -1206,7 +1206,7 @@ function initGlobalSearch() {
             if (!query) return;
             const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
             const data = await res.json();
-            alert(`Search Results for "${query}":\nProfiles Found: ${data.matched_nodes.length}\nEvidence Records: ${data.matched_evidence.length}`);
+            alert(`🔍 Search Results for "${query}":\nProfiles Found: ${data.matched_nodes.length}\nEvidence Records: ${data.matched_evidence.length}`);
         }
     });
 }
