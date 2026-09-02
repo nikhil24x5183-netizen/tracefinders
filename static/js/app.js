@@ -1,4 +1,4 @@
-// TRACE-X Intelligence Workstation Application Controller
+// TRACE FINDERS Intelligence Workstation Application Controller
 let currentCaseId = 'TRX-2026-017';
 let currentPersonId = 'P-001';
 let currentGraphLayout = 'tree-ud';
@@ -23,6 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
     initGlobalSearch();
     loadOverviewData();
 });
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.innerText = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+}
 
 function toggleSidebar() {
     const sidebar = document.getElementById('app-sidebar');
@@ -124,8 +131,8 @@ async function loadOverviewData() {
         const actList = document.getElementById('activity-feed');
         if (actList && data.investigation_activity) {
             actList.innerHTML = data.investigation_activity.map(act => `
-                <div style="padding: 12px 0; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; font-size: 13px;">
-                    <span>⚡ <strong style="color: #f8fafc;">[${act.time}]</strong> ${act.event}</span>
+                <div style="padding: 12px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; font-size: 13px;">
+                    <span>⚡ <strong style="color: var(--text-main);">[${act.time}]</strong> ${act.event}</span>
                     <span class="badge badge-verified">${act.domain}</span>
                 </div>
             `).join('');
@@ -148,7 +155,7 @@ async function loadInvestigationsData() {
             const secondaries = c.secondary_suspects || [];
 
             return `
-                <div class="card" style="border-left: 4px solid #3b82f6;">
+                <div class="card" style="border-left: 4px solid var(--accent-blue);">
                     <div class="card-title">
                         <span>${c.id}: ${c.title} (${c.location})</span>
                         <span class="badge badge-verified">${c.status}</span>
@@ -157,26 +164,26 @@ async function loadInvestigationsData() {
                     <div class="suspect-card" onclick="openPersonDrawer('${primary.id}')" style="cursor: pointer;">
                         <img src="${primary.photo_url}" class="suspect-avatar">
                         <div>
-                            <div style="font-size: 16px; font-weight: 800; color: #f8fafc;">${primary.name} <span class="badge badge-high" style="font-size: 10px;">Primary Subject</span></div>
-                            <div style="font-size: 13px; color: #94a3b8; margin: 4px 0;">Age: <strong>${primary.age}</strong> | City: <strong>${primary.city}</strong> | Occupation: <strong>${primary.occupation}</strong></div>
-                            <div style="font-size: 13px; color: #38bdf8;">📞 ${primary.phone} | ✉️ ${primary.email}</div>
+                            <div style="font-size: 16px; font-weight: 800; color: var(--text-main);">${primary.name} <span class="badge badge-high" style="font-size: 10px;">Primary Subject</span></div>
+                            <div style="font-size: 13px; color: var(--text-muted); margin: 4px 0;">Age: <strong>${primary.age}</strong> | City: <strong>${primary.city}</strong> | Occupation: <strong>${primary.occupation}</strong></div>
+                            <div style="font-size: 13px; color: var(--accent-blue);">📞 ${primary.phone} | ✉️ ${primary.email}</div>
                         </div>
                     </div>
 
-                    <div style="font-size: 12px; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin: 12px 0 8px 0;">👥 Connected Subjects & Associates (${secondaries.length}):</div>
+                    <div style="font-size: 12px; font-weight: 800; color: var(--accent-blue); text-transform: uppercase; margin: 12px 0 8px 0;">👥 Connected Subjects & Associates (${secondaries.length}):</div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 12px;">
                         ${secondaries.map(sec => `
-                            <div style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; display: flex; gap: 10px; align-items: center; cursor: pointer;" onclick="changeActivePerson('${sec.id}')">
+                            <div style="padding: 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; display: flex; gap: 10px; align-items: center; cursor: pointer;" onclick="changeActivePerson('${sec.id}')">
                                 <img src="${sec.photo_url}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
                                 <div>
-                                    <div style="font-size: 13px; font-weight: 700; color: #f8fafc;">${sec.name}</div>
-                                    <div style="font-size: 11px; color: #38bdf8;">${sec.role}</div>
+                                    <div style="font-size: 13px; font-weight: 700; color: var(--text-main);">${sec.name}</div>
+                                    <div style="font-size: 11px; color: var(--accent-blue);">${sec.role}</div>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
 
-                    <p style="font-size: 13px; color: #94a3b8; margin-bottom: 12px;">${c.description}</p>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">${c.description}</p>
                 </div>
             `;
         }).join('');
@@ -197,60 +204,60 @@ async function loadPersonsViewData() {
 
         container.innerHTML = `
             <div class="card">
-                <div style="display: flex; gap: 24px; border-bottom: 1px solid #334155; padding-bottom: 20px; margin-bottom: 20px;">
-                    <img src="${p.photo_url}" style="width: 100px; height: 100px; border-radius: 14px; object-fit: cover; border: 3px solid #3b82f6;">
+                <div style="display: flex; gap: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px;">
+                    <img src="${p.photo_url}" style="width: 100px; height: 100px; border-radius: 14px; object-fit: cover; border: 3px solid var(--accent-blue);">
                     <div>
-                        <div style="font-size: 24px; font-weight: 800; color: #f8fafc;">${p.name}</div>
-                        <div style="font-size: 15px; font-weight: 700; color: #38bdf8; margin: 4px 0;">Role: ${p.role} (ID: ${p.id})</div>
-                        <div style="font-size: 13px; color: #94a3b8; display: flex; gap: 20px; margin-top: 8px;">
-                            <div>Case: <strong style="color: #f8fafc;">${currentCaseId}</strong></div>
+                        <div style="font-size: 24px; font-weight: 800; color: var(--text-main);">${p.name}</div>
+                        <div style="font-size: 15px; font-weight: 700; color: var(--accent-blue); margin: 4px 0;">Role: ${p.role} (ID: ${p.id})</div>
+                        <div style="font-size: 13px; color: var(--text-muted); display: flex; gap: 20px; margin-top: 8px;">
+                            <div>Case: <strong style="color: var(--text-main);">${currentCaseId}</strong></div>
                             <div>Status: <span class="badge badge-high">${p.status}</span></div>
-                            <div>Last Updated: <strong style="color: #f8fafc;">${p.last_updated}</strong></div>
+                            <div>Last Updated: <strong style="color: var(--text-main);">${p.last_updated}</strong></div>
                         </div>
                     </div>
                 </div>
 
-                <h4 style="font-size: 15px; color: #38bdf8; margin-bottom: 12px;">STRUCTURED IDENTIFIERS (Click identifier to navigate):</h4>
+                <h4 style="font-size: 15px; color: var(--accent-blue); margin-bottom: 12px;">STRUCTURED IDENTIFIERS (Click identifier to navigate):</h4>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; font-size: 13px;">
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px;">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">FULL NAME</div>
-                        <div style="font-weight: 700; color: #f8fafc; font-size: 14px;">${p.name}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">FULL NAME</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${p.name}</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px;">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">KNOWN ALIASES</div>
-                        <div style="font-weight: 700; color: #38bdf8; font-size: 14px;">${p.alias}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">KNOWN ALIASES</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">${p.alias}</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px;">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">AGE & GENDER</div>
-                        <div style="font-weight: 700; color: #f8fafc; font-size: 14px;">${p.age} (${p.gender})</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">AGE & GENDER</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${p.age} (${p.gender})</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px;">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">OCCUPATION</div>
-                        <div style="font-weight: 700; color: #f8fafc; font-size: 14px;">${p.occupation}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">OCCUPATION</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${p.occupation}</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px;">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">ORGANIZATION</div>
-                        <div style="font-weight: 700; color: #f8fafc; font-size: 14px;">${p.organization}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">ORGANIZATION</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">${p.organization}</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; cursor: pointer;" onclick="switchTab('communications')">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">PHONE ➔ COMMUNICATION ANALYSIS</div>
-                        <div style="font-weight: 700; color: #38bdf8; font-size: 14px;">📞 ${p.phone}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;" onclick="switchTab('communications')">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">PHONE ➔ COMMUNICATION ANALYSIS</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">📞 ${p.phone}</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px;">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">EMAIL</div>
-                        <div style="font-weight: 700; color: #f8fafc; font-size: 14px;">✉️ ${p.email}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">EMAIL</div>
+                        <div style="font-weight: 700; color: var(--text-main); font-size: 14px;">✉️ ${p.email}</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; cursor: pointer;" onclick="switchTab('dvr')">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">VEHICLE ➔ VEHICLE INTELLIGENCE</div>
-                        <div style="font-weight: 700; color: #38bdf8; font-size: 14px;">🚘 ${p.vehicle}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;" onclick="switchTab('dvr')">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">VEHICLE ➔ VEHICLE INTELLIGENCE</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">🚘 ${p.vehicle}</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; cursor: pointer;" onclick="switchTab('osint')">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">PUBLIC USERNAME ➔ PUBLIC-SOURCE INTEL</div>
-                        <div style="font-weight: 700; color: #38bdf8; font-size: 14px;">🌐 ${p.social_usernames ? p.social_usernames.twitter || '@user' : '@user'}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;" onclick="switchTab('osint')">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">PUBLIC USERNAME ➔ PUBLIC-SOURCE INTEL</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">🌐 ${p.social_usernames ? p.social_usernames.twitter || '@user' : '@user'}</div>
                     </div>
-                    <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; cursor: pointer;" onclick="switchTab('blockchain')">
-                        <div style="font-size: 11px; color: #64748b; font-weight: 800;">WALLET ➔ BLOCKCHAIN ANALYSIS</div>
-                        <div style="font-weight: 700; color: #38bdf8; font-size: 14px;">⛓️ ${p.wallet_address}</div>
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;" onclick="switchTab('blockchain')">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 800;">WALLET ➔ BLOCKCHAIN ANALYSIS</div>
+                        <div style="font-weight: 700; color: var(--accent-blue); font-size: 14px;">⛓️ ${p.wallet_address}</div>
                     </div>
                 </div>
             </div>
@@ -260,7 +267,7 @@ async function loadPersonsViewData() {
     }
 }
 
-// 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENTS 1 - 23)
+// 10. CCTV / DVR FORENSICS WORKSPACE
 async function loadDVRData() {
     try {
         const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
@@ -268,22 +275,19 @@ async function loadDVRData() {
         
         currentDVRVideos = data.dvr_videos;
 
-        // Update Person-Scoped Header (Requirement 8)
         document.getElementById('dvr-header-subject').innerText = data.header_stats.subject_name.toUpperCase();
         document.getElementById('dvr-header-events').innerText = data.header_stats.events_count;
         document.getElementById('dvr-header-cameras').innerText = data.header_stats.cameras_count;
 
-        // Render Camera Strip (Requirement 9)
         const cameraStrip = document.getElementById('camera-strip-container');
         if (cameraStrip && data.camera_strip) {
             cameraStrip.innerHTML = data.camera_strip.map(c => `
                 <div class="camera-chip" onclick="filterByCamera('${c.camera_id}')">
-                    <strong style="color: #38bdf8;">${c.camera_id}</strong> · ${c.location} (<span style="color: #10b981;">${c.status}</span>)
+                    <strong style="color: var(--accent-blue);">${c.camera_id}</strong> · ${c.location} (<span style="color: var(--status-green);">${c.status}</span>)
                 </div>
             `).join('');
         }
 
-        // Render Camera Filter Select Options (Requirement 10)
         const camSelect = document.getElementById('dvr-filter-camera');
         if (camSelect && data.camera_strip) {
             camSelect.innerHTML = `<option value="ALL">All Cameras</option>` + data.camera_strip.map(c => `<option value="${c.camera_id}">${c.camera_id} - ${c.location}</option>`).join('');
@@ -291,19 +295,17 @@ async function loadDVRData() {
 
         renderDVRVideoGrid(currentDVRVideos);
 
-        // Select first video by default
         if (currentDVRVideos.length > 0) {
             selectDVRVideo(currentDVRVideos[0]);
         } else {
-            document.getElementById('dvr-selected-details-panel').innerHTML = `<div style="padding: 10px; color: #94a3b8;">No surveillance clips logged for selected subject.</div>`;
+            document.getElementById('dvr-selected-details-panel').innerHTML = `<div style="padding: 10px; color: var(--text-muted);">No surveillance clips logged for selected subject.</div>`;
         }
 
-        // Render Camera Locations Map List (Requirement 18)
         const camList = document.getElementById('dvr-camera-list');
         if (camList && data.camera_strip) {
             camList.innerHTML = data.camera_strip.map(c => `
-                <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; margin-bottom: 6px; cursor: pointer;" onclick="filterByCamera('${c.camera_id}')">
-                    <strong style="color: #38bdf8;">${c.camera_id}</strong>: ${c.location}
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 6px; cursor: pointer;" onclick="filterByCamera('${c.camera_id}')">
+                    <strong style="color: var(--accent-blue);">${c.camera_id}</strong>: ${c.location}
                 </div>
             `).join('');
         }
@@ -335,7 +337,7 @@ function renderDVRVideoGrid(videos) {
     if (!videoGrid) return;
 
     if (videos.length === 0) {
-        videoGrid.innerHTML = `<div style="font-size: 13px; color: #94a3b8; padding: 16px; grid-column: span 3;">No surveillance clips match current filter criteria.</div>`;
+        videoGrid.innerHTML = `<div style="font-size: 13px; color: var(--text-muted); padding: 16px; grid-column: span 3;">No surveillance clips match current filter criteria.</div>`;
         return;
     }
 
@@ -344,13 +346,13 @@ function renderDVRVideoGrid(videos) {
             <div class="dvr-card-thumb">
                 <img src="${v.video_thumbnail}" alt="CCTV Thumbnail">
                 <div style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-family: monospace;">● ${v.camera_id}</div>
-                <div style="position: absolute; bottom: 6px; right: 6px; background: rgba(59,130,246,0.9); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">${v.timestamp.split(' ')[2] || ''}</div>
+                <div style="position: absolute; bottom: 6px; right: 6px; background: rgba(37,99,235,0.9); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">${v.timestamp.split(' ')[2] || ''}</div>
             </div>
             <div style="padding: 10px;">
-                <div style="font-size: 13px; font-weight: 800; color: #f8fafc;">${v.event_title}</div>
-                <div style="font-size: 11px; color: #38bdf8; font-weight: 700; margin: 2px 0;">📍 ${v.location}</div>
-                <div style="font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-                    <span>Ref: <strong style="color: #f8fafc;">${v.evidence_id}</strong></span>
+                <div style="font-size: 13px; font-weight: 800; color: var(--text-main);">${v.event_title}</div>
+                <div style="font-size: 11px; color: var(--accent-blue); font-weight: 700; margin: 2px 0;">📍 ${v.location}</div>
+                <div style="font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                    <span>Ref: <strong style="color: var(--text-main);">${v.evidence_id}</strong></span>
                     <span class="badge ${v.status === 'VERIFIED' ? 'badge-verified' : 'badge-medium'}">${v.status}</span>
                 </div>
             </div>
@@ -370,23 +372,21 @@ function selectDVRVideo(v) {
     document.getElementById('dvr-overlay-cam').innerText = v.camera_id;
     document.getElementById('dvr-overlay-time').innerText = v.timestamp;
 
-    // Center Details Panel (Requirement 3)
     const detailsPanel = document.getElementById('dvr-selected-details-panel');
     if (detailsPanel) {
         detailsPanel.innerHTML = `
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                <div>Event: <strong style="color: #f8fafc;">${v.event_title}</strong></div>
-                <div>Camera: <strong style="color: #38bdf8;">${v.camera_name}</strong></div>
+                <div>Event: <strong style="color: var(--text-main);">${v.event_title}</strong></div>
+                <div>Camera: <strong style="color: var(--accent-blue);">${v.camera_name}</strong></div>
                 <div>Timestamp: <strong>${v.timestamp}</strong></div>
                 <div>Location: <strong>${v.location}</strong></div>
-                <div>Persons: <strong style="color: #f8fafc;">${v.suspects_identified.join(', ')}</strong></div>
-                <div>Vehicle: <strong style="color: #38bdf8;">${v.associated_vehicle}</strong></div>
+                <div>Persons: <strong style="color: var(--text-main);">${v.suspects_identified.join(', ')}</strong></div>
+                <div>Vehicle: <strong style="color: var(--accent-blue);">${v.associated_vehicle}</strong></div>
             </div>
             <div>Description: ${v.description}</div>
         `;
     }
 
-    // Linked Evidence Buttons (Requirement 14)
     const linkedBtns = document.getElementById('dvr-linked-evidence-btns');
     if (linkedBtns) {
         linkedBtns.innerHTML = (v.linked_evidence || [v.evidence_id]).map(evId => `
@@ -396,24 +396,23 @@ function selectDVRVideo(v) {
         `;
     }
 
-    // Right Column Related Entities (Requirement 13)
     const relEntities = document.getElementById('dvr-related-entities-list');
     if (relEntities) {
         relEntities.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 ${v.suspects_identified.map(pName => `
-                    <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="switchTab('persons')">
-                        👤 PERSON: <strong style="color: #38bdf8;">${pName}</strong>
+                    <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('persons')">
+                        👤 PERSON: <strong style="color: var(--accent-blue);">${pName}</strong>
                     </div>
                 `).join('')}
-                <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="switchTab('dvr')">
-                    🚘 VEHICLE: <strong style="color: #38bdf8;">${v.associated_vehicle}</strong>
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('dvr')">
+                    🚘 VEHICLE: <strong style="color: var(--accent-blue);">${v.associated_vehicle}</strong>
                 </div>
-                <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="switchTab('communications')">
-                    📞 COMMUNICATION: <strong style="color: #38bdf8;">${v.comm_ref || 'COM-001'}</strong>
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('communications')">
+                    📞 COMMUNICATION: <strong style="color: var(--accent-blue);">${v.comm_ref || 'COM-001'}</strong>
                 </div>
-                <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="switchTab('financial')">
-                    💳 FINANCIAL EVENT: <strong style="color: #38bdf8;">${v.fin_ref || 'TXN-88421'}</strong>
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;" onclick="switchTab('financial')">
+                    💳 FINANCIAL EVENT: <strong style="color: var(--accent-blue);">${v.fin_ref || 'TXN-88421'}</strong>
                 </div>
             </div>
         `;
@@ -462,12 +461,14 @@ function renderGraphWithLayout(layoutType) {
     const container = document.getElementById('graph-canvas');
     if (!container) return;
 
+    const isDark = document.body.classList.contains('dark-mode');
+
     const visNodes = currentGraphData.nodes.map(n => ({
         id: n.id,
         label: `${n.label}\n[${n.type}]`,
         shape: n.type === 'PERSON' ? 'dot' : 'square',
-        color: n.id === currentPersonId ? { background: '#ef4444', border: '#b91c1c' } : { background: '#3b82f6', border: '#1d4ed8' },
-        font: { color: '#f8fafc', size: 14, strokeWidth: 2, strokeColor: '#0b0f19', face: 'Inter' },
+        color: n.id === currentPersonId ? { background: '#dc2626', border: '#b91c1c' } : { background: '#2563eb', border: '#1d4ed8' },
+        font: { color: isDark ? '#f8fafc' : '#0f172a', size: 14, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff', face: 'Inter' },
         level: n.tree_level !== undefined ? n.tree_level : 1
     }));
 
@@ -477,8 +478,8 @@ function renderGraphWithLayout(layoutType) {
         to: e.target,
         label: e.relation,
         arrows: 'to',
-        color: { color: '#38bdf8' },
-        font: { color: '#94a3b8', size: 12, strokeWidth: 2, strokeColor: '#0b0f19' },
+        color: { color: '#2563eb' },
+        font: { color: isDark ? '#94a3b8' : '#475569', size: 12, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff' },
         length: 60
     }));
 
@@ -537,10 +538,10 @@ async function loadCommunicationsData() {
         const tree = document.getElementById('comm-contact-tree');
         if (tree && data.contacts) {
             tree.innerHTML = data.contacts.map(c => `
-                <div style="padding: 12px; background: #0f172a; border: 1px solid #334155; border-left: 4px solid #0284c7; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-blue); border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong style="font-size: 14px; color: #f8fafc;">${c.name}</strong> (${c.role})
-                        <div style="font-size: 12px; color: #38bdf8;">📞 ${c.phone}</div>
+                        <strong style="font-size: 14px; color: var(--text-main);">${c.name}</strong> (${c.role})
+                        <div style="font-size: 12px; color: var(--accent-blue);">📞 ${c.phone}</div>
                     </div>
                     <span class="badge badge-verified">${c.calls} Calls Logged</span>
                 </div>
@@ -574,9 +575,9 @@ async function loadFinancialData() {
         const grid = document.getElementById('fin-accounts-grid');
         if (grid) {
             grid.innerHTML = `
-                <div style="padding: 16px; background: #0f172a; border: 1px solid #334155; border-radius: 10px;">
-                    <div style="font-size: 15px; font-weight: 800; color: #10b981;">Account: ${data.account}</div>
-                    <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">Current Balance: <strong style="color: #f8fafc;">${data.balance}</strong></div>
+                <div style="padding: 16px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 10px;">
+                    <div style="font-size: 15px; font-weight: 800; color: var(--status-green);">Account: ${data.account}</div>
+                    <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Current Balance: <strong style="color: var(--text-main);">${data.balance}</strong></div>
                 </div>
             `;
         }
@@ -587,11 +588,11 @@ async function loadFinancialData() {
                 <tr>
                     <td>${t.date}</td>
                     <td>${t.time}</td>
-                    <td><strong style="color: ${t.direction === 'OUT' ? '#ef4444' : '#10b981'}; font-size: 14px;">${t.amount}</strong></td>
+                    <td><strong style="color: ${t.direction === 'OUT' ? '#dc2626' : '#16a34a'}; font-size: 14px;">${t.amount}</strong></td>
                     <td><span class="badge ${t.direction === 'OUT' ? 'badge-high' : 'badge-verified'}">${t.direction}</span></td>
                     <td>${t.account}</td>
                     <td><strong>${t.counterparty}</strong></td>
-                    <td><code style="color: #38bdf8;">${t.reference}</code></td>
+                    <td><code style="color: var(--accent-blue);">${t.reference}</code></td>
                     <td><button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</button></td>
                 </tr>
             `).join('');
@@ -612,8 +613,8 @@ async function loadBlockchainData() {
         const summary = document.getElementById('blk-summary');
         if (summary) {
             summary.innerHTML = `
-                <div style="font-size: 15px; font-weight: 800; color: #f59e0b;">Wallet Address: ${data.address} (Ref: ${data.associated_evidence})</div>
-                <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">Balance: <strong>${data.balance}</strong> | Total Observed Transactions: ${data.incoming + data.outgoing}</div>
+                <div style="font-size: 15px; font-weight: 800; color: var(--status-amber);">Wallet Address: ${data.address} (Ref: ${data.associated_evidence})</div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Balance: <strong>${data.balance}</strong> | Total Observed Transactions: ${data.incoming + data.outgoing}</div>
             `;
         }
 
@@ -621,7 +622,7 @@ async function loadBlockchainData() {
         if (tbody && data.transactions) {
             tbody.innerHTML = data.transactions.map(t => `
                 <tr>
-                    <td><code style="color: #f59e0b;">${t.hash}</code></td>
+                    <td><code style="color: var(--status-amber);">${t.hash}</code></td>
                     <td>${t.from_addr}</td>
                     <td>${t.to_addr}</td>
                     <td><strong style="font-size: 14px;">${t.value}</strong></td>
@@ -648,12 +649,12 @@ async function loadOSINTData() {
         const list = document.getElementById('osint-list');
         if (list && data.records) {
             list.innerHTML = data.records.map(o => `
-                <div style="padding: 14px; background: #0f172a; border: 1px solid #334155; border-left: 4px solid #8b5cf6; border-radius: 8px; margin-bottom: 10px;">
+                <div style="padding: 14px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-left: 4px solid var(--accent-purple); border-radius: 8px; margin-bottom: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 14px; font-weight: 800; color: #f8fafc;">SOURCE RECORD ${o.id}: ${o.value}</span>
+                        <span style="font-size: 14px; font-weight: 800; color: var(--text-main);">SOURCE RECORD ${o.id}: ${o.value}</span>
                         <span class="badge badge-verified">Confidence: ${o.confidence}</span>
                     </div>
-                    <div style="font-size: 12px; color: #94a3b8; margin-top: 6px;">Subject: <strong>${o.subject}</strong> | Source: ${o.source} | Observed: ${o.last_observed} | Entity: <strong>${o.entity}</strong> | Location: ${o.location}</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Subject: <strong>${o.subject}</strong> | Source: ${o.source} | Observed: ${o.last_observed} | Entity: <strong>${o.entity}</strong> | Location: ${o.location}</div>
                     <button class="btn btn-secondary" style="margin-top: 8px; font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('${o.evidence_id}')">View Evidence: ${o.evidence_id}</button>
                 </div>
             `).join('');
@@ -677,9 +678,9 @@ async function loadTimelineData() {
         if (container && data.events) {
             container.innerHTML = data.events.map(ev => `
                 <div class="timeline-item" style="cursor: pointer;" onclick="openEvidenceDetailModal('${ev.evidence_id}')">
-                    <div style="font-size: 11px; color: #38bdf8; font-weight: 700;">[${ev.domain}] ${ev.timestamp}</div>
-                    <div style="font-size: 14px; font-weight: 700; color: #f8fafc; margin: 4px 0;">${ev.title}</div>
-                    <div style="font-size: 12px; color: #94a3b8;">Person: <strong>${ev.person}</strong> | Location: ${ev.location} | Details: ${ev.details}</div>
+                    <div style="font-size: 11px; color: var(--accent-blue); font-weight: 700;">[${ev.domain}] ${ev.timestamp}</div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 4px 0;">${ev.title}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">Person: <strong>${ev.person}</strong> | Location: ${ev.location} | Details: ${ev.details}</div>
                 </div>
             `).join('');
         }
@@ -699,19 +700,19 @@ async function loadEntityResolutionData() {
         const cand = data.person;
 
         container.innerHTML = `
-            <div style="padding: 20px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; max-width: 650px;">
-                <div style="font-size: 16px; font-weight: 800; color: #f59e0b; margin-bottom: 10px;">POTENTIAL MATCH: ${cand.name} (Candidate ID: ${cand.id})</div>
-                <div style="font-size: 13px; color: #f8fafc; margin-bottom: 6px;">Possible match to Primary Subject: <strong>Arjun Sharma (P-001)</strong></div>
-                <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">
+            <div style="padding: 20px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 12px; max-width: 650px;">
+                <div style="font-size: 16px; font-weight: 800; color: var(--status-amber); margin-bottom: 10px;">POTENTIAL MATCH: ${cand.name} (Candidate ID: ${cand.id})</div>
+                <div style="font-size: 13px; color: var(--text-main); margin-bottom: 6px;">Possible match to Primary Subject: <strong>Arjun Sharma (P-001)</strong></div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
                     <div>Signals: <strong>Name similarity</strong>, <strong>Location overlap</strong></div>
                     <div>Match Confidence Score: <span class="badge badge-medium">43%</span></div>
-                    <div>Status: <strong style="color: #f59e0b;">${cand.status}</strong></div>
+                    <div>Status: <strong style="color: var(--status-amber);">${cand.status}</strong></div>
                 </div>
-                <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">${cand.notes}</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">${cand.notes}</p>
 
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn" style="background: #10b981;" onclick="actionEntityResolution('CONFIRM')">CONFIRM MATCH</button>
-                    <button class="btn" style="background: #ef4444;" onclick="actionEntityResolution('REJECT')">REJECT MATCH</button>
+                    <button class="btn" style="background: #16a34a;" onclick="actionEntityResolution('CONFIRM')">CONFIRM MATCH</button>
+                    <button class="btn" style="background: #dc2626;" onclick="actionEntityResolution('REJECT')">REJECT MATCH</button>
                     <button class="btn btn-secondary" onclick="actionEntityResolution('REVIEW')">MARK FOR REVIEW</button>
                 </div>
             </div>
@@ -793,19 +794,19 @@ async function openEvidenceDetailModal(evidenceId) {
         const e = await res.json();
 
         document.getElementById('evidence-modal-body').innerHTML = `
-            <div style="padding: 16px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; margin-bottom: 16px;">
+            <div style="padding: 16px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 16px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-size: 16px; font-weight: 800; color: #38bdf8;">EVIDENCE RECORD ${e.id}</span>
+                    <span style="font-size: 16px; font-weight: 800; color: var(--accent-blue);">EVIDENCE RECORD ${e.id}</span>
                     <span class="badge badge-verified">${e.evidence_type}</span>
                 </div>
-                <div style="font-size: 13px; color: #94a3b8; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <div>CASE: <strong style="color: #f8fafc;">${e.case_id}</strong></div>
-                    <div>PERSON ID: <strong style="color: #f8fafc;">${e.personId}</strong></div>
+                <div style="font-size: 13px; color: var(--text-muted); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>CASE: <strong style="color: var(--text-main);">${e.case_id}</strong></div>
+                    <div>PERSON ID: <strong style="color: var(--text-main);">${e.personId}</strong></div>
                     <div>SOURCE: <strong>${e.source}</strong></div>
                     <div>ACQUISITION DATE: <strong>${e.acquisition_date}</strong></div>
                     <div>HASH INTEGRITY: <span class="badge badge-verified">SHA-256 Verified</span></div>
                 </div>
-                <p style="font-size: 13px; color: #f8fafc;"><strong>ANALYTICAL EXTRACTION:</strong> ${e.analyst_notes}</p>
+                <p style="font-size: 13px; color: var(--text-main);"><strong>ANALYTICAL EXTRACTION:</strong> ${e.analyst_notes}</p>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
@@ -853,18 +854,18 @@ async function switchDrawerTab(tabName) {
             <div class="suspect-card">
                 <img src="${p.photo_url}" class="suspect-avatar">
                 <div>
-                    <div style="font-size: 16px; font-weight: 800; color: #f8fafc;">${p.name}</div>
-                    <div style="font-size: 13px; color: #38bdf8; font-weight: 700;">Role: ${p.role}</div>
-                    <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Age: ${p.age} | City: ${p.city}</div>
+                    <div style="font-size: 16px; font-weight: 800; color: var(--text-main);">${p.name}</div>
+                    <div style="font-size: 13px; color: var(--accent-blue); font-weight: 700;">Role: ${p.role}</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Age: ${p.age} | City: ${p.city}</div>
                 </div>
             </div>
 
-            <div style="font-size: 13px; color: #94a3b8; margin: 16px 0; display: flex; flex-direction: flex-column; gap: 6px;">
-                <div><strong>PHONE:</strong> <span style="color: #38bdf8; cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('communications'); closePersonDrawer();">${p.phone}</span></div>
+            <div style="font-size: 13px; color: var(--text-muted); margin: 16px 0; display: flex; flex-direction: flex-column; gap: 6px;">
+                <div><strong>PHONE:</strong> <span style="color: var(--accent-blue); cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('communications'); closePersonDrawer();">${p.phone}</span></div>
                 <div><strong>EMAIL:</strong> ${p.email}</div>
-                <div><strong>VEHICLE:</strong> <span style="color: #38bdf8; cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('dvr'); closePersonDrawer();">${p.vehicle}</span></div>
-                <div><strong>PUBLIC USERNAME:</strong> <span style="color: #38bdf8; cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('osint'); closePersonDrawer();">${p.social_usernames ? p.social_usernames.twitter || '@user' : '@user'}</span></div>
-                <div><strong>WALLET:</strong> <span style="color: #38bdf8; cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('blockchain'); closePersonDrawer();">${p.wallet_address}</span></div>
+                <div><strong>VEHICLE:</strong> <span style="color: var(--accent-blue); cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('dvr'); closePersonDrawer();">${p.vehicle}</span></div>
+                <div><strong>PUBLIC USERNAME:</strong> <span style="color: var(--accent-blue); cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('osint'); closePersonDrawer();">${p.social_usernames ? p.social_usernames.twitter || '@user' : '@user'}</span></div>
+                <div><strong>WALLET:</strong> <span style="color: var(--accent-blue); cursor: pointer;" onclick="changeActivePerson('${p.id}'); switchTab('blockchain'); closePersonDrawer();">${p.wallet_address}</span></div>
                 <div><strong>NOTES:</strong> ${p.notes}</div>
             </div>
             
