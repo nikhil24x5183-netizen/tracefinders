@@ -5,6 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadOverviewData();
 });
 
+// Sidebar Toggle Handler
+function toggleSidebar() {
+    const sidebar = document.getElementById('app-sidebar');
+    if (sidebar) sidebar.classList.toggle('collapsed');
+}
+
 // Navigation Tab Switcher
 function initNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
@@ -89,28 +95,65 @@ async function loadInvestigationsData() {
         const container = document.getElementById('investigations-list');
         if (!container) return;
 
-        container.innerHTML = data.cases.map(c => `
-            <div class="card" style="margin-bottom: 16px; border-left: 4px solid ${c.priority === 'HIGH' ? '#dc2626' : '#2563eb'};">
-                <div class="card-title">
-                    <span>${c.id}: ${c.title}</span>
-                    <span class="badge ${c.priority === 'HIGH' ? 'badge-high' : 'badge-verified'}">${c.priority} PRIORITY</span>
+        container.innerHTML = data.cases.map(c => {
+            const primary = c.primary_suspect || {};
+            const secondaryList = c.secondary_suspects || [];
+
+            return `
+                <div class="card" style="margin-bottom: 20px; border-left: 5px solid ${c.priority === 'HIGH' ? '#dc2626' : '#2563eb'};">
+                    <div class="card-title">
+                        <span>${c.id}: ${c.title}</span>
+                        <span class="badge ${c.priority === 'HIGH' ? 'badge-high' : 'badge-verified'}">${c.priority} PRIORITY</span>
+                    </div>
+
+                    <!-- PRIMARY SUSPECT PROFILE CARD -->
+                    <div class="suspect-card" style="background: #f8fafc; border-left: 4px solid #2563eb;">
+                        <img src="${primary.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" class="suspect-avatar" alt="Primary Suspect">
+                        <div>
+                            <div style="font-size: 14px; font-weight: 800; color: #0f172a;">${primary.name || c.subject_name} <span class="badge badge-high" style="font-size: 10px;">Primary Suspect</span></div>
+                            <div style="font-size: 12px; color: #475569; margin: 2px 0;">Role: <strong>${primary.role || 'Syndicate Lead'}</strong></div>
+                            <div style="font-size: 12px; color: #64748b;">📞 Phone: ${primary.phone || 'N/A'} | ✉️ Email: ${primary.email || 'N/A'}</div>
+                            <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+                                ${Object.entries(primary.social_profiles || {}).map(([platform, handle]) => `
+                                    <span class="social-badge">🌐 ${platform.toUpperCase()}: ${handle}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECONDARY SUSPECTS LIST -->
+                    ${secondaryList.length > 0 ? `
+                        <div style="margin-top: 10px; margin-bottom: 12px;">
+                            <div style="font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin-bottom: 6px;">👥 Secondary Suspects & Co-Conspirators (${secondaryList.length}):</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
+                                ${secondaryList.map(sec => `
+                                    <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; display: flex; gap: 10px; align-items: center;">
+                                        <img src="${sec.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
+                                        <div>
+                                            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${sec.name}</div>
+                                            <div style="font-size: 11px; color: #0284c7; font-weight: 600;">${sec.role}</div>
+                                            <div style="font-size: 11px; color: #64748b;">${sec.phone || 'N/A'}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <p style="font-size: 12px; color: #475569; margin-bottom: 12px;">${c.description}</p>
+                    <div style="font-size: 11px; color: #64748b; margin-bottom: 14px; display: flex; gap: 20px; flex-wrap: wrap;">
+                        <div>Investigator: <strong style="color: #0f172a;">${c.investigator}</strong></div>
+                        <div>Agency: <strong style="color: #0f172a;">${c.agency}</strong></div>
+                        <div>Start Date: <strong style="color: #0f172a;">${c.start_date}</strong></div>
+                        <div>Status: <strong style="color: #16a34a;">${c.status}</strong></div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn" onclick="selectActiveCase('${c.id}')">🕸️ Analyze Network Tree Graph</button>
+                        <button class="btn btn-secondary" onclick="switchTab('fusion')">🔗 Open Evidence Fusion</button>
+                    </div>
                 </div>
-                <div style="font-size: 13px; margin-bottom: 8px;">
-                    <strong>Primary Subject / Suspect:</strong> <span style="color: #2563eb; font-weight: 700;">${c.subject_name}</span>
-                </div>
-                <p style="font-size: 12px; color: #475569; margin-bottom: 12px;">${c.description}</p>
-                <div style="font-size: 11px; color: #64748b; margin-bottom: 14px; display: flex; gap: 20px;">
-                    <div>Investigator: <strong style="color: #0f172a;">${c.investigator}</strong></div>
-                    <div>Agency: <strong style="color: #0f172a;">${c.agency}</strong></div>
-                    <div>Start Date: <strong style="color: #0f172a;">${c.start_date}</strong></div>
-                    <div>Status: <strong style="color: #16a34a;">${c.status}</strong></div>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn" onclick="selectActiveCase('${c.id}')">🕸️ Analyze Network Graph</button>
-                    <button class="btn btn-secondary" onclick="switchTab('fusion')">🔗 Open Evidence Fusion</button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     } catch (err) {
         console.error(err);
     }
@@ -135,20 +178,55 @@ async function submitNewCase(e) {
     e.preventDefault();
     const title = document.getElementById('case-input-title').value.trim();
     const subject_name = document.getElementById('case-input-subject').value.trim();
+    const priority = document.getElementById('case-input-priority').value;
     const investigator = document.getElementById('case-input-investigator').value.trim();
     const agency = document.getElementById('case-input-agency').value.trim();
-    const priority = document.getElementById('case-input-priority').value;
     const description = document.getElementById('case-input-desc').value.trim();
+
+    // Primary suspect social details
+    const phone = document.getElementById('case-input-phone').value.trim();
+    const email = document.getElementById('case-input-email').value.trim();
+    const telegram = document.getElementById('case-input-telegram').value.trim();
+    const darkweb = document.getElementById('case-input-darkweb').value.trim();
+
+    const primary_suspect = {
+        name: subject_name,
+        role: "Primary Suspect",
+        avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+        phone: phone,
+        email: email,
+        social_profiles: {
+            telegram: telegram || "@suspect_tg",
+            darkweb: darkweb || "dark_alias_01"
+        }
+    };
+
+    // Secondary suspect details
+    const sec_name = document.getElementById('case-input-sec-name').value.trim();
+    const sec_role = document.getElementById('case-input-sec-role').value.trim();
+    const sec_phone = document.getElementById('case-input-sec-phone').value.trim();
+    const sec_social = document.getElementById('case-input-sec-social').value.trim();
+
+    const secondary_suspects = [];
+    if (sec_name) {
+        secondary_suspects.push({
+            name: sec_name,
+            role: sec_role || "Co-Conspirator",
+            avatar_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+            phone: sec_phone,
+            social_profiles: { social: sec_social || "@sec_alias" }
+        });
+    }
 
     try {
         const res = await fetch('/api/cases', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, subject_name, investigator, agency, priority, description })
+            body: JSON.stringify({ title, subject_name, investigator, agency, priority, description, primary_suspect, secondary_suspects })
         });
         const data = await res.json();
         if (data.success) {
-            alert(`✅ Case Registered Successfully!\n\nCase ID: ${data.case.id}\nStatus: Active Investigation logged on Blockchain Ledger.`);
+            alert(`✅ Case Registered Successfully!\n\nCase ID: ${data.case.id}\nPrimary Suspect: ${subject_name}\nSecondary Suspects: ${secondary_suspects.length}\nLogged on Blockchain Evidence Ledger.`);
             closeCreateCaseModal();
             loadInvestigationsData();
             loadOverviewData();
@@ -159,53 +237,89 @@ async function submitNewCase(e) {
     }
 }
 
-// 3. Interactive Network Graph Loader (Vis.js Canvas)
+// 3. TREE TYPE NETWORK GRAPH & MULTI-LAYOUT CONTROLLER (Vis.js Canvas)
 let visNetworkInstance = null;
+let currentGraphData = null;
+let currentLayoutType = 'tree-ud'; // 'tree-ud', 'tree-lr', 'force', 'circular'
 
 async function loadGraphData() {
     try {
         const res = await fetch('/api/graph');
-        const data = await res.json();
-
-        const container = document.getElementById('graph-canvas');
-        if (!container) return;
-
-        const visNodes = data.nodes.map(n => ({
-            id: n.id,
-            label: `${n.label}\n(${n.type})`,
-            shape: getNodeShape(n.type),
-            color: getNodeColor(n.type),
-            font: { color: '#0f172a', size: 12, strokeWidth: 2, strokeColor: '#ffffff' }
-        }));
-
-        const visEdges = data.edges.map(e => ({
-            from: e.source,
-            to: e.target,
-            label: e.relation,
-            arrows: 'to',
-            color: { color: getDomainColor(e.domain) },
-            font: { color: '#475569', size: 9, strokeWidth: 2, strokeColor: '#ffffff' }
-        }));
-
-        const visData = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
-        const options = {
-            nodes: { borderWidth: 2 },
-            physics: { barnesHut: { gravitationalConstant: -3000, springLength: 95 } },
-            interaction: { hover: true, tooltipDelay: 200 }
-        };
-
-        if (visNetworkInstance) visNetworkInstance.destroy();
-        visNetworkInstance = new vis.Network(container, visData, options);
-
-        visNetworkInstance.on('selectNode', function(params) {
-            const nodeId = params.nodes[0];
-            const entity = data.nodes.find(n => n.id === nodeId);
-            if (entity) showEntityDrawer(entity);
-        });
-
+        currentGraphData = await res.json();
+        renderGraphWithLayout(currentLayoutType);
     } catch (err) {
         console.error('Failed to render graph:', err);
     }
+}
+
+function changeGraphLayout(layoutType) {
+    currentLayoutType = layoutType;
+    document.querySelectorAll('.graph-layout-btn').forEach(btn => btn.classList.remove('active'));
+    
+    const activeBtn = document.getElementById(`btn-layout-${layoutType}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    renderGraphWithLayout(layoutType);
+}
+
+function renderGraphWithLayout(layoutType) {
+    if (!currentGraphData) return;
+    const container = document.getElementById('graph-canvas');
+    if (!container) return;
+
+    const visNodes = currentGraphData.nodes.map(n => ({
+        id: n.id,
+        label: `${n.label}\n[${n.type}]`,
+        shape: getNodeShape(n.type),
+        color: getNodeColor(n.type),
+        font: { color: '#0f172a', size: 11, strokeWidth: 2, strokeColor: '#ffffff', face: 'Inter' },
+        level: n.tree_level !== undefined ? n.tree_level : 2
+    }));
+
+    const visEdges = currentGraphData.edges.map(e => ({
+        from: e.source,
+        to: e.target,
+        label: e.relation,
+        arrows: 'to',
+        color: { color: getDomainColor(e.domain) },
+        font: { color: '#475569', size: 9, strokeWidth: 2, strokeColor: '#ffffff' }
+    }));
+
+    const visData = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
+
+    let layoutConfig = {};
+    let physicsConfig = { enabled: true };
+
+    if (layoutType === 'tree-ud') {
+        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 120, levelSeparation: 140 } };
+        physicsConfig = { enabled: false };
+    } else if (layoutType === 'tree-lr') {
+        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 100, levelSeparation: 160 } };
+        physicsConfig = { enabled: false };
+    } else if (layoutType === 'circular') {
+        layoutConfig = { randomSeed: 42 };
+        physicsConfig = { barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 95 } };
+    } else {
+        // Force-Directed
+        layoutConfig = { randomSeed: 100 };
+        physicsConfig = { barnesHut: { gravitationalConstant: -3500, springLength: 95 } };
+    }
+
+    const options = {
+        nodes: { borderWidth: 2 },
+        layout: layoutConfig,
+        physics: physicsConfig,
+        interaction: { hover: true, tooltipDelay: 200 }
+    };
+
+    if (visNetworkInstance) visNetworkInstance.destroy();
+    visNetworkInstance = new vis.Network(container, visData, options);
+
+    visNetworkInstance.on('selectNode', function(params) {
+        const nodeId = params.nodes[0];
+        const entity = currentGraphData.nodes.find(n => n.id === nodeId);
+        if (entity) showEntityDrawer(entity);
+    });
 }
 
 function getNodeShape(type) {
@@ -351,14 +465,56 @@ async function loadBlockchainData() {
     }
 }
 
-// 9. OSINT Loader
+// 9. OSINT Workspace & Suspect Dossiers Loader
 async function loadOSINTData() {
     try {
-        const res = await fetch('/api/osint');
-        const data = await res.json();
+        const resCases = await fetch('/api/cases');
+        const dataCases = await resCases.json();
+        
+        const suspectContainer = document.getElementById('osint-suspects-container');
+        if (suspectContainer && dataCases.cases.length > 0) {
+            const currentCase = dataCases.cases[0];
+            const primary = currentCase.primary_suspect || {};
+            const secondaries = currentCase.secondary_suspects || [];
+
+            suspectContainer.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+                    <!-- PRIMARY SUSPECT -->
+                    <div class="suspect-card" style="border-left: 5px solid #dc2626;">
+                        <img src="${primary.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" class="suspect-avatar">
+                        <div>
+                            <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${primary.name || 'Rahul Sharma'} <span class="badge badge-high" style="font-size: 10px;">Primary Suspect</span></div>
+                            <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin: 2px 0;">${primary.role || 'Syndicate Lead'}</div>
+                            <div style="font-size: 12px; color: #475569;">📞 ${primary.phone || 'N/A'} | ✉️ ${primary.email || 'N/A'}</div>
+                            <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                                ${Object.entries(primary.social_profiles || {}).map(([p, h]) => `<span class="social-badge">🌐 ${p.toUpperCase()}: ${h}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECONDARY SUSPECTS -->
+                    ${secondaries.map(sec => `
+                        <div class="suspect-card" style="border-left: 5px solid #0284c7;">
+                            <img src="${sec.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}" class="suspect-avatar" style="border-color: #0284c7;">
+                            <div>
+                                <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${sec.name} <span class="badge badge-verified" style="font-size: 10px;">Secondary Suspect</span></div>
+                                <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin: 2px 0;">${sec.role}</div>
+                                <div style="font-size: 12px; color: #475569;">📞 ${sec.phone || 'N/A'} | ✉️ ${sec.email || 'N/A'}</div>
+                                <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                                    ${Object.entries(sec.social_profiles || {}).map(([p, h]) => `<span class="social-badge">🌐 ${p.toUpperCase()}: ${h}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        const resOsint = await fetch('/api/osint');
+        const dataOsint = await resOsint.json();
         const container = document.getElementById('osint-list');
         if (container) {
-            container.innerHTML = data.osint_edges.map(o => `
+            container.innerHTML = dataOsint.osint_edges.map(o => `
                 <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
                     <div style="font-weight: 700; color: #7c3aed; font-size: 13px;">🌐 Public Correlation: ${o.source} ➔ ${o.target}</div>
                     <div style="font-size: 12px; color: #475569; margin-top: 4px;">${o.details}</div>
@@ -370,16 +526,40 @@ async function loadOSINTData() {
     }
 }
 
-// 10. DVR Loader
+// 10. DVR/NVR Forensics Loader with 3 Surveillance Video Cards
 async function loadDVRData() {
     try {
         const res = await fetch('/api/dvr');
         const data = await res.json();
+        
+        // Render 3 Interactive CCTV Surveillance Video Player Cards
+        const videoGrid = document.getElementById('dvr-video-grid-container');
+        if (videoGrid && data.dvr_videos) {
+            videoGrid.innerHTML = data.dvr_videos.map(v => `
+                <div class="dvr-card">
+                    <div class="dvr-thumb-wrapper">
+                        <img src="${v.video_thumbnail}" class="dvr-thumb-img" alt="CCTV Stream">
+                        <div class="dvr-rec-badge">● REC | ${v.camera_id}</div>
+                        <div class="dvr-play-overlay" onclick="openCCTVVideoModal('${v.camera_id}', '${v.event_title}', '${v.timestamp}', '${v.anpr_license_plate}', '${v.video_thumbnail}', '${v.description.replace(/'/g, "\\'")}')">▶</div>
+                    </div>
+                    <div class="dvr-info-body">
+                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">${v.event_title}</div>
+                        <div style="font-size: 11px; color: #2563eb; font-weight: 700; margin-bottom: 6px;">📍 ${v.location}</div>
+                        <div style="font-size: 12px; color: #475569; margin-bottom: 8px;"><strong>Identified Suspects:</strong> ${v.suspects_identified.join(', ')}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: monospace;">
+                            <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">⏱️ ${v.timestamp}</span>
+                            <span class="badge badge-verified">ANPR: ${v.anpr_license_plate}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         const container = document.getElementById('dvr-list');
         if (container) {
             container.innerHTML = data.dvr_edges.map(d => `
                 <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="font-weight: 700; color: #db2777; font-size: 13px;">📹 Cam C12 Detection: ${d.source} ➔ ${d.target}</div>
+                    <div style="font-weight: 700; color: #db2777; font-size: 13px;">📹 ${d.source} ➔ ${d.target}</div>
                     <div style="font-size: 12px; color: #475569; margin-top: 4px;">${d.details}</div>
                 </div>
             `).join('');
@@ -387,6 +567,23 @@ async function loadDVRData() {
     } catch (err) {
         console.error(err);
     }
+}
+
+function openCCTVVideoModal(camId, title, timestamp, anpr, imgUrl, desc) {
+    const modal = document.getElementById('cctv-video-modal');
+    if (!modal) return;
+    document.getElementById('cctv-modal-cam').innerText = camId;
+    document.getElementById('cctv-modal-title').innerText = title;
+    document.getElementById('cctv-modal-timestamp').innerText = timestamp;
+    document.getElementById('cctv-modal-anpr').innerText = `ANPR: ${anpr}`;
+    document.getElementById('cctv-modal-img').src = imgUrl;
+    document.getElementById('cctv-modal-desc').innerText = desc;
+    modal.style.display = 'flex';
+}
+
+function closeCCTVVideoModal() {
+    const modal = document.getElementById('cctv-video-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 // 11. Analytics & XAI Loader

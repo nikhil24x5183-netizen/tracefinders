@@ -15,7 +15,7 @@
 <body>
 
     <!-- Sidebar Navigation -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="app-sidebar">
         <div class="brand">
             <div class="brand-icon">X</div>
             <div>
@@ -46,9 +46,12 @@
         
         <!-- Top Header Bar -->
         <header class="top-header">
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="global-search-input" class="search-input" placeholder="Global Search (Person, Phone, Acc, Wallet, Vehicle, Case)...">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar Navigation">☰</button>
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="global-search-input" class="search-input" placeholder="Global Search (Person, Phone, Acc, Wallet, Vehicle, Case)...">
+                </div>
             </div>
             <div class="header-actions">
                 <div class="case-selector" id="header-active-case">ACTIVE CASE: TRACE-2026-017</div>
@@ -152,16 +155,30 @@
                 </div>
             </section>
 
-            <!-- 4. NETWORK GRAPH -->
+            <!-- 4. NETWORK GRAPH WITH TREE TYPE LAYOUT TOOLBAR -->
             <section id="view-graph" class="tab-view">
-                <div class="card-title" style="margin-bottom: 12px;">
-                    <span>Interactive Knowledge Network Canvas (Vis.js Physics Engine)</span>
+                <div class="card-title" style="margin-bottom: 8px;">
+                    <span>Knowledge Graph Analyzer</span>
                     <div>
                         <span class="badge badge-verified">16 Entity Classes</span>
                         <span class="badge badge-verified">15 Relation Types</span>
                     </div>
                 </div>
+
+                <!-- TREE & GRAPH LAYOUT TOOLBAR -->
+                <div class="graph-toolbar">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">LAYOUT MODE:</span>
+                        <button id="btn-layout-tree-ud" class="graph-layout-btn active" onclick="changeGraphLayout('tree-ud')">🌲 Tree (Top-Down)</button>
+                        <button id="btn-layout-tree-lr" class="graph-layout-btn" onclick="changeGraphLayout('tree-lr')">🌲 Tree (Left-Right)</button>
+                        <button id="btn-layout-force" class="graph-layout-btn" onclick="changeGraphLayout('force')">🕸️ Force Directed</button>
+                        <button id="btn-layout-circular" class="graph-layout-btn" onclick="changeGraphLayout('circular')">⭕ Circular Cluster</button>
+                    </div>
+                    <div style="font-size: 11px; color: #64748b; font-weight: 600;">💡 Click any node to inspect detailed CDR, social profiles & financial transfers</div>
+                </div>
+
                 <div id="graph-canvas"></div>
+
                 <div id="entity-drawer" class="card" style="display: none; margin-top: 16px; border-left: 4px solid var(--accent-cyan);">
                     <h3>Entity Details: <span id="drawer-entity-name" style="color: var(--accent-cyan);"></span></h3>
                     <div style="font-size: 12px; margin-top: 6px; display: flex; gap: 16px;">
@@ -186,7 +203,7 @@
             <section id="view-communications" class="tab-view">
                 <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Communication Intelligence (CDR Analytics)</h2>
                 <div class="card">
-                    <div class="card-title">Flagged Pre-Incident Communication Bursts</div>
+                    <div class="card-title">Case Communication Log & Suspect Contact Pairs</div>
                     <div id="comm-flagged-list">Loading CDR intelligence...</div>
                 </div>
             </section>
@@ -209,18 +226,32 @@
                 </div>
             </section>
 
-            <!-- 9. OSINT WORKSPACE -->
+            <!-- 9. OSINT WORKSPACE WITH PRIMARY & SECONDARY SUSPECT PROFILES -->
             <section id="view-osint" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">OSINT Workspace (Public Intel Correlation)</h2>
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">OSINT Workspace & Suspect Social Profiles</h2>
                 <div class="card">
-                    <div class="card-title">Correlated Handles, Darkweb Pastes & Public Web Records</div>
+                    <div class="card-title">Case Suspect Dossiers & Social Media Profiles</div>
+                    <div id="osint-suspects-container">Loading suspect dossiers...</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Correlated Public Threat Intel & Darkweb Pastes</div>
                     <div id="osint-list">Loading OSINT findings...</div>
                 </div>
             </section>
 
-            <!-- 10. DVR/NVR FORENSICS -->
+            <!-- 10. DVR/NVR FORENSICS WITH 3 DUMMY SURVEILLANCE VIDEOS -->
             <section id="view-dvr" class="tab-view">
                 <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">DVR/NVR Forensic Video Analysis</h2>
+                
+                <div class="card">
+                    <div class="card-title">
+                        <span>📹 Case CCTV Evidence Streams (3 Carved Forensic Videos)</span>
+                        <span class="badge badge-verified">ANPR & Face Matched</span>
+                    </div>
+                    <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Seized video frame carvings cross-referenced with vehicle ANPR and facial recognition logs.</p>
+                    <div id="dvr-video-grid-container" class="dvr-video-grid">Loading DVR videos...</div>
+                </div>
+
                 <div class="card">
                     <div class="card-title">ANPR License Plate Detections & Frame Carving Logs</div>
                     <div id="dvr-list">Loading DVR logs...</div>
@@ -300,7 +331,7 @@
         </main>
     </div>
 
-    <!-- MATCHED UI HIGH-FIDELITY CREATE NEW CASE MODAL -->
+    <!-- HIGH-FIDELITY CREATE NEW CASE MODAL WITH SECONDARY SUSPECTS & SOCIAL HANDLES -->
     <div id="create-case-modal" class="modal-overlay">
         <div class="modal-card">
             
@@ -321,7 +352,7 @@
 
                 <div class="form-grid-2">
                     <div>
-                        <label class="form-label">PRIMARY SUBJECT <span class="req">*</span></label>
+                        <label class="form-label">PRIMARY SUSPECT FULL NAME <span class="req">*</span></label>
                         <input type="text" id="case-input-subject" required class="form-field-input" placeholder="e.g. Rahul Sharma">
                     </div>
                     <div>
@@ -331,6 +362,32 @@
                             <option value="MEDIUM">MEDIUM PRIORITY</option>
                             <option value="LOW">LOW PRIORITY</option>
                         </select>
+                    </div>
+                </div>
+
+                <!-- PRIMARY SUSPECT INFO & SOCIAL PROFILES -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 16px;">
+                    <div style="font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; margin-bottom: 8px;">👤 Primary Suspect Contact & Social Handles</div>
+                    <div class="form-grid-2" style="margin-bottom: 8px;">
+                        <input type="text" id="case-input-phone" class="form-field-input" placeholder="Phone e.g. +91-98765-10001">
+                        <input type="email" id="case-input-email" class="form-field-input" placeholder="Email e.g. rahul.sharma@protonmail.com">
+                    </div>
+                    <div class="form-grid-2" style="margin-bottom: 0;">
+                        <input type="text" id="case-input-telegram" class="form-field-input" placeholder="Telegram handle e.g. @cipher_king">
+                        <input type="text" id="case-input-darkweb" class="form-field-input" placeholder="Darkweb Alias e.g. shadow_broker99">
+                    </div>
+                </div>
+
+                <!-- SECONDARY SUSPECT INFO -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 16px;">
+                    <div style="font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin-bottom: 8px;">👥 Secondary Suspect (Co-Conspirator / Driver / Hawala Agent)</div>
+                    <div class="form-grid-2" style="margin-bottom: 8px;">
+                        <input type="text" id="case-input-sec-name" class="form-field-input" placeholder="Secondary Suspect Name e.g. Vikram Singh">
+                        <input type="text" id="case-input-sec-role" class="form-field-input" placeholder="Role e.g. Driver / Hawala Coordinator">
+                    </div>
+                    <div class="form-grid-2" style="margin-bottom: 0;">
+                        <input type="text" id="case-input-sec-phone" class="form-field-input" placeholder="Phone e.g. +91-98765-20002">
+                        <input type="text" id="case-input-sec-social" class="form-field-input" placeholder="Social handle e.g. @v_singh_wheels">
                     </div>
                 </div>
 
@@ -346,7 +403,7 @@
 
                 <div class="form-group">
                     <label class="form-label">CASE SCOPE & DESCRIPTION <span class="req">*</span></label>
-                    <textarea id="case-input-desc" required rows="3" class="form-field-input" placeholder="Enter key crime report facts, FIR identifiers, and preliminary leads..."></textarea>
+                    <textarea id="case-input-desc" required rows="2" class="form-field-input" placeholder="Enter key crime report facts, FIR identifiers, and preliminary leads..."></textarea>
                 </div>
 
                 <div class="modal-actions">
@@ -355,6 +412,33 @@
                 </div>
 
             </form>
+        </div>
+    </div>
+
+    <!-- CCTV FORENSIC VIDEO PLAYER MODAL -->
+    <div id="cctv-video-modal" class="modal-overlay">
+        <div class="modal-card" style="width: 720px;">
+            <div class="modal-header">
+                <div class="modal-header-title">
+                    <div class="modal-header-icon">📹</div>
+                    <span id="cctv-modal-title">CCTV Surveillance Carved Stream</span>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeCCTVVideoModal()">✕</button>
+            </div>
+            <div style="background: #000; border-radius: 12px; height: 320px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
+                <img id="cctv-modal-img" src="" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.85;">
+                <div style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; font-family: monospace;">
+                    ● LIVE CCTV FORENSIC REPLAY | <span id="cctv-modal-cam">Cam C12</span>
+                </div>
+                <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(0, 0, 0, 0.75); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-family: monospace; display: flex; justify-content: space-between;">
+                    <span id="cctv-modal-timestamp">2026-08-28 20:01:15 IST</span>
+                    <span id="cctv-modal-anpr" style="color: #6ee7b7; font-weight: bold;">ANPR: MH12-RS-9988</span>
+                </div>
+            </div>
+            <p id="cctv-modal-desc" style="font-size: 13px; color: #475569; margin-bottom: 16px;"></p>
+            <div style="display: flex; justify-content: flex-end;">
+                <button class="btn-pill-cancel" onclick="closeCCTVVideoModal()">CLOSE PLAYER</button>
+            </div>
         </div>
     </div>
 

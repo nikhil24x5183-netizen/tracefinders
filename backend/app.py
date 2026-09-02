@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
 import time
 
-from backend.models import Case, Entity, Relationship, EvidenceItem, Anomaly, InvestigativeLead, AuditBlock
+from backend.models import Case, Entity, Relationship, EvidenceItem, Anomaly, InvestigativeLead, AuditBlock, SuspectProfile
 from backend.mock_data_generator import generate_synthetic_dataset
 from backend.graph_engine import graph_engine
 from backend.nlp_extractor import nlp_engine
@@ -25,13 +25,11 @@ from backend.report_generator import report_generator
 app = FastAPI(
     title="TRACE-X — AI-Powered Criminal Network Intelligence & Evidence Fusion System",
     description="SIH 2026 Problem Statement SIH26189 - Blockchain & Cybersecurity",
-    version="2.0.0"
+    version="2.1.0"
 )
 
-# Seed synthetic dataset in memory
 DATASTORE = generate_synthetic_dataset()
 
-# Seed initial blockchain audit log blocks for all evidence items
 for evd in DATASTORE["evidence_items"]:
     evidence_ledger.add_evidence_block(
         case_id=evd["case_id"],
@@ -45,7 +43,6 @@ for evd in DATASTORE["evidence_items"]:
         }
     )
 
-# Pydantic Requests
 class NLPExtractRequest(BaseModel):
     text: str
     investigator_name: Optional[str] = "Investigator Deshmukh (#IND-8842)"
@@ -67,6 +64,8 @@ class CreateCaseRequest(BaseModel):
     investigator: str
     agency: str
     priority: Optional[str] = "HIGH"
+    primary_suspect: Optional[SuspectProfile] = None
+    secondary_suspects: List[SuspectProfile] = []
 
 # ----------------- REST API ROUTES -----------------
 
@@ -115,11 +114,34 @@ def get_case_details(case_id: str):
 @app.post("/api/cases")
 def create_case(req: CreateCaseRequest):
     case_id = f"TRACE-2026-{len(DATASTORE['cases']) + 18:03d}"
+    
+    primary_profile = req.primary_suspect.dict() if req.primary_suspect else {
+        "name": req.subject_name,
+        "role": "Primary Suspect",
+        "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        "phone": "+91-98765-90001",
+        "email": f"{req.subject_name.lower().replace(' ', '.')}@protonmail.com",
+        "social_profiles": {"telegram": f"@{req.subject_name.lower().replace(' ', '_')}"},
+        "known_vehicles": [],
+        "crypto_wallets": []
+    }
+    
+    sec_profiles = [s.dict() for s in req.secondary_suspects]
+    
     new_case = {
         "id": case_id,
         "title": req.title,
         "subject_name": req.subject_name,
-        "subject_known_identifiers": {"phone": [], "email": [], "aliases": [], "vehicle": [], "wallet": [], "account": []},
+        "primary_suspect": primary_profile,
+        "secondary_suspects": sec_profiles,
+        "subject_known_identifiers": {
+            "phone": [primary_profile.get("phone", "")] if primary_profile.get("phone") else [],
+            "email": [primary_profile.get("email", "")] if primary_profile.get("email") else [],
+            "aliases": [req.subject_name],
+            "vehicle": primary_profile.get("known_vehicles", []),
+            "wallet": primary_profile.get("crypto_wallets", []),
+            "account": []
+        },
         "description": req.description,
         "investigator": req.investigator,
         "agency": req.agency,
@@ -128,13 +150,58 @@ def create_case(req: CreateCaseRequest):
         "start_date": time.strftime("%Y-%m-%d"),
         "tags": ["NEW_INVESTIGATION"]
     }
+    
     DATASTORE["cases"][case_id] = new_case
+    
+    # Add Primary Suspect Node to Graph
+    p_node_id = f"person_{req.subject_name.lower().replace(' ', '_')}"
+    if not any(n["id"] == p_node_id for n in DATASTORE["nodes"]):
+        DATASTORE["nodes"].append({
+            "id": p_node_id,
+            "label": req.subject_name,
+            "type": "PERSON",
+            "risk_score": 85,
+            "confidence": 1.0,
+            "details": f"Primary Suspect in Case {case_id}. Role: {primary_profile['role']}",
+            "status": "Confirmed",
+            "source_evidence_ids": ["EVD-DOC-001"],
+            "tree_level": 0
+        })
+
+    # Add Secondary Suspect Nodes to Graph
+    for sec in sec_profiles:
+        sec_node_id = f"person_{sec['name'].lower().replace(' ', '_')}"
+        if not any(n["id"] == sec_node_id for n in DATASTORE["nodes"]):
+            DATASTORE["nodes"].append({
+                "id": sec_node_id,
+                "label": sec["name"],
+                "type": "PERSON",
+                "risk_score": 75,
+                "confidence": 0.9,
+                "details": f"Secondary Suspect in Case {case_id}. Role: {sec['role']}",
+                "status": "Confirmed",
+                "source_evidence_ids": ["EVD-DOC-001"],
+                "tree_level": 1
+            })
+            DATASTORE["edges"].append({
+                "id": f"rel_sec_{hash(sec_node_id)&0xfffffff}",
+                "source": p_node_id,
+                "target": sec_node_id,
+                "relation": "ASSOCIATED_WITH",
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "confidence": 0.9,
+                "source_evidence_ids": ["EVD-DOC-001"],
+                "details": f"Co-conspirator association: {sec['role']}",
+                "domain": "COMMUNICATION"
+            })
+
     evidence_ledger.add_evidence_block(
         case_id=case_id,
         action_type="CASE_INITIALIZED",
         actor=req.investigator,
-        data_payload={"title": req.title, "agency": req.agency}
+        data_payload={"title": req.title, "agency": req.agency, "primary_suspect": req.subject_name}
     )
+    
     return {"success": True, "case": new_case}
 
 @app.get("/api/evidence")
@@ -275,7 +342,8 @@ def get_dvr():
     return {
         "monitored_cameras": 20,
         "anpr_detections": 100,
-        "dvr_edges": dvr_edges
+        "dvr_edges": dvr_edges,
+        "dvr_videos": DATASTORE.get("dvr_videos", [])
     }
 
 @app.get("/api/anomalies")

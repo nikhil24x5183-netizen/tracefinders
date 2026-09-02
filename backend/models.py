@@ -1,6 +1,32 @@
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 
+class SuspectProfile(BaseModel):
+    name: str
+    role: str = "Primary Suspect"  # Primary Suspect, Secondary Suspect, Co-Conspirator, Logistics
+    avatar_url: Optional[str] = "/static/avatars/suspect1.png"
+    phone: Optional[str] = ""
+    email: Optional[str] = ""
+    social_profiles: Dict[str, str] = {}  # telegram, twitter, instagram, darkweb_alias
+    known_vehicles: List[str] = []
+    crypto_wallets: List[str] = []
+
+class Case(BaseModel):
+    id: str
+    title: str
+    subject_name: str
+    primary_suspect: Optional[SuspectProfile] = None
+    secondary_suspects: List[SuspectProfile] = []
+    subject_known_identifiers: Dict[str, List[str]] = {}
+    description: str
+    investigator: str
+    agency: str
+    priority: str = "HIGH"
+    status: str = "ACTIVE"
+    start_date: str
+    end_date: Optional[str] = None
+    tags: List[str] = []
+
 class Entity(BaseModel):
     id: str
     label: str
@@ -36,20 +62,6 @@ class EvidenceItem(BaseModel):
     processing_status: str = "PROCESSED"
     provenance: str
     analyst_notes: str = ""
-
-class Case(BaseModel):
-    id: str
-    title: str
-    subject_name: str
-    subject_known_identifiers: Dict[str, List[str]]
-    description: str
-    investigator: str
-    agency: str
-    priority: str = "HIGH"
-    status: str = "ACTIVE"
-    start_date: str
-    end_date: Optional[str] = None
-    tags: List[str] = []
 
 class Anomaly(BaseModel):
     id: str

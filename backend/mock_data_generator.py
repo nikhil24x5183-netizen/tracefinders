@@ -9,11 +9,54 @@ def generate_synthetic_dataset() -> Dict[str, Any]:
         "id": "TRACE-2026-017",
         "title": "Operation Cipher Net - Cyber-Financial Syndicate Investigation",
         "subject_name": "Rahul Sharma",
+        "primary_suspect": {
+            "name": "Rahul Sharma",
+            "role": "Primary Suspect / Syndicate Lead",
+            "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+            "phone": "+91-98765-10001",
+            "email": "rahul.sharma89@protonmail.com",
+            "social_profiles": {
+                "telegram": "@cipher_king",
+                "twitter": "@r_sharma89",
+                "instagram": "@rahul_cyber_99",
+                "darkweb": "shadow_broker99"
+            },
+            "known_vehicles": ["MH-12-RS-9988"],
+            "crypto_wallets": ["0x71a9b4fe82c19a...9b4"]
+        },
+        "secondary_suspects": [
+            {
+                "name": "Vikram Singh",
+                "role": "Secondary Suspect / Driver & Field Logistics",
+                "avatar_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+                "phone": "+91-98765-20002",
+                "email": "vikram.logistics@gmail.com",
+                "social_profiles": {
+                    "telegram": "@vikram_runner",
+                    "instagram": "@v_singh_wheels"
+                },
+                "known_vehicles": ["MH12-AB-1234"],
+                "crypto_wallets": []
+            },
+            {
+                "name": "Amit Patel",
+                "role": "Secondary Suspect / Hawala & Shell Corp Director",
+                "avatar_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
+                "phone": "+91-98765-30003",
+                "email": "patel.amit@apexglobal.in",
+                "social_profiles": {
+                    "linkedin": "in/amit-patel-apex",
+                    "darkweb": "fiat_mixer_07"
+                },
+                "known_vehicles": ["MH-14-XY-1001"],
+                "crypto_wallets": ["0x3910ab12f0090884210419280011a0029b920199"]
+            }
+        ],
         "subject_known_identifiers": {
             "phone": ["+91-98765-10001", "+91-98765-10099"],
             "email": ["rahul.sharma89@protonmail.com", "r_sharma_cyber@gmail.com"],
             "aliases": ["Rahul S.", "r_sharma_1989", "Cipher_King", "shadow_broker99"],
-            "vehicle": ["MH-12-RS-9988", "MH-14-XY-1001"],
+            "vehicle": ["MH-12-RS-9988", "MH12-AB-1234"],
             "wallet": ["0x71a9b4fe82c19a004812f883b1029c71a9b4fe82", "0x3910ab12f0090884210419280011a0029b920199"],
             "account": ["ACC-IND-994101", "ACC-HDFC-882104"]
         },
@@ -33,6 +76,17 @@ def generate_synthetic_dataset() -> Dict[str, Any]:
             "id": "TRACE-2026-004",
             "title": "Investigation into Telecommunication Fraud Syndicate B",
             "subject_name": "Unknown Syndicate Alpha",
+            "primary_suspect": {
+                "name": "Syndicate Alpha Lead",
+                "role": "Primary Suspect",
+                "avatar_url": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80",
+                "phone": "+91-98111-00001",
+                "email": "alpha.boss@securesim.org",
+                "social_profiles": {"telegram": "@alpha_telecom"},
+                "known_vehicles": [],
+                "crypto_wallets": []
+            },
+            "secondary_suspects": [],
             "subject_known_identifiers": {"phone": ["+91-98111-00001"]},
             "description": "Parallel inquiry into SIM-box operation in Western Corridor.",
             "investigator": "Sub-Ins. Neha Gupta (#INV-4401)",
@@ -48,42 +102,46 @@ def generate_synthetic_dataset() -> Dict[str, Any]:
     incident_dt = datetime(2026, 8, 28, 20, 7, 0)
     
     nodes = []
-    nodes.append({"id": "person_rahul_sharma", "label": "Rahul Sharma", "type": "PERSON", "risk_score": 92, "confidence": 1.0, "details": "Primary Subject in Case TRACE-2026-017. Associated with multiple telecom and crypto identifiers.", "status": "Confirmed", "source_evidence_ids": ["EVD-DOC-001", "EVD-CDR-101", "EVD-BNK-201"]})
-    nodes.append({"id": "person_vikram_singh", "label": "Vikram Singh", "type": "PERSON", "risk_score": 88, "confidence": 0.95, "details": "High network centrality hub. Key logistics and driver coordinator.", "status": "Confirmed", "source_evidence_ids": ["EVD-CDR-101", "EVD-DVR-501", "EVD-BNK-201"]})
-    nodes.append({"id": "person_amit_patel", "label": "Amit Patel", "type": "PERSON", "risk_score": 81, "confidence": 0.92, "details": "Registered director of Apex Global Logistics. Facilitator of multi-hop transactions.", "status": "Confirmed", "source_evidence_ids": ["EVD-BNK-201", "EVD-BLK-301"]})
-    nodes.append({"id": "person_priya_verma", "label": "Priya Verma", "type": "PERSON", "risk_score": 68, "confidence": 0.88, "details": "Accountant receiving repeated off-market UPI cash transfers.", "status": "Confirmed", "source_evidence_ids": ["EVD-BNK-202"]})
-    nodes.append({"id": "person_r_sharma_ambiguous", "label": "R. Sharma (Unverified)", "type": "PERSON", "risk_score": 54, "confidence": 0.62, "details": "Identity Resolution Candidate: Name similarity with Rahul Sharma, shared cell tower location in Pune, but distinct phone operator.", "status": "Needs Review", "source_evidence_ids": ["EVD-DOC-004", "EVD-OSINT-402"]})
+    # Primary & Secondary Suspect Nodes with parent hierarchical tree tags
+    nodes.append({"id": "person_rahul_sharma", "label": "Rahul Sharma", "type": "PERSON", "risk_score": 92, "confidence": 1.0, "details": "Primary Suspect / Syndicate Lead. Associated with Telegram @cipher_king.", "status": "Confirmed", "source_evidence_ids": ["EVD-DOC-001", "EVD-CDR-101", "EVD-BNK-201"], "tree_level": 0})
+    nodes.append({"id": "person_vikram_singh", "label": "Vikram Singh", "type": "PERSON", "risk_score": 88, "confidence": 0.95, "details": "Secondary Suspect / Driver & Field Logistics. Driver of SUV MH12-AB-1234.", "status": "Confirmed", "source_evidence_ids": ["EVD-CDR-101", "EVD-DVR-501", "EVD-BNK-201"], "tree_level": 1})
+    nodes.append({"id": "person_amit_patel", "label": "Amit Patel", "type": "PERSON", "risk_score": 81, "confidence": 0.92, "details": "Secondary Suspect / Hawala & Shell Director of Apex Global Logistics.", "status": "Confirmed", "source_evidence_ids": ["EVD-BNK-201", "EVD-BLK-301"], "tree_level": 1})
+    nodes.append({"id": "person_priya_verma", "label": "Priya Verma", "type": "PERSON", "risk_score": 68, "confidence": 0.88, "details": "Accountant receiving off-market UPI cash transfers.", "status": "Confirmed", "source_evidence_ids": ["EVD-BNK-202"], "tree_level": 2})
+    nodes.append({"id": "person_r_sharma_ambiguous", "label": "R. Sharma (Unverified)", "type": "PERSON", "risk_score": 54, "confidence": 0.62, "details": "Identity Resolution Candidate: Name similarity with Rahul Sharma, shared Pune cell tower.", "status": "Needs Review", "source_evidence_ids": ["EVD-DOC-004", "EVD-OSINT-402"], "tree_level": 2})
 
+    # Synthetic persons for graph breadth
     first_names = ["Aarav", "Rohan", "Suresh", "Karan", "Ananya", "Deepak", "Manish", "Kavita", "Sanjay", "Rajesh", "Pooja", "Sunil", "Meera", "Alok", "Vivek", "Nitin", "Tarun", "Gaurav", "Preeti", "Ritu"]
     last_names = ["Kulkarni", "Deshmukh", "Joshi", "Mehta", "Shah", "Nair", "Iyer", "Yadav", "Chauhan", "Rao", "Gupta", "Agarwal", "Reddy", "Bhat", "Saxena"]
     
     for i in range(1, 46):
         fn = first_names[i % len(first_names)]
         ln = last_names[(i * 3) % len(last_names)]
-        nodes.append({"id": f"person_synth_{i:03d}", "label": f"{fn} {ln}", "type": "PERSON", "risk_score": random.randint(15, 65), "confidence": round(random.uniform(0.75, 0.98), 2), "details": f"Synthetic background entity #{i} in urban communication directory.", "status": "Confirmed", "source_evidence_ids": [f"EVD-CDR-10{random.randint(1,4)}"]})
+        nodes.append({"id": f"person_synth_{i:03d}", "label": f"{fn} {ln}", "type": "PERSON", "risk_score": random.randint(15, 65), "confidence": round(random.uniform(0.75, 0.98), 2), "details": f"Synthetic background entity #{i} in urban communication directory.", "status": "Confirmed", "source_evidence_ids": [f"EVD-CDR-10{random.randint(1,4)}"], "tree_level": 3})
 
-    nodes.append({"id": "phone_rahul_1", "label": "+91-98765-10001", "type": "PHONE", "risk_score": 90, "confidence": 1.0, "details": "Primary MSISDN assigned to Rahul Sharma", "status": "Confirmed", "source_evidence_ids": ["EVD-CDR-101"]})
-    nodes.append({"id": "phone_vikram_1", "label": "+91-98765-20002", "type": "PHONE", "risk_score": 85, "confidence": 1.0, "details": "Primary MSISDN assigned to Vikram Singh", "status": "Confirmed", "source_evidence_ids": ["EVD-CDR-101"]})
-    nodes.append({"id": "phone_amit_1", "label": "+91-98765-30003", "type": "PHONE", "risk_score": 75, "confidence": 0.95, "details": "Business phone for Apex Global Logistics", "status": "Confirmed", "source_evidence_ids": ["EVD-CDR-102"]})
+    nodes.append({"id": "phone_rahul_1", "label": "+91-98765-10001", "type": "PHONE", "risk_score": 90, "confidence": 1.0, "details": "Primary MSISDN assigned to Rahul Sharma", "status": "Confirmed", "source_evidence_ids": ["EVD-CDR-101"], "tree_level": 1})
+    nodes.append({"id": "phone_vikram_1", "label": "+91-98765-20002", "type": "PHONE", "risk_score": 85, "confidence": 1.0, "details": "Primary MSISDN assigned to Vikram Singh", "status": "Confirmed", "source_evidence_ids": ["EVD-CDR-101"], "tree_level": 2})
+    nodes.append({"id": "phone_amit_1", "label": "+91-98765-30003", "type": "PHONE", "risk_score": 75, "confidence": 0.95, "details": "Business phone for Apex Global Logistics", "status": "Confirmed", "source_evidence_ids": ["EVD-CDR-102"], "tree_level": 2})
 
-    nodes.append({"id": "acc_apex_global", "label": "ACC-IND-994101 (Apex Global)", "type": "BANK_ACCOUNT", "risk_score": 86, "confidence": 1.0, "details": "HDFC Current Account used for rapid multi-hop fund routing", "status": "Confirmed", "source_evidence_ids": ["EVD-BNK-201"]})
-    nodes.append({"id": "wallet_shadow", "label": "0x71a9b4fe82c19a...9b4", "type": "CRYPTO_WALLET", "risk_score": 94, "confidence": 0.98, "details": "Tether / Ethereum cold wallet referenced in OSINT threat intel", "status": "Confirmed", "source_evidence_ids": ["EVD-BLK-301", "EVD-OSINT-401"]})
-    nodes.append({"id": "vehicle_mh12", "label": "MH12-AB-1234 (SUV)", "type": "VEHICLE", "risk_score": 82, "confidence": 0.96, "details": "Black Mahindra XUV700 registered under Vikram Singh", "status": "Confirmed", "source_evidence_ids": ["EVD-DVR-501"]})
-    nodes.append({"id": "camera_c12", "label": "Cam C12 - MG Road Junction", "type": "CAMERA", "risk_score": 40, "confidence": 1.0, "details": "High-Definition ANPR & Face CCTV Camera at MG Road Corridor", "status": "Confirmed", "source_evidence_ids": ["EVD-DVR-501"]})
-    nodes.append({"id": "incident_1042", "label": "Incident #1042 (Cyber Extortion Event)", "type": "INCIDENT", "risk_score": 100, "confidence": 1.0, "details": "Targeted Cyber Extortion & Ransom Drop Event on 2026-08-28 20:07 IST", "status": "Confirmed", "source_evidence_ids": ["EVD-DOC-001"]})
-    nodes.append({"id": "org_apex", "label": "Apex Global Logistics Pvt Ltd", "type": "ORGANIZATION", "risk_score": 78, "confidence": 0.95, "details": "Logistics shell company used for layer 2 transaction masking", "status": "Confirmed", "source_evidence_ids": ["EVD-BNK-201"]})
+    nodes.append({"id": "acc_apex_global", "label": "ACC-IND-994101 (Apex Global)", "type": "BANK_ACCOUNT", "risk_score": 86, "confidence": 1.0, "details": "HDFC Current Account used for rapid multi-hop fund routing", "status": "Confirmed", "source_evidence_ids": ["EVD-BNK-201"], "tree_level": 2})
+    nodes.append({"id": "wallet_shadow", "label": "0x71a9b4fe82c19a...9b4", "type": "CRYPTO_WALLET", "risk_score": 94, "confidence": 0.98, "details": "Tether / Ethereum cold wallet referenced in OSINT threat intel", "status": "Confirmed", "source_evidence_ids": ["EVD-BLK-301", "EVD-OSINT-401"], "tree_level": 3})
+    nodes.append({"id": "vehicle_mh12", "label": "MH12-AB-1234 (SUV)", "type": "VEHICLE", "risk_score": 82, "confidence": 0.96, "details": "Black Mahindra XUV700 registered under Vikram Singh", "status": "Confirmed", "source_evidence_ids": ["EVD-DVR-501"], "tree_level": 2})
+    nodes.append({"id": "camera_c12", "label": "Cam C12 - MG Road Junction", "type": "CAMERA", "risk_score": 40, "confidence": 1.0, "details": "High-Definition ANPR & Face CCTV Camera at MG Road Corridor", "status": "Confirmed", "source_evidence_ids": ["EVD-DVR-501"], "tree_level": 3})
+    nodes.append({"id": "incident_1042", "label": "Incident #1042 (Cyber Extortion Event)", "type": "INCIDENT", "risk_score": 100, "confidence": 1.0, "details": "Targeted Cyber Extortion & Ransom Drop Event on 2026-08-28 20:07 IST", "status": "Confirmed", "source_evidence_ids": ["EVD-DOC-001"], "tree_level": 0})
+    nodes.append({"id": "org_apex", "label": "Apex Global Logistics Pvt Ltd", "type": "ORGANIZATION", "risk_score": 78, "confidence": 0.95, "details": "Logistics shell company used for layer 2 transaction masking", "status": "Confirmed", "source_evidence_ids": ["EVD-BNK-201"], "tree_level": 2})
 
     edges = []
-    edges.append({"id": "rel_1", "source": "person_rahul_sharma", "target": "phone_rahul_1", "relation": "USES", "timestamp": "2026-08-01 10:00:00", "confidence": 0.99, "source_evidence_ids": ["EVD-CDR-101"], "details": "Subscriber registration & CDR verification", "domain": "COMMUNICATION"})
-    edges.append({"id": "rel_2", "source": "person_vikram_singh", "target": "phone_vikram_1", "relation": "USES", "timestamp": "2026-08-01 10:00:00", "confidence": 0.99, "source_evidence_ids": ["EVD-CDR-101"], "details": "CDR subscriber record match", "domain": "COMMUNICATION"})
-    edges.append({"id": "rel_3", "source": "phone_rahul_1", "target": "phone_vikram_1", "relation": "CALLED", "timestamp": "2026-08-28 19:25:00", "confidence": 0.98, "source_evidence_ids": ["EVD-CDR-101"], "details": "14 encrypted voice calls logged between 19:20 and 20:00 (Pre-Incident Burst)", "domain": "COMMUNICATION"})
-    edges.append({"id": "rel_4", "source": "person_vikram_singh", "target": "vehicle_mh12", "relation": "OWNS", "timestamp": "2026-01-15 00:00:00", "confidence": 0.95, "source_evidence_ids": ["EVD-DVR-501"], "details": "RTO vehicle ownership database record", "domain": "PHYSICAL"})
-    edges.append({"id": "rel_5", "source": "vehicle_mh12", "target": "camera_c12", "relation": "OBSERVED_AT", "timestamp": "2026-08-28 20:12:00", "confidence": 0.94, "source_evidence_ids": ["EVD-DVR-501"], "details": "ANPR Camera C12 capture of MH12-AB-1234 moving away from Incident site", "domain": "DVR"})
-    edges.append({"id": "rel_6", "source": "incident_1042", "target": "camera_c12", "relation": "LOCATED_AT", "timestamp": "2026-08-28 20:07:00", "confidence": 1.0, "source_evidence_ids": ["EVD-DOC-001"], "details": "Incident spot location within 150m of Camera C12", "domain": "PHYSICAL"})
-    edges.append({"id": "rel_7", "source": "person_vikram_singh", "target": "acc_apex_global", "relation": "TRANSFERRED", "timestamp": "2026-08-28 20:45:00", "confidence": 0.97, "source_evidence_ids": ["EVD-BNK-201"], "details": "IMPS Transfer of ₹25,00,000 flagged as Hawala/Rapid Cash Movement", "domain": "FINANCIAL"})
-    edges.append({"id": "rel_8", "source": "person_amit_patel", "target": "org_apex", "relation": "WORKS_FOR", "timestamp": "2025-06-01 00:00:00", "confidence": 0.99, "source_evidence_ids": ["EVD-BNK-201"], "details": "Director status in MCA filing", "domain": "FINANCIAL"})
-    edges.append({"id": "rel_9", "source": "acc_apex_global", "target": "wallet_shadow", "relation": "TRANSFERRED", "timestamp": "2026-08-28 21:15:00", "confidence": 0.92, "source_evidence_ids": ["EVD-BLK-301"], "details": "Layer 3 conversion into 8.5 ETH off-ramped to crypto wallet", "domain": "BLOCKCHAIN"})
-    edges.append({"id": "rel_10", "source": "wallet_shadow", "target": "person_rahul_sharma", "relation": "ASSOCIATED_WITH", "timestamp": "2026-08-29 02:30:00", "confidence": 0.86, "source_evidence_ids": ["EVD-OSINT-401"], "details": "Darkweb paste bin post linking wallet 0x71a...9b4 to handle 'Cipher_King' (Rahul Sharma)", "domain": "OSINT"})
+    edges.append({"id": "rel_1", "source": "person_rahul_sharma", "target": "person_vikram_singh", "relation": "COMMANDS", "timestamp": "2026-08-01 10:00:00", "confidence": 0.98, "source_evidence_ids": ["EVD-CDR-101"], "details": "Hierarchical coordination link: Rahul Sharma directs field logistics of Vikram Singh", "domain": "COMMUNICATION"})
+    edges.append({"id": "rel_2", "source": "person_rahul_sharma", "target": "person_amit_patel", "relation": "FINANCIALLY_DIRECTS", "timestamp": "2026-08-01 10:00:00", "confidence": 0.95, "source_evidence_ids": ["EVD-BNK-201"], "details": "Hierarchical financial link: Rahul Sharma controls shell director Amit Patel", "domain": "FINANCIAL"})
+    edges.append({"id": "rel_3", "source": "person_rahul_sharma", "target": "phone_rahul_1", "relation": "USES", "timestamp": "2026-08-01 10:00:00", "confidence": 0.99, "source_evidence_ids": ["EVD-CDR-101"], "details": "Subscriber registration & CDR verification", "domain": "COMMUNICATION"})
+    edges.append({"id": "rel_4", "source": "person_vikram_singh", "target": "phone_vikram_1", "relation": "USES", "timestamp": "2026-08-01 10:00:00", "confidence": 0.99, "source_evidence_ids": ["EVD-CDR-101"], "details": "CDR subscriber record match", "domain": "COMMUNICATION"})
+    edges.append({"id": "rel_5", "source": "phone_rahul_1", "target": "phone_vikram_1", "relation": "CALLED", "timestamp": "2026-08-28 19:25:00", "confidence": 0.98, "source_evidence_ids": ["EVD-CDR-101"], "details": "14 encrypted voice calls logged between 19:20 and 20:00 (Pre-Incident Burst)", "domain": "COMMUNICATION"})
+    edges.append({"id": "rel_6", "source": "person_vikram_singh", "target": "vehicle_mh12", "relation": "OWNS", "timestamp": "2026-01-15 00:00:00", "confidence": 0.95, "source_evidence_ids": ["EVD-DVR-501"], "details": "RTO vehicle ownership database record", "domain": "PHYSICAL"})
+    edges.append({"id": "rel_7", "source": "vehicle_mh12", "target": "camera_c12", "relation": "OBSERVED_AT", "timestamp": "2026-08-28 20:12:00", "confidence": 0.94, "source_evidence_ids": ["EVD-DVR-501"], "details": "ANPR Camera C12 capture of MH12-AB-1234 moving away from Incident site", "domain": "DVR"})
+    edges.append({"id": "rel_8", "source": "incident_1042", "target": "camera_c12", "relation": "LOCATED_AT", "timestamp": "2026-08-28 20:07:00", "confidence": 1.0, "source_evidence_ids": ["EVD-DOC-001"], "details": "Incident spot location within 150m of Camera C12", "domain": "PHYSICAL"})
+    edges.append({"id": "rel_9", "source": "person_vikram_singh", "target": "acc_apex_global", "relation": "TRANSFERRED", "timestamp": "2026-08-28 20:45:00", "confidence": 0.97, "source_evidence_ids": ["EVD-BNK-201"], "details": "IMPS Transfer of ₹25,00,000 flagged as Hawala/Rapid Cash Movement", "domain": "FINANCIAL"})
+    edges.append({"id": "rel_10", "source": "person_amit_patel", "target": "org_apex", "relation": "WORKS_FOR", "timestamp": "2025-06-01 00:00:00", "confidence": 0.99, "source_evidence_ids": ["EVD-BNK-201"], "details": "Director status in MCA filing", "domain": "FINANCIAL"})
+    edges.append({"id": "rel_11", "source": "acc_apex_global", "target": "wallet_shadow", "relation": "TRANSFERRED", "timestamp": "2026-08-28 21:15:00", "confidence": 0.92, "source_evidence_ids": ["EVD-BLK-301"], "details": "Layer 3 conversion into 8.5 ETH off-ramped to crypto wallet", "domain": "BLOCKCHAIN"})
+    edges.append({"id": "rel_12", "source": "wallet_shadow", "target": "person_rahul_sharma", "relation": "ASSOCIATED_WITH", "timestamp": "2026-08-29 02:30:00", "confidence": 0.86, "source_evidence_ids": ["EVD-OSINT-401"], "details": "Darkweb paste bin post linking wallet 0x71a...9b4 to handle 'Cipher_King' (Rahul Sharma)", "domain": "OSINT"})
 
     for i in range(1, 40):
         src = f"person_synth_{i:03d}"
@@ -109,9 +167,49 @@ def generate_synthetic_dataset() -> Dict[str, Any]:
         {"id": "EVD-DVR-501", "case_id": "TRACE-2026-017", "title": "NVR Forensic Video Frame Extraction - Cam C12 (MG Road)", "evidence_type": "DVR_NVR", "source": "City Surveillance Command & Control Center", "acquisition_timestamp": "2026-08-29 09:45:00", "file_hash": "d41d8cd98f00b204e9800998ecf8427e56b3e66487e44a49c6d3ff3cf81734f2", "file_size_bytes": 45000000, "integrity_status": "VERIFIED", "processing_status": "PROCESSED", "provenance": "Seized NVR hard drive #NVR-702 frame hash carving.", "analyst_notes": "ALPR match for vehicle MH12-AB-1234 at 20:12:00."}
     ]
 
+    # 3 DUMMY DVR SURVEILLANCE VIDEOS
+    dvr_videos = [
+        {
+            "id": "DVR-VID-01",
+            "camera_id": "Cam C12",
+            "location": "MG Road Junction - Coffee Shop Exterior",
+            "timestamp": "2026-08-28 20:01:15 IST",
+            "event_title": "Pre-Incident Suspect Meeting (Pre-Extortion Coordination)",
+            "suspects_identified": ["Rahul Sharma (Primary)", "Vikram Singh (Secondary)"],
+            "anpr_license_plate": "MH12-RS-9988",
+            "confidence_score": "96.4%",
+            "video_thumbnail": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80",
+            "description": "High-Definition ANPR and facial recognition carving captured Primary Suspect Rahul Sharma meeting Secondary Suspect Vikram Singh outside Caffeine Coffee Shop 6 minutes before Incident #1042 report."
+        },
+        {
+            "id": "DVR-VID-02",
+            "camera_id": "Cam C14",
+            "location": "Commercial Complex Parking Lot B",
+            "timestamp": "2026-08-28 20:12:40 IST",
+            "event_title": "Money Laundering & Cash Bag Handover Event",
+            "suspects_identified": ["Vikram Singh (Secondary)", "Amit Patel (Shell Director)"],
+            "anpr_license_plate": "MH12-AB-1234",
+            "confidence_score": "94.8%",
+            "video_thumbnail": "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=600&auto=format&fit=crop&q=80",
+            "description": "CCTV NVR frame carving captured SUV MH12-AB-1234 stopping near Parking Bay 4. Secondary Suspect Vikram Singh handed over black duffel bag (₹25L cash equivalent) to Shell Director Amit Patel."
+        },
+        {
+            "id": "DVR-VID-03",
+            "camera_id": "Cam C18",
+            "location": "Expressway Toll Plaza Gate 3",
+            "timestamp": "2026-08-28 20:45:10 IST",
+            "event_title": "Vehicle Getaway & Highway Off-Ramp Passage",
+            "suspects_identified": ["SUV MH12-AB-1234"],
+            "anpr_license_plate": "MH12-AB-1234",
+            "confidence_score": "98.2%",
+            "video_thumbnail": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600&auto=format&fit=crop&q=80",
+            "description": "Automated ANPR camera captured vehicle MH12-AB-1234 passing toll plaza gate 3 at high velocity 38 minutes post-incident."
+        }
+    ]
+
     anomalies = [
         {"id": "ANM-001", "category": "Communication Burst", "title": "Unusual Pre-Incident Communication Burst Detected", "severity": "HIGH", "timestamp": "2026-08-28 19:45:00", "affected_entity_ids": ["person_rahul_sharma", "person_vikram_singh"], "explanation": "Communication frequency between +91-98765-10001 (Rahul Sharma) and +91-98765-20002 (Vikram Singh) increased by 420% during the 45 minutes preceding Incident #1042.", "evidence_ids": ["EVD-CDR-101", "EVD-DOC-001"], "confidence": 0.94, "analyst_status": "Requires Review"},
-        {"id": "ANM-002", "category": "Financial / Informal Transfer", "title": "Rapid Multi-Hop Fund Transfer & Hawala Risk Indicator", "severity": "HIGH", "timestamp": "2026-08-28 20:45:00", "affected_entity_ids": ["person_vikram_singh", "acc_apex_global", "person_amit_patel"], "explanation": "Anomalous fund velocity: ₹25,00,000 deposited into HDFC Acc #ACC-IND-994101 was split into 3 accounts within 18 minutes without typical commercial invoice trail.", "evidence_ids": ["EVD-BNK-201"], "confidence": 0.89, "analyst_status": "Requires Review"},
+        {"id": "ANM-002", "category": "Financial / Informal Transfer", "title": "Rapid Cash Movement / Informal Value Transfer Indicator", "severity": "HIGH", "timestamp": "2026-08-28 20:45:00", "affected_entity_ids": ["person_vikram_singh", "acc_apex_global", "person_amit_patel"], "explanation": "Anomalous fund velocity: ₹25,00,000 deposited into HDFC Acc #ACC-IND-994101 was split into 3 accounts within 18 minutes without typical commercial invoice trail.", "evidence_ids": ["EVD-BNK-201"], "confidence": 0.89, "analyst_status": "Requires Review"},
         {"id": "ANM-003", "category": "Temporal Correlation", "title": "Cross-Domain Temporal Convergence around Incident #1042", "severity": "HIGH", "timestamp": "2026-08-28 20:12:00", "affected_entity_ids": ["vehicle_mh12", "camera_c12", "incident_1042"], "explanation": "Vehicle MH12-AB-1234 passed CCTV Cam C12 exactly 5 minutes after Incident #1042 was reported 150 meters away.", "evidence_ids": ["EVD-DVR-501", "EVD-DOC-001"], "confidence": 0.92, "analyst_status": "Requires Review"}
     ]
 
@@ -144,6 +242,7 @@ def generate_synthetic_dataset() -> Dict[str, Any]:
         "nodes": nodes,
         "edges": edges,
         "evidence_items": evidence_items,
+        "dvr_videos": dvr_videos,
         "anomalies": anomalies,
         "leads": leads
     }
