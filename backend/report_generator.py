@@ -21,14 +21,15 @@ class ReportGenerator:
         priority = case_data.get("priority", "High")
         lead = case_data.get("lead_investigator", "Ins. Vikramaditya Rao (#INV-7092)")
 
-        # Case Primary Subject vs Current Selected Subject (Requirements 2, 6, 20, 21)
+        # Case Primary Subject vs Current Selected Subject (Requirements 4, 6)
         primary_case_subject = "Arjun Sharma"
         
-        # Person-Scoped Profile Data
+        # Person-Scoped Profile Data (Requirements 1, 2, 3, 7, 9)
         pid = person_data.get("id", "P-001")
         pname = person_data.get("name", "Arjun Sharma")
         palias = person_data.get("alias", "Arjun S.")
         prole = person_data.get("role", "Primary Subject")
+        photo_url = person_data.get("photo_url", "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300")
         page = person_data.get("age", 34)
         pgender = person_data.get("gender", "Male")
         pcity = person_data.get("city", "Pune")
@@ -43,7 +44,6 @@ class ReportGenerator:
         pcounts = person_data.get("counts", {})
 
         evd_rows = ""
-        # Build person-scoped evidence table (Requirement 8)
         person_evidences = [
             {"id": f"EV-CCTV-{pid}-001", "type": "DVR/NVR Forensics", "title": f"CCTV Sighting ({pname})", "source": "CAM-04 / CAM-01", "hash": "8f31c44298fc1c149a..."},
             {"id": f"EV-COM-{pid}-001", "type": "CDR / Telecommunication", "title": f"Call Log ({pphone})", "source": "Telecom Node #7092", "hash": "d41d8cd98f00b204e9..."},
@@ -66,7 +66,27 @@ class ReportGenerator:
     <meta charset="UTF-8">
     <title>TRACE FINDERS Official Investigation Dossier - {case_id} ({pname})</title>
     <style>
-        body {{ font-family: 'Segoe UI', Arial, sans-serif; color: #0f172a; padding: 28px; line-height: 1.5; font-size: 13px; background: #ffffff; }}
+        @page {{
+            size: A4;
+            margin: 15mm;
+        }}
+        body {{
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            color: #0f172a;
+            padding: 24px;
+            line-height: 1.5;
+            font-size: 13px;
+            background: #f8fafc;
+        }}
+        .a4-container {{
+            max-width: 820px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }}
         h1, h2, h3 {{ color: #1e3a8a; font-weight: 800; border-bottom: 2px solid #2563eb; padding-bottom: 4px; margin-top: 24px; }}
         .meta-table, .data-table {{ width: 100%; border-collapse: collapse; margin-bottom: 16px; }}
         .meta-table th, .meta-table td, .data-table th, .data-table td {{ padding: 8px 12px; border: 1px solid #cbd5e1; text-align: left; }}
@@ -74,107 +94,173 @@ class ReportGenerator:
         .badge {{ background-color: #eff6ff; color: #2563eb; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px; border: 1px solid #bfdbfe; }}
         .disclaimer {{ background-color: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 12px; border-radius: 6px; font-size: 11px; margin-bottom: 20px; }}
         .context-highlight {{ background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; }}
+        
+        /* SUBJECT PROFILE SECTION WITH EMBEDDED PHOTO (REQUIREMENTS 1, 3, 5, 7) */
+        .subject-profile-card {{
+            display: flex;
+            gap: 20px;
+            background: #f8fafc;
+            border: 1.5px solid #2563eb;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 24px;
+            align-items: center;
+        }}
+        .subject-photo {{
+            width: 140px;
+            height: 140px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 3px solid #2563eb;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.2);
+            flex-shrink: 0;
+        }}
+        .profile-inner-table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }}
+        .profile-inner-table th {{
+            text-align: left;
+            color: #64748b;
+            font-weight: 800;
+            font-size: 10px;
+            text-transform: uppercase;
+            padding: 3px 6px;
+            width: 18%;
+        }}
+        .profile-inner-table td {{
+            padding: 3px 6px;
+            color: #0f172a;
+        }}
+
+        @media print {{
+            body {{ background: #ffffff; padding: 0; }}
+            .a4-container {{ border: none; box-shadow: none; padding: 0; max-width: 100%; }}
+            .page-break {{ page-break-before: always; }}
+        }}
     </style>
 </head>
 <body>
 
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 14px;">
-            <img src="/static/logo.png" style="height: 48px; width: auto;" alt="TRACE FINDERS LOGO">
-            <div>
-                <h1 style="margin:0; font-size: 20px; border-bottom: none; padding: 0;">TRACE FINDERS OFFICIAL INVESTIGATION DOSSIER</h1>
-                <div style="font-size: 11px; color: #64748b; font-weight: 700;">CONFIDENTIAL // SIH26189 AI-POWERED CRIMINAL NETWORK ANALYSIS SYSTEM</div>
+    <div class="a4-container">
+
+        <!-- HEADER BAR -->
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <img src="/static/logo.png" style="height: 48px; width: auto;" alt="TRACE FINDERS LOGO">
+                <div>
+                    <h1 style="margin:0; font-size: 20px; border-bottom: none; padding: 0;">TRACE FINDERS OFFICIAL INVESTIGATION DOSSIER</h1>
+                    <div style="font-size: 11px; color: #64748b; font-weight: 700;">CONFIDENTIAL // SIH26189 AI-POWERED CRIMINAL NETWORK ANALYSIS SYSTEM</div>
+                </div>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: #64748b;">
+                <div>Generated: <strong>{timestamp_str}</strong></div>
+                <div>Dossier Ref: <strong>{case_id}-{pid}-DOSSIER</strong></div>
             </div>
         </div>
-        <div style="text-align: right; font-size: 11px; color: #64748b;">
-            <div>Generated: <strong>{timestamp_str}</strong></div>
-            <div>Dossier Ref: <strong>{case_id}-{pid}-DOSSIER</strong></div>
+
+        <hr style="margin: 16px 0; border: none; border-top: 1px solid #cbd5e1;">
+
+        <!-- DYNAMIC INVESTIGATION CONTEXT LINE (REQUIREMENTS 4, 6) -->
+        <div class="context-highlight">
+            <div>📁 <strong>CASE REFERENCE:</strong> {case_id} — {case_title}</div>
+            <div>👤 <strong>CASE PRIMARY SUBJECT:</strong> {primary_case_subject}</div>
+            <div>🎯 <strong>CURRENT INVESTIGATION SUBJECT:</strong> <span style="font-size: 15px; font-weight: 800; color: #2563eb;">{pname.upper()}</span> (Role: <strong>{prole}</strong> | ID: <strong>{pid}</strong>)</div>
         </div>
-    </div>
 
-    <hr style="margin: 16px 0; border: none; border-top: 1px solid #cbd5e1;">
-
-    <!-- DYNAMIC INVESTIGATION CONTEXT LINE (REQUIREMENTS 2, 6, 20, 21) -->
-    <div class="context-highlight">
-        <div>📁 <strong>CASE REFERENCE:</strong> {case_id} — {case_title}</div>
-        <div>👤 <strong>CASE PRIMARY SUBJECT:</strong> {primary_case_subject}</div>
-        <div>🎯 <strong>CURRENT INVESTIGATION SUBJECT:</strong> <span style="font-size: 15px; font-weight: 800; color: #2563eb;">{pname.upper()}</span> (Role: <strong>{prole}</strong> | ID: <strong>{pid}</strong>)</div>
-    </div>
-
-    <div class="disclaimer">
-        ⚖️ <strong>LEGAL NOTICE & STATUTORY COMPLIANCE STATEMENT:</strong><br>
-        This dossier is generated by the TRACE FINDERS AI Evidence Fusion Workstation under SIH26189. All investigative leads represent decision-support findings requiring manual verification under Sec 91 & Sec 65B of the Indian Evidence Act.
-    </div>
-
-    <h2>1. Executive Summary & Subject Identifiers</h2>
-    <table class="meta-table">
-        <tr><th>Case Reference</th><td>{case_id}</td><th>Case Title</th><td>{case_title}</td></tr>
-        <tr><th>Case Primary Subject</th><td>{primary_case_subject}</td><th>Status</th><td><span class="badge">{status}</span></td></tr>
-        <tr><th>Current Subject View</th><td><strong style="color: #2563eb; font-size: 14px;">{pname}</strong></td><th>Role / Status</th><td><strong>{prole}</strong></td></tr>
-        <tr><th>Age & Gender</th><td>{page} ({pgender})</td><th>City / Jurisdiction</th><td>{pcity}, Maharashtra</td></tr>
-        <tr><th>Occupation</th><td>{poccupation}</td><th>Organization</th><td>{porg}</td></tr>
-        <tr><th>Registered Phone</th><td><strong>{pphone}</strong></td><th>Registered Email</th><td>{pemail}</td></tr>
-        <tr><th>Registered Vehicle</th><td><strong>{pvehicle}</strong></td><th>Bank Account</th><td><strong>{paccount}</strong></td></tr>
-        <tr><th>Crypto Wallet</th><td><code>{pwallet}</code></td><th>Risk Score</th><td><span class="badge" style="background:#fef2f2; color:#dc2626;">{prisk} / 100 Risk</span></td></tr>
-    </table>
-
-    <h2>2. Person-Scoped Key Evidence Records ({pname})</h2>
-    <table class="data-table">
-        <thead>
-            <tr><th>Evidence ID</th><th>Type</th><th>Title</th><th>Source</th><th>Hash Verification</th></tr>
-        </thead>
-        <tbody>
-            {evd_rows}
-        </tbody>
-    </table>
-
-    <h2>3. Communication & Telecommunication Analysis</h2>
-    <table class="meta-table">
-        <tr><th>Tracked Subject</th><td><strong>{pname}</strong> ({pphone})</td><th>Total CDR Events</th><td><strong>{pcounts.get('calls', 0) + pcounts.get('messages', 0)}</strong></td></tr>
-        <tr><th>Calls Logged</th><td>{pcounts.get('calls', 0)}</td><th>Messages Logged</th><td>{pcounts.get('messages', 0)}</td></tr>
-        <tr><th>Unique Contacts</th><td>{pcounts.get('contacts', 0)}</td><th>Active Window</th><td>03 Aug – 18 Aug 2026</td></tr>
-    </table>
-
-    <h2>4. Financial & Asset Ledger ({paccount})</h2>
-    <table class="meta-table">
-        <tr><th>Tracked Account</th><td><strong>{paccount}</strong> ({pname})</td><th>Ledger Balance</th><td><strong>₹14,50,000</strong></td></tr>
-        <tr><th>Total Transactions</th><td>{pcounts.get('financial', 0)}</td><th>Risk Rationale</th><td>Observed wire transfer activities.</td></tr>
-    </table>
-
-    <h2>5. Blockchain Wallet Intelligence ({pwallet})</h2>
-    <table class="meta-table">
-        <tr><th>Wallet Address</th><td><code>{pwallet}</code></td><th>Wallet Balance</th><td><strong>8.42 ETH</strong></td></tr>
-        <tr><th>On-Chain Txs</th><td>{pcounts.get('blockchain', 0)} Transactions</td><th>Evidence Link</th><td>EV-BC-{pid}-001</td></tr>
-    </table>
-
-    <h2>6. CCTV / DVR Surveillance Forensics</h2>
-    <table class="data-table">
-        <thead>
-            <tr><th>Timestamp</th><th>Camera ID</th><th>Surveillance Event</th><th>Location</th><th>Linked Evidence</th></tr>
-        </thead>
-        <tbody>
-            {cctv_rows}
-        </tbody>
-    </table>
-
-    <h2>7. Explainable AI Investigative Leads ({pname})</h2>
-    <div style="padding: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; border-radius: 8px;">
-        <div style="font-weight: 800; color: #1e3a8a; margin-bottom: 4px;">🧠 PRIMARY LEAD FOR {pname.upper()}:</div>
-        <div>Multi-hop intelligence correlation indicates temporal activity overlap for {pname} across CDR logs ({pphone}) and surveillance sightings.</div>
-    </div>
-
-    <h2>8. Investigator Sign-Off & Certification</h2>
-    <div style="margin-top: 40px; display: flex; justify-content: space-between;">
-        <div>
-            <div>__________________________________</div>
-            <div><strong>Ins. Vikramaditya Rao (#INV-7092)</strong></div>
-            <div>Lead Investigator, SCCIC</div>
+        <!-- SUBJECT PROFILE SECTION WITH PROFILE PHOTO (REQUIREMENTS 1, 2, 3, 5, 7, 8) -->
+        <div class="subject-profile-card">
+            <img src="{photo_url}" alt="{pname} Profile Photo" class="subject-photo">
+            <div style="flex: 1;">
+                <div style="font-size: 20px; font-weight: 800; color: #1e3a8a; margin-bottom: 2px;">{pname.upper()}</div>
+                <div style="font-size: 13px; font-weight: 700; color: #2563eb; margin-bottom: 8px;">Role: {prole} (ID: {pid}) | Risk Score: <span class="badge" style="background:#fef2f2; color:#dc2626;">{prisk} / 100</span></div>
+                
+                <table class="profile-inner-table">
+                    <tr><th>Age & Gender:</th><td>{page} ({pgender})</td><th>City:</th><td>{pcity}, Maharashtra</td></tr>
+                    <tr><th>Occupation:</th><td>{poccupation}</td><th>Organization:</th><td>{porg}</td></tr>
+                    <tr><th>Phone:</th><td><strong>{pphone}</strong></td><th>Vehicle:</th><td><strong>{pvehicle}</strong></td></tr>
+                    <tr><th>Bank Acc:</th><td><strong>{paccount}</strong></td><th>Crypto Wallet:</th><td><code>{pwallet}</code></td></tr>
+                </table>
+            </div>
         </div>
-        <div>
-            <div>__________________________________</div>
-            <div><strong>Superintendent of Police</strong></div>
-            <div>Cyber Crime Division</div>
+
+        <div class="disclaimer">
+            ⚖️ <strong>LEGAL NOTICE & STATUTORY COMPLIANCE STATEMENT:</strong><br>
+            This dossier is generated by the TRACE FINDERS AI Evidence Fusion Workstation under SIH26189. All investigative leads represent decision-support findings requiring manual verification under Sec 91 & Sec 65B of the Indian Evidence Act.
         </div>
+
+        <h2>1. Executive Summary & Structured Identifiers</h2>
+        <table class="meta-table">
+            <tr><th>Case Reference</th><td>{case_id}</td><th>Case Title</th><td>{case_title}</td></tr>
+            <tr><th>Case Primary Subject</th><td>{primary_case_subject}</td><th>Status</th><td><span class="badge">{status}</span></td></tr>
+            <tr><th>Current Subject View</th><td><strong style="color: #2563eb; font-size: 14px;">{pname}</strong></td><th>Role / Status</th><td><strong>{prole}</strong></td></tr>
+            <tr><th>Age & Gender</th><td>{page} ({pgender})</td><th>City / Jurisdiction</th><td>{pcity}, Maharashtra</td></tr>
+            <tr><th>Occupation</th><td>{poccupation}</td><th>Organization</th><td>{porg}</td></tr>
+            <tr><th>Registered Phone</th><td><strong>{pphone}</strong></td><th>Registered Email</th><td>{pemail}</td></tr>
+            <tr><th>Registered Vehicle</th><td><strong>{pvehicle}</strong></td><th>Bank Account</th><td><strong>{paccount}</strong></td></tr>
+            <tr><th>Crypto Wallet</th><td><code>{pwallet}</code></td><th>Risk Score</th><td><span class="badge" style="background:#fef2f2; color:#dc2626;">{prisk} / 100 Risk</span></td></tr>
+        </table>
+
+        <h2>2. Person-Scoped Key Evidence Records ({pname})</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Evidence ID</th><th>Type</th><th>Title</th><th>Source</th><th>Hash Verification</th></tr>
+            </thead>
+            <tbody>
+                {evd_rows}
+            </tbody>
+        </table>
+
+        <h2>3. Communication & Telecommunication Analysis</h2>
+        <table class="meta-table">
+            <tr><th>Tracked Subject</th><td><strong>{pname}</strong> ({pphone})</td><th>Total CDR Events</th><td><strong>{pcounts.get('calls', 0) + pcounts.get('messages', 0)}</strong></td></tr>
+            <tr><th>Calls Logged</th><td>{pcounts.get('calls', 0)}</td><th>Messages Logged</th><td>{pcounts.get('messages', 0)}</td></tr>
+            <tr><th>Unique Contacts</th><td>{pcounts.get('contacts', 0)}</td><th>Active Window</th><td>03 Aug – 18 Aug 2026</td></tr>
+        </table>
+
+        <h2>4. Financial & Asset Ledger ({paccount})</h2>
+        <table class="meta-table">
+            <tr><th>Tracked Account</th><td><strong>{paccount}</strong> ({pname})</td><th>Ledger Balance</th><td><strong>₹14,50,000</strong></td></tr>
+            <tr><th>Total Transactions</th><td>{pcounts.get('financial', 0)}</td><th>Risk Rationale</th><td>Observed wire transfer activities.</td></tr>
+        </table>
+
+        <h2>5. Blockchain Wallet Intelligence ({pwallet})</h2>
+        <table class="meta-table">
+            <tr><th>Wallet Address</th><td><code>{pwallet}</code></td><th>Wallet Balance</th><td><strong>8.42 ETH</strong></td></tr>
+            <tr><th>On-Chain Txs</th><td>{pcounts.get('blockchain', 0)} Transactions</td><th>Evidence Link</th><td>EV-BC-{pid}-001</td></tr>
+        </table>
+
+        <h2>6. CCTV / DVR Surveillance Forensics</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Timestamp</th><th>Camera ID</th><th>Surveillance Event</th><th>Location</th><th>Linked Evidence</th></tr>
+            </thead>
+            <tbody>
+                {cctv_rows}
+            </tbody>
+        </table>
+
+        <h2>7. Explainable AI Investigative Leads ({pname})</h2>
+        <div style="padding: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; border-radius: 8px;">
+            <div style="font-weight: 800; color: #1e3a8a; margin-bottom: 4px;">🧠 PRIMARY LEAD FOR {pname.upper()}:</div>
+            <div>Multi-hop intelligence correlation indicates temporal activity overlap for {pname} across CDR logs ({pphone}) and surveillance sightings.</div>
+        </div>
+
+        <h2>8. Investigator Sign-Off & Certification</h2>
+        <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+            <div>
+                <div>__________________________________</div>
+                <div><strong>Ins. Vikramaditya Rao (#INV-7092)</strong></div>
+                <div>Lead Investigator, SCCIC</div>
+            </div>
+            <div>
+                <div>__________________________________</div>
+                <div><strong>Superintendent of Police</strong></div>
+                <div>Cyber Crime Division</div>
+            </div>
+        </div>
+
     </div>
 
 </body>
@@ -184,6 +270,7 @@ class ReportGenerator:
             "case_id": case_id,
             "person_id": pid,
             "subject_name": pname,
+            "photo_url": photo_url,
             "generated_at": timestamp_str,
             "html_content": html_content
         }

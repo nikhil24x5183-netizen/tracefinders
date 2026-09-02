@@ -990,7 +990,7 @@ async function loadAuditData() {
     }
 }
 
-// 14. REPORTS (100% PERSON-SCOPED DOSSIER GENERATION)
+// 14. REPORTS (100% PERSON-SCOPED DOSSIER GENERATION & EMBEDDED PHOTO)
 async function loadReportData() {
     try {
         const res = await fetch(`/api/reports/generate?case_id=${currentCaseId}&person_id=${currentPersonId}`, { method: 'GET' });
@@ -1001,6 +1001,16 @@ async function loadReportData() {
         }
     } catch (err) {
         console.error(err);
+    }
+}
+
+function printDossierPDF() {
+    const previewFrame = document.getElementById('report-preview-frame');
+    if (previewFrame && previewFrame.contentWindow) {
+        previewFrame.contentWindow.focus();
+        previewFrame.contentWindow.print();
+    } else {
+        window.print();
     }
 }
 

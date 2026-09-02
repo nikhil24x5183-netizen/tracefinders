@@ -157,7 +157,7 @@
                 </div>
             </section>
 
-            <!-- 5. LINK ANALYSIS GRAPH (FULL FREE MOVEMENT & FLOATING CONTROLS) -->
+            <!-- 5. LINK ANALYSIS GRAPH -->
             <section id="view-graph" class="tab-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <div>
@@ -474,15 +474,15 @@
                 </div>
             </section>
 
-            <!-- 14. REPORTS (DOSSIER PREVIEW) -->
+            <!-- 14. REPORTS (DOSSIER PREVIEW & PRINT/EXPORT PDF) -->
             <section id="view-reports" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Official Investigation Summary Report</h2>
                 <div class="card">
                     <div class="card-title">
                         <span>TRACE FINDERS Official Investigation Dossier</span>
-                        <button class="btn" onclick="window.print()">🖨️ Print / Export PDF Dossier</button>
+                        <button class="btn" onclick="printDossierPDF()">🖨️ Print / Export PDF Dossier</button>
                     </div>
-                    <iframe id="report-preview-frame" style="width: 100%; height: 640px; border: 1px solid var(--border-color); background: #ffffff; border-radius: 8px;"></iframe>
+                    <iframe id="report-preview-frame" style="width: 100%; height: 720px; border: 1px solid var(--border-color); background: #ffffff; border-radius: 8px; box-shadow: var(--shadow-sm);"></iframe>
                 </div>
             </section>
 
