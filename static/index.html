@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRACE-X — Criminal Network Intelligence & Evidence Fusion Workstation</title>
+    <title>TRACE FINDERS — Criminal Network Intelligence & Evidence Fusion Workstation</title>
     <!-- CSS & Fonts -->
     <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,9 +17,9 @@
     <!-- 1. GLOBAL LEFT SIDEBAR -->
     <aside class="sidebar" id="app-sidebar">
         <div class="brand">
-            <div class="brand-icon">X</div>
+            <img src="/static/logo.png" style="height: 42px; width: auto; border-radius: 6px;" alt="TRACE FINDERS Logo">
             <div>
-                <div class="brand-text">TRACE-X</div>
+                <div class="brand-text" style="font-size: 16px;">TRACE FINDERS</div>
                 <div class="sih-badge">INTELLIGENCE WORKSTATION</div>
             </div>
         </div>
@@ -273,7 +273,7 @@
                 </div>
             </section>
 
-            <!-- 10. CCTV / DVR FORENSICS WORKSPACE (COMPLETE POLISH - REQUIREMENTS 1 TO 23) -->
+            <!-- 10. CCTV / DVR FORENSICS WORKSPACE -->
             <section id="view-dvr" class="tab-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                     <div>
@@ -288,10 +288,10 @@
                     </div>
                 </div>
 
-                <!-- CAMERA STRIP (REQUIREMENT 9) -->
+                <!-- CAMERA STRIP -->
                 <div class="camera-strip" id="camera-strip-container">Loading cameras...</div>
 
-                <!-- DVR FILTER BAR (REQUIREMENT 10) -->
+                <!-- DVR FILTER BAR -->
                 <div class="dvr-filter-bar">
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <span style="font-size: 11px; font-weight: 800; color: #64748b;">DATE:</span>
@@ -311,13 +311,13 @@
                     </div>
                 </div>
 
-                <!-- COMPACT 3 VIDEO CARDS GRID (REQUIREMENTS 4, 15, 16) -->
+                <!-- COMPACT 3 VIDEO CARDS GRID -->
                 <div id="dvr-video-grid-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">Loading surveillance clips...</div>
 
-                <!-- LOWER 3-COLUMN SPLIT ANALYTICAL SECTION (REQUIREMENTS 1, 2, 3, 11, 12, 13, 14, 18) -->
+                <!-- LOWER 3-COLUMN SPLIT ANALYTICAL SECTION -->
                 <div class="dvr-analytics-3col">
                     
-                    <!-- LEFT COLUMN: INVESTIGATION EVIDENCE TIMELINE (REQUIREMENT 2) -->
+                    <!-- LEFT COLUMN: INVESTIGATION EVIDENCE TIMELINE -->
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title" style="font-size: 15px;">⏱️ Investigation Timeline</div>
                         <div class="timeline-list" style="font-size: 12px;" id="dvr-timeline-list">
@@ -344,23 +344,20 @@
                         </div>
                     </div>
 
-                    <!-- CENTER COLUMN: SELECTED EVIDENCE & PLAYBACK CONTROLS (REQUIREMENTS 3, 11, 12, 14) -->
+                    <!-- CENTER COLUMN: SELECTED EVIDENCE & PLAYBACK CONTROLS -->
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title" style="font-size: 15px;">
                             <span>📹 Selected Surveillance Event</span>
                             <span id="dvr-selected-id" style="color: #38bdf8; font-size: 13px;">EV-CCTV-031</span>
                         </div>
 
-                        <!-- VIDEO PLAYER BOX WITH PLAYBACK CONTROLS -->
                         <div class="dvr-player-box" style="margin-bottom: 14px;">
                             <div style="position: relative; aspect-ratio: 16/9; background: #000;">
                                 <img id="dvr-main-img" src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800" style="width: 100%; height: 100%; object-fit: cover;">
-                                <!-- SURVEILLANCE OVERLAY (REQUIREMENT 12) -->
                                 <div style="position: absolute; top: 8px; left: 10px; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 11px; color: #10b981;">
                                     <span id="dvr-overlay-cam">CAM-04</span> | 18 AUG 2026 | <span id="dvr-overlay-time">20:01:00 IST</span>
                                 </div>
                             </div>
-                            <!-- PLAYBACK CONTROLS (REQUIREMENT 11) -->
                             <div class="dvr-player-controls">
                                 <button class="dvr-btn-play" onclick="togglePlay()">▶</button>
                                 <button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;">⏮ 10s</button>
@@ -370,20 +367,17 @@
                             </div>
                         </div>
 
-                        <!-- SELECTED EVIDENCE DETAILS PANEL (REQUIREMENT 3) -->
                         <div id="dvr-selected-details-panel" style="font-size: 12px; color: #94a3b8; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 12px;">Loading event details...</div>
 
-                        <!-- LINKED EVIDENCE BUTTONS (REQUIREMENT 14) -->
                         <div style="font-size: 11px; font-weight: 800; color: #38bdf8; margin-bottom: 6px;">LINKED EVIDENCE:</div>
                         <div id="dvr-linked-evidence-btns" style="display: flex; gap: 8px; flex-wrap: wrap;">Loading linked evidence...</div>
                     </div>
 
-                    <!-- RIGHT COLUMN: RELATED ENTITIES & CAMERA MAP (REQUIREMENTS 13 & 18) -->
+                    <!-- RIGHT COLUMN: RELATED ENTITIES & CAMERA MAP -->
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title" style="font-size: 15px;">🔗 Related Entities</div>
                         <div id="dvr-related-entities-list" style="font-size: 12px; margin-bottom: 18px;">Loading entities...</div>
 
-                        <!-- SMALL CAMERA LOCATIONS LIST (REQUIREMENT 18) -->
                         <div class="card-title" style="font-size: 14px; margin-bottom: 8px;">🎥 Camera Locations</div>
                         <div id="dvr-camera-list" style="font-size: 11px;">Loading cameras...</div>
                     </div>
@@ -434,15 +428,15 @@
                 </div>
             </section>
 
-            <!-- 14. REPORTS -->
+            <!-- 14. REPORTS (DOSSIER PREVIEW) -->
             <section id="view-reports" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Official Investigation Summary Report</h2>
                 <div class="card">
                     <div class="card-title">
-                        <span>TRACE-X Official Investigation Dossier</span>
+                        <span>TRACE FINDERS Official Investigation Dossier</span>
                         <button class="btn" onclick="window.print()">🖨️ Print / Export PDF Dossier</button>
                     </div>
-                    <iframe id="report-preview-frame" style="width: 100%; height: 620px; border: 1px solid var(--border-color); background: #ffffff; border-radius: 8px;"></iframe>
+                    <iframe id="report-preview-frame" style="width: 100%; height: 640px; border: 1px solid var(--border-color); background: #ffffff; border-radius: 8px;"></iframe>
                 </div>
             </section>
 
@@ -531,10 +525,7 @@
             </div>
             <form id="wizard-form" onsubmit="submitWizardForm(event)">
                 <div id="wizard-panel-1">
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label class="form-label">Case Name / Title *</label>
-                        <input type="text" id="wiz-case-title" required class="form-field-input" placeholder="e.g. OPERATION NEXUS">
-                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;"><label class="form-label">Case Name / Title *</label><input type="text" id="wiz-case-title" required class="form-field-input" placeholder="e.g. OPERATION NEXUS"></div>
                     <div class="form-grid-2">
                         <div><label class="form-label">Investigation Type</label><input type="text" id="wiz-case-type" class="form-field-input" value="Cyber-Financial Crime"></div>
                         <div><label class="form-label">Priority</label><select id="wiz-case-priority" class="form-field-input"><option value="HIGH" selected>High Priority</option><option value="MEDIUM">Medium Priority</option><option value="LOW">Low Priority</option></select></div>

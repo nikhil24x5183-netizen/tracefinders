@@ -14,9 +14,9 @@ from backend.mock_data_generator import generate_synthetic_dataset
 from backend.report_generator import report_generator
 
 app = FastAPI(
-    title="TRACE-X — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
+    title="TRACE FINDERS — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
     description="SIH 2026 Problem Statement SIH26189 - AI-Powered Criminal Network Analysis System",
-    version="6.0.0"
+    version="7.0.0"
 )
 
 DATASTORE = generate_synthetic_dataset()
@@ -85,7 +85,7 @@ def get_person_profile(person_id: str):
         "cctv": cctv_recs
     }
 
-# ----------------- CCTV / DVR FORENSICS API (REQUIREMENTS 7, 8, 9, 10) -----------------
+# ----------------- CCTV / DVR FORENSICS API -----------------
 @app.get("/api/dvr")
 def get_dvr(
     person_id: Optional[str] = "P-001",
@@ -97,7 +97,6 @@ def get_dvr(
     prof = DATASTORE["profiles"][pid]
     videos = DATASTORE["cctv"].get(pid, [])
 
-    # Filter logic
     if camera_id and camera_id != "ALL":
         videos = [v for v in videos if v["camera_id"] == camera_id]
     if event_type and event_type != "ALL":
@@ -209,6 +208,20 @@ def get_evidence_detail(evidence_id: str):
         "analyst_notes": f"Surveillance video capture associated with evidence ID {evidence_id}."
     }
 
+# REPORT GENERATION ENDPOINTS (POST & GET FOR DOSSIER PREVIEW)
+@app.post("/api/reports/generate")
+@app.get("/api/reports/generate")
+def generate_report(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):
+    case_data = DATASTORE["cases"].get("TRX-2026-017", {})
+    fusion_data = {
+        "explainable_ai": {
+            "WHAT": "Multi-hop intelligence chain correlated across CDR, DVR, and Financial logs.",
+            "WHY": "Repeated temporal burst and account transfer correlation."
+        }
+    }
+    res = report_generator.generate_report(case_data, [], [], [], fusion_data)
+    return res
+
 @app.get("/api/search")
 def global_search(q: str = Query(...)):
     query = q.lower()
@@ -223,6 +236,6 @@ def serve_index():
     index_path = os.path.join(static_dir, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return HTMLResponse("<h1>TRACE-X Workstation Loading...</h1>")
+    return HTMLResponse("<h1>TRACE FINDERS Workstation Loading...</h1>")
 
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
