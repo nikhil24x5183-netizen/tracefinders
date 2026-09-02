@@ -157,7 +157,7 @@
                 </div>
             </section>
 
-            <!-- 5. LINK ANALYSIS GRAPH -->
+            <!-- 5. LINK ANALYSIS GRAPH (FULL FREE MOVEMENT & FLOATING CONTROLS) -->
             <section id="view-graph" class="tab-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <div>
@@ -181,10 +181,20 @@
                         <button id="btn-layout-hierarchy" class="graph-layout-btn" onclick="changeGraphLayout('hierarchy')">Hierarchy</button>
                         <button id="btn-layout-compact" class="graph-layout-btn" onclick="changeGraphLayout('compact')">Compact</button>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">💡 Click Person for drawer | Click Entity to view module | Click Edge for Evidence</div>
+                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">🖐️ Drag canvas to pan | Scroll to zoom | Drag nodes freely | Double-click node to focus</div>
                 </div>
 
-                <div id="graph-canvas"></div>
+                <div class="graph-container-wrapper">
+                    <!-- FLOATING GRAPH CONTROLS TOOLBAR OVERLAY -->
+                    <div class="graph-floating-controls">
+                        <button class="graph-control-btn" onclick="zoomGraphIn()" title="Zoom In">[ + ]</button>
+                        <button class="graph-control-btn" onclick="zoomGraphOut()" title="Zoom Out">[ − ]</button>
+                        <button class="graph-control-btn" onclick="fitGraphToScreen()" title="Fit to Screen">[ ⛶ ]</button>
+                        <button class="graph-control-btn" onclick="resetGraphLayout()" title="Reset Layout">[ ⟳ ]</button>
+                        <button class="graph-control-btn" onclick="focusSelectedPerson()" title="Center Root Node">[ 🎯 ]</button>
+                    </div>
+                    <div id="graph-canvas"></div>
+                </div>
             </section>
 
             <!-- 6. COMMUNICATION ANALYSIS -->
@@ -289,7 +299,7 @@
                 </div>
             </section>
 
-            <!-- 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENTS 1 - 22) -->
+            <!-- 10. CCTV / DVR FORENSICS WORKSPACE -->
             <section id="view-dvr" class="tab-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                     <div>
@@ -304,7 +314,7 @@
                     </div>
                 </div>
 
-                <!-- CAMERA SEARCH & FILTERS BAR (REQUIREMENTS 7 & 8) -->
+                <!-- CAMERA SEARCH & FILTERS BAR -->
                 <div class="dvr-filter-bar">
                     <div class="search-box" style="width: 280px;">
                         <span class="search-icon">🔍</span>
@@ -328,11 +338,11 @@
                     </div>
                 </div>
 
-                <!-- ALL 12 CAMERAS RESPONSIVE INVENTORY GRID (REQUIREMENTS 1, 3, 4, 5, 6, 18, 20) -->
+                <!-- ALL 12 CAMERAS RESPONSIVE INVENTORY GRID -->
                 <div class="card-title" style="font-size: 16px; margin-bottom: 12px;">📷 Camera Inventory (All 12 Monitored Locations)</div>
                 <div class="camera-inventory-grid" id="camera-inventory-grid-container">Loading camera inventory...</div>
 
-                <!-- ALL CAMERA EVENTS TABLE (REQUIREMENT 11) -->
+                <!-- ALL CAMERA EVENTS TABLE -->
                 <div class="card">
                     <div class="card-title" style="font-size: 16px;">📋 All Camera Surveillance Events Log</div>
                     <table class="table-custom">
@@ -353,7 +363,7 @@
                     </table>
                 </div>
 
-                <!-- SELECTED PERSON CCTV SURVEILLANCE EVENTS (REQUIREMENTS 12, 19) -->
+                <!-- SELECTED PERSON CCTV SURVEILLANCE EVENTS -->
                 <div class="card-title" style="font-size: 16px; margin: 24px 0 12px 0;">
                     <span>🎥 Person-Scoped Surveillance Clips (<strong id="dvr-person-clips-title" style="color: var(--accent-blue);">Arjun Sharma</strong>)</span>
                 </div>
@@ -504,7 +514,7 @@
         </main>
     </div>
 
-    <!-- CAMERA DETAIL & 24H RECORDING TIMELINE MODAL (REQUIREMENTS 9 & 10) -->
+    <!-- CAMERA DETAIL & 24H RECORDING TIMELINE MODAL -->
     <div id="camera-detail-modal" class="modal-overlay">
         <div class="modal-card">
             <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
@@ -587,7 +597,7 @@
                 </div>
                 <div id="wizard-panel-2" style="display: none;">
                     <div class="form-grid-2">
-                        <div><label class="form-label">Primary Subject Full Name *</label><input type="text" id="wiz-p-name" class="form-field-input" placeholder="e.g. Arjun Sharma"></div>
+                        <div><label class="form-label">Primary Suspect Full Name *</label><input type="text" id="wiz-p-name" class="form-field-input" placeholder="e.g. Arjun Sharma"></div>
                         <div><label class="form-label">Alias</label><input type="text" id="wiz-p-alias" class="form-field-input" placeholder="e.g. Arjun S."></div>
                     </div>
                     <div class="form-grid-2">

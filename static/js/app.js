@@ -269,7 +269,7 @@ async function loadPersonsViewData() {
     }
 }
 
-// 5. LINK ANALYSIS KNOWLEDGE GRAPH
+// 5. LINK ANALYSIS KNOWLEDGE GRAPH (UNCONSTRAINED FREE MOVEMENT & CONTROLS)
 async function loadGraphData() {
     try {
         const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
@@ -300,6 +300,34 @@ function changeGraphLayout(layoutType) {
 }
 
 function focusSelectedPerson() {
+    if (visNetworkInstance && currentPersonId) {
+        visNetworkInstance.focus(currentPersonId, { scale: 1.2, animation: { duration: 500 } });
+    } else {
+        renderGraphWithLayout(currentGraphLayout);
+    }
+}
+
+function zoomGraphIn() {
+    if (visNetworkInstance) {
+        const currentScale = visNetworkInstance.getScale();
+        visNetworkInstance.moveTo({ scale: currentScale * 1.25, animation: { duration: 300 } });
+    }
+}
+
+function zoomGraphOut() {
+    if (visNetworkInstance) {
+        const currentScale = visNetworkInstance.getScale();
+        visNetworkInstance.moveTo({ scale: currentScale * 0.75, animation: { duration: 300 } });
+    }
+}
+
+function fitGraphToScreen() {
+    if (visNetworkInstance) {
+        visNetworkInstance.fit({ animation: { duration: 400 } });
+    }
+}
+
+function resetGraphLayout() {
     renderGraphWithLayout(currentGraphLayout);
 }
 
@@ -346,39 +374,49 @@ function renderGraphWithLayout(layoutType) {
         arrows: 'to',
         color: { color: isDark ? '#60a5fa' : '#2563eb' },
         font: { color: isDark ? '#94a3b8' : '#475569', size: 11, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff' },
-        length: 80,
+        length: 100,
         evidenceId: e.evidence_id
     }));
 
     const visData = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
 
     let layoutConfig = {};
-    let physicsConfig = { enabled: true };
+    let physicsConfig = { enabled: false };
 
     if (layoutType === 'tree-ud') {
-        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 90, levelSeparation: 100 } };
+        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 100, levelSeparation: 110 } };
         physicsConfig = { enabled: false };
     } else if (layoutType === 'hierarchy') {
-        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 90, levelSeparation: 110 } };
+        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 100, levelSeparation: 120 } };
         physicsConfig = { enabled: false };
     } else if (layoutType === 'compact') {
         layoutConfig = { randomSeed: 42 };
-        physicsConfig = { barnesHut: { gravitationalConstant: -800, springLength: 40 } };
+        physicsConfig = { barnesHut: { gravitationalConstant: -1000, springLength: 50 } };
     } else {
         layoutConfig = { randomSeed: 42 };
-        physicsConfig = { barnesHut: { gravitationalConstant: -1400, springLength: 60 } };
+        physicsConfig = { barnesHut: { gravitationalConstant: -1600, springLength: 70 } };
     }
 
     const options = {
         nodes: { borderWidth: 2 },
         layout: layoutConfig,
         physics: physicsConfig,
-        interaction: { hover: true }
+        interaction: {
+            dragNodes: true,
+            dragView: true,
+            zoomView: true,
+            hover: true,
+            multiselect: true,
+            selectable: true,
+            hoverConnectedEdges: true,
+            keyboard: { enabled: true, bindToWindow: false }
+        }
     };
 
     if (visNetworkInstance) visNetworkInstance.destroy();
     visNetworkInstance = new vis.Network(container, visData, options);
 
+    // Single Click Navigation
     visNetworkInstance.on('selectNode', function(params) {
         const nodeId = params.nodes[0];
         const selectedNode = currentGraphData.nodes.find(n => n.id === nodeId);
@@ -401,6 +439,14 @@ function renderGraphWithLayout(layoutType) {
         }
     });
 
+    // Double Click Node Focus / Zoom
+    visNetworkInstance.on('doubleClick', function(params) {
+        if (params.nodes.length > 0) {
+            const nodeId = params.nodes[0];
+            visNetworkInstance.focus(nodeId, { scale: 1.4, animation: { duration: 400 } });
+        }
+    });
+
     visNetworkInstance.on('selectEdge', function(params) {
         if (params.edges.length > 0 && params.nodes.length === 0) {
             const edgeId = params.edges[0];
@@ -409,7 +455,7 @@ function renderGraphWithLayout(layoutType) {
     });
 }
 
-// 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENTS 1 - 22)
+// 10. CCTV / DVR FORENSICS WORKSPACE
 async function loadDVRData() {
     try {
         const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
@@ -424,13 +470,8 @@ async function loadDVRData() {
         document.getElementById('dvr-header-subject').innerText = pName.toUpperCase();
         document.getElementById('dvr-person-clips-title').innerText = pName;
 
-        // Render All 12 Camera Inventory Grid (Requirements 1 & 4)
         renderCameraInventoryGrid(allCameraInventoryData);
-
-        // Render All Camera Surveillance Events Table (Requirement 11)
         renderAllCameraEventsTable(data.all_camera_events || []);
-
-        // Render Person-Scoped Clips (Requirements 12 & 19)
         renderDVRVideoGrid(currentDVRVideos);
 
         if (currentDVRVideos.length > 0) {
@@ -453,7 +494,6 @@ async function loadDVRData() {
     }
 }
 
-// CAMERA INVENTORY GRID RENDERER (REQUIREMENTS 1, 3, 4, 5, 6, 18, 20)
 function renderCameraInventoryGrid(cameras) {
     const grid = document.getElementById('camera-inventory-grid-container');
     if (!grid) return;
@@ -491,7 +531,6 @@ function renderCameraInventoryGrid(cameras) {
     `).join('');
 }
 
-// CAMERA SEARCH & FILTERS FUNCTION (REQUIREMENTS 7 & 8)
 function filterCameraGrid() {
     const searchVal = (document.getElementById('camera-search-input')?.value || '').toLowerCase();
     const statusVal = document.getElementById('cam-filter-status')?.value || 'ALL';
@@ -516,7 +555,6 @@ function filterCameraGrid() {
     renderCameraInventoryGrid(filtered);
 }
 
-// ALL CAMERA EVENTS TABLE (REQUIREMENT 11)
 function renderAllCameraEventsTable(events) {
     const tbody = document.getElementById('all-camera-events-tbody');
     if (!tbody) return;
@@ -534,7 +572,6 @@ function renderAllCameraEventsTable(events) {
     `).join('');
 }
 
-// CAMERA DETAIL & 24H RECORDING TIMELINE MODAL (REQUIREMENTS 9 & 10)
 function openCameraDetailModal(camId) {
     const modal = document.getElementById('camera-detail-modal');
     if (!modal) return;
