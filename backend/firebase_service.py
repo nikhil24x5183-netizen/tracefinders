@@ -8,8 +8,8 @@ import urllib.request
 import json
 import os
 
-# Configurable Firebase Database URL from environment or default cloud endpoint
-FIREBASE_DB_URL = os.environ.get("FIREBASE_DATABASE_URL", "https://tracefinders-default-rtdb.firebaseio.com")
+# Configurable Firebase Database URL from environment or user's project endpoint
+FIREBASE_DB_URL = os.environ.get("FIREBASE_DATABASE_URL", "https://tracefinders-daa12-default-rtdb.firebaseio.com")
 
 LOCAL_CLOUD_PERSISTENCE = {}
 
