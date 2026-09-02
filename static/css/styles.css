@@ -164,7 +164,7 @@ body {
 
 .search-box {
   position: relative;
-  width: 340px;
+  width: 300px;
 }
 
 .search-input {
@@ -201,14 +201,16 @@ body {
   gap: 14px;
 }
 
-.case-selector {
+.person-select-dropdown {
   background-color: #eff6ff;
   border: 1px solid #bfdbfe;
   color: #1d4ed8;
-  padding: 6px 14px;
-  border-radius: 20px;
+  padding: 6px 12px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
+  outline: none;
+  cursor: pointer;
 }
 
 .user-badge {

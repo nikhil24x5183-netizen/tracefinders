@@ -1,9 +1,21 @@
 // TRACE-X Intelligence Platform Frontend Application Controller
+let selectedPersonFilter = 'ALL';
+
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initGlobalSearch();
     loadOverviewData();
 });
+
+// Global Person/Suspect Filter Handler
+function filterAllModulesByPerson(personId) {
+    selectedPersonFilter = personId;
+    
+    // Update active view
+    const activeNav = document.querySelector('.nav-item.active');
+    const tabId = activeNav ? activeNav.getAttribute('data-tab') : 'overview';
+    switchTab(tabId);
+}
 
 // Sidebar Toggle Handler
 function toggleSidebar() {
@@ -106,11 +118,11 @@ async function loadInvestigationsData() {
                         <span class="badge ${c.priority === 'HIGH' ? 'badge-high' : 'badge-verified'}">${c.priority} PRIORITY</span>
                     </div>
 
-                    <!-- PRIMARY SUSPECT PROFILE CARD -->
+                    <!-- PRIMARY SUSPECT PROFILE CARD WITH INDIAN FACE PHOTO -->
                     <div class="suspect-card" style="background: #f8fafc; border-left: 4px solid #2563eb;">
-                        <img src="${primary.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" class="suspect-avatar" alt="Primary Suspect">
+                        <img src="${primary.avatar_url || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300'}" class="suspect-avatar" alt="Primary Suspect">
                         <div>
-                            <div style="font-size: 14px; font-weight: 800; color: #0f172a;">${primary.name || c.subject_name} <span class="badge badge-high" style="font-size: 10px;">Primary Suspect</span></div>
+                            <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${primary.name || c.subject_name} <span class="badge badge-high" style="font-size: 10px;">Primary Suspect</span></div>
                             <div style="font-size: 12px; color: #475569; margin: 2px 0;">Role: <strong>${primary.role || 'Syndicate Lead'}</strong></div>
                             <div style="font-size: 12px; color: #64748b;">📞 Phone: ${primary.phone || 'N/A'} | ✉️ Email: ${primary.email || 'N/A'}</div>
                             <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
@@ -128,7 +140,7 @@ async function loadInvestigationsData() {
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
                                 ${secondaryList.map(sec => `
                                     <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; display: flex; gap: 10px; align-items: center;">
-                                        <img src="${sec.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover;">
+                                        <img src="${sec.avatar_url || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300'}" style="width: 46px; height: 46px; border-radius: 50%; object-fit: cover;">
                                         <div>
                                             <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${sec.name}</div>
                                             <div style="font-size: 11px; color: #0284c7; font-weight: 600;">${sec.role}</div>
@@ -160,7 +172,6 @@ async function loadInvestigationsData() {
 }
 
 function selectActiveCase(caseId) {
-    document.getElementById('header-active-case').innerText = `ACTIVE CASE: ${caseId}`;
     switchTab('graph');
 }
 
@@ -183,7 +194,6 @@ async function submitNewCase(e) {
     const agency = document.getElementById('case-input-agency').value.trim();
     const description = document.getElementById('case-input-desc').value.trim();
 
-    // Primary suspect social details
     const phone = document.getElementById('case-input-phone').value.trim();
     const email = document.getElementById('case-input-email').value.trim();
     const telegram = document.getElementById('case-input-telegram').value.trim();
@@ -192,7 +202,7 @@ async function submitNewCase(e) {
     const primary_suspect = {
         name: subject_name,
         role: "Primary Suspect",
-        avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+        avatar_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300",
         phone: phone,
         email: email,
         social_profiles: {
@@ -201,7 +211,6 @@ async function submitNewCase(e) {
         }
     };
 
-    // Secondary suspect details
     const sec_name = document.getElementById('case-input-sec-name').value.trim();
     const sec_role = document.getElementById('case-input-sec-role').value.trim();
     const sec_phone = document.getElementById('case-input-sec-phone').value.trim();
@@ -212,7 +221,7 @@ async function submitNewCase(e) {
         secondary_suspects.push({
             name: sec_name,
             role: sec_role || "Co-Conspirator",
-            avatar_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+            avatar_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300",
             phone: sec_phone,
             social_profiles: { social: sec_social || "@sec_alias" }
         });
@@ -237,7 +246,7 @@ async function submitNewCase(e) {
     }
 }
 
-// 3. TREE TYPE NETWORK GRAPH & MULTI-LAYOUT CONTROLLER (Vis.js Canvas)
+// 3. TREE TYPE NETWORK GRAPH WITH COMPACT SHORT LINKS
 let visNetworkInstance = null;
 let currentGraphData = null;
 let currentLayoutType = 'tree-ud'; // 'tree-ud', 'tree-lr', 'force', 'circular'
@@ -267,7 +276,26 @@ function renderGraphWithLayout(layoutType) {
     const container = document.getElementById('graph-canvas');
     if (!container) return;
 
-    const visNodes = currentGraphData.nodes.map(n => ({
+    // Filter graph nodes if a specific suspect is selected
+    let nodesToRender = currentGraphData.nodes;
+    let edgesToRender = currentGraphData.edges;
+
+    if (selectedPersonFilter !== 'ALL') {
+        const selectedNode = currentGraphData.nodes.find(n => n.id === selectedPersonFilter);
+        if (selectedNode) {
+            // Find 1-hop and 2-hop connected nodes
+            const connectedEdges = currentGraphData.edges.filter(e => e.source === selectedPersonFilter || e.target === selectedPersonFilter);
+            const connectedNodeIds = new Set([selectedPersonFilter]);
+            connectedEdges.forEach(e => {
+                connectedNodeIds.add(e.source);
+                connectedNodeIds.add(e.target);
+            });
+            nodesToRender = currentGraphData.nodes.filter(n => connectedNodeIds.has(n.id));
+            edgesToRender = connectedEdges;
+        }
+    }
+
+    const visNodes = nodesToRender.map(n => ({
         id: n.id,
         label: `${n.label}\n[${n.type}]`,
         shape: getNodeShape(n.type),
@@ -276,13 +304,14 @@ function renderGraphWithLayout(layoutType) {
         level: n.tree_level !== undefined ? n.tree_level : 2
     }));
 
-    const visEdges = currentGraphData.edges.map(e => ({
+    const visEdges = edgesToRender.map(e => ({
         from: e.source,
         to: e.target,
         label: e.relation,
         arrows: 'to',
         color: { color: getDomainColor(e.domain) },
-        font: { color: '#475569', size: 9, strokeWidth: 2, strokeColor: '#ffffff' }
+        font: { color: '#475569', size: 9, strokeWidth: 2, strokeColor: '#ffffff' },
+        length: 60 // COMPACT SHORT LINKS
     }));
 
     const visData = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
@@ -291,18 +320,20 @@ function renderGraphWithLayout(layoutType) {
     let physicsConfig = { enabled: true };
 
     if (layoutType === 'tree-ud') {
-        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 120, levelSeparation: 140 } };
+        // Compact Short-Link Top-Down Tree
+        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 80, levelSeparation: 90 } };
         physicsConfig = { enabled: false };
     } else if (layoutType === 'tree-lr') {
-        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 100, levelSeparation: 160 } };
+        // Compact Short-Link Left-Right Tree
+        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 70, levelSeparation: 110 } };
         physicsConfig = { enabled: false };
     } else if (layoutType === 'circular') {
         layoutConfig = { randomSeed: 42 };
-        physicsConfig = { barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 95 } };
+        physicsConfig = { barnesHut: { gravitationalConstant: -1200, centralGravity: 0.4, springLength: 45 } };
     } else {
-        // Force-Directed
+        // Compact Force-Directed
         layoutConfig = { randomSeed: 100 };
-        physicsConfig = { barnesHut: { gravitationalConstant: -3500, springLength: 95 } };
+        physicsConfig = { barnesHut: { gravitationalConstant: -1800, springLength: 45 } };
     }
 
     const options = {
@@ -359,6 +390,16 @@ function showEntityDrawer(entity) {
     document.getElementById('drawer-entity-risk').innerText = `${entity.risk_score}/100`;
     document.getElementById('drawer-entity-status').innerText = entity.status;
     document.getElementById('drawer-entity-details').innerText = entity.details;
+
+    const avatarEl = document.getElementById('drawer-entity-avatar');
+    if (avatarEl) {
+        if (entity.avatar) {
+            avatarEl.src = entity.avatar;
+            avatarEl.style.display = 'block';
+        } else {
+            avatarEl.style.display = 'none';
+        }
+    }
 }
 
 // 4. Multi-Domain Timeline Loader
@@ -390,7 +431,12 @@ async function loadEvidenceData() {
         const tbody = document.getElementById('evidence-tbody');
         if (!tbody) return;
 
-        tbody.innerHTML = data.evidence_items.map(e => `
+        let items = data.evidence_items;
+        if (selectedPersonFilter !== 'ALL') {
+            items = items.filter(e => e.person_id === selectedPersonFilter || e.case_id === 'TRACE-2026-017');
+        }
+
+        tbody.innerHTML = items.map(e => `
             <tr>
                 <td><strong>${e.id}</strong></td>
                 <td><span class="badge badge-verified">${e.evidence_type}</span></td>
@@ -413,11 +459,20 @@ async function loadCommunicationsData() {
         const data = await res.json();
         const container = document.getElementById('comm-flagged-list');
         if (container) {
-            container.innerHTML = data.communication_edges.map(c => `
-                <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="font-weight: 700; color: #0284c7; font-size: 13px;">📞 ${c.source} ➔ ${c.target}</div>
-                    <div style="font-size: 12px; color: #475569; margin-top: 4px;">${c.details}</div>
-                    <div style="font-size: 11px; color: #d97706; font-weight: 700; margin-top: 4px;">FLAGGED PATTERN: Pre-Incident Burst (14 Calls)</div>
+            let edges = data.communication_edges;
+            if (selectedPersonFilter !== 'ALL') {
+                const pName = selectedPersonFilter.replace('person_', '').replace('_', ' ');
+                edges = edges.filter(c => c.source.toLowerCase().includes(pName) || c.target.toLowerCase().includes(pName) || c.details.toLowerCase().includes(pName));
+            }
+
+            container.innerHTML = edges.map(c => `
+                <div style="padding: 14px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #0284c7; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="font-weight: 800; color: #0284c7; font-size: 14px;">📞 ${c.source} ➔ ${c.target}</div>
+                    <div style="font-size: 12px; color: #334155; margin-top: 4px; font-weight: 500;">${c.details}</div>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
+                        <span class="badge badge-high">PRE-INCIDENT CALL BURST</span>
+                        <span style="font-size: 11px; color: #64748b;">Confidence: ${c.confidence * 100}%</span>
+                    </div>
                 </div>
             `).join('');
         }
@@ -433,11 +488,17 @@ async function loadFinancialData() {
         const data = await res.json();
         const container = document.getElementById('fin-list');
         if (container) {
-            container.innerHTML = data.financial_edges.map(f => `
-                <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="font-weight: 700; color: #16a34a; font-size: 13px;">💳 ${f.source} ➔ ${f.target}</div>
-                    <div style="font-size: 12px; color: #475569; margin-top: 4px;">${f.details}</div>
-                    <span class="badge badge-high" style="margin-top: 4px;">HAWALA INDICATOR: Rapid Off-Market Layering</span>
+            let edges = data.financial_edges;
+            if (selectedPersonFilter !== 'ALL') {
+                const pName = selectedPersonFilter.replace('person_', '').replace('_', ' ');
+                edges = edges.filter(f => f.source.toLowerCase().includes(pName) || f.target.toLowerCase().includes(pName) || f.details.toLowerCase().includes(pName));
+            }
+
+            container.innerHTML = edges.map(f => `
+                <div style="padding: 14px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="font-weight: 800; color: #16a34a; font-size: 14px;">💳 ${f.source} ➔ ${f.target}</div>
+                    <div style="font-size: 12px; color: #334155; margin-top: 4px; font-weight: 500;">${f.details}</div>
+                    <span class="badge badge-high" style="margin-top: 6px;">HAWALA INDICATOR: Rapid Cash Layering</span>
                 </div>
             `).join('');
         }
@@ -454,9 +515,9 @@ async function loadBlockchainData() {
         const container = document.getElementById('blk-list');
         if (container) {
             container.innerHTML = data.blockchain_edges.map(b => `
-                <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="font-weight: 700; color: #d97706; font-size: 13px;">⛓️ ${b.source} ➔ ${b.target}</div>
-                    <div style="font-size: 12px; color: #475569; margin-top: 4px;">${b.details}</div>
+                <div style="padding: 14px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #d97706; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="font-weight: 800; color: #d97706; font-size: 14px;">⛓️ ${b.source} ➔ ${b.target}</div>
+                    <div style="font-size: 12px; color: #334155; margin-top: 4px; font-weight: 500;">${b.details}</div>
                 </div>
             `).join('');
         }
@@ -479,9 +540,9 @@ async function loadOSINTData() {
 
             suspectContainer.innerHTML = `
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
-                    <!-- PRIMARY SUSPECT -->
+                    <!-- PRIMARY SUSPECT WITH INDIAN FACE PHOTO -->
                     <div class="suspect-card" style="border-left: 5px solid #dc2626;">
-                        <img src="${primary.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" class="suspect-avatar">
+                        <img src="${primary.avatar_url || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300'}" class="suspect-avatar">
                         <div>
                             <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${primary.name || 'Rahul Sharma'} <span class="badge badge-high" style="font-size: 10px;">Primary Suspect</span></div>
                             <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin: 2px 0;">${primary.role || 'Syndicate Lead'}</div>
@@ -495,7 +556,7 @@ async function loadOSINTData() {
                     <!-- SECONDARY SUSPECTS -->
                     ${secondaries.map(sec => `
                         <div class="suspect-card" style="border-left: 5px solid #0284c7;">
-                            <img src="${sec.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150'}" class="suspect-avatar" style="border-color: #0284c7;">
+                            <img src="${sec.avatar_url || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300'}" class="suspect-avatar" style="border-color: #0284c7;">
                             <div>
                                 <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${sec.name} <span class="badge badge-verified" style="font-size: 10px;">Secondary Suspect</span></div>
                                 <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin: 2px 0;">${sec.role}</div>
@@ -526,26 +587,25 @@ async function loadOSINTData() {
     }
 }
 
-// 10. DVR/NVR Forensics Loader with 3 Surveillance Video Cards
+// 10. DVR/NVR Forensics Loader with Realistic Surveillance Video Cards
 async function loadDVRData() {
     try {
         const res = await fetch('/api/dvr');
         const data = await res.json();
         
-        // Render 3 Interactive CCTV Surveillance Video Player Cards
         const videoGrid = document.getElementById('dvr-video-grid-container');
         if (videoGrid && data.dvr_videos) {
             videoGrid.innerHTML = data.dvr_videos.map(v => `
                 <div class="dvr-card">
                     <div class="dvr-thumb-wrapper">
                         <img src="${v.video_thumbnail}" class="dvr-thumb-img" alt="CCTV Stream">
-                        <div class="dvr-rec-badge">● REC | ${v.camera_id}</div>
+                        <div class="dvr-rec-badge">● LIVE STREAM | ${v.camera_id}</div>
                         <div class="dvr-play-overlay" onclick="openCCTVVideoModal('${v.camera_id}', '${v.event_title}', '${v.timestamp}', '${v.anpr_license_plate}', '${v.video_thumbnail}', '${v.description.replace(/'/g, "\\'")}')">▶</div>
                     </div>
                     <div class="dvr-info-body">
                         <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">${v.event_title}</div>
                         <div style="font-size: 11px; color: #2563eb; font-weight: 700; margin-bottom: 6px;">📍 ${v.location}</div>
-                        <div style="font-size: 12px; color: #475569; margin-bottom: 8px;"><strong>Identified Suspects:</strong> ${v.suspects_identified.join(', ')}</div>
+                        <div style="font-size: 12px; color: #475569; margin-bottom: 8px;"><strong>Identified Indian Suspects:</strong> ${v.suspects_identified.join(', ')}</div>
                         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: monospace;">
                             <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">⏱️ ${v.timestamp}</span>
                             <span class="badge badge-verified">ANPR: ${v.anpr_license_plate}</span>

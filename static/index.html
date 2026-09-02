@@ -54,7 +54,17 @@
                 </div>
             </div>
             <div class="header-actions">
-                <div class="case-selector" id="header-active-case">ACTIVE CASE: TRACE-2026-017</div>
+                <!-- GLOBAL SUSPECT & CASE SELECTOR -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 11px; font-weight: 800; color: #2563eb;">CASE & SUSPECT:</span>
+                    <select id="global-person-select" class="person-select-dropdown" onchange="filterAllModulesByPerson(this.value)">
+                        <option value="ALL">ALL SUSPECTS & ENTITIES</option>
+                        <option value="person_rahul_sharma" selected>🔴 Rahul Sharma (Primary Suspect)</option>
+                        <option value="person_vikram_singh">🔵 Vikram Singh (Secondary Suspect / Driver)</option>
+                        <option value="person_amit_patel">🟢 Amit Patel (Secondary Suspect / Hawala Director)</option>
+                        <option value="person_priya_verma">🟡 Priya Verma (Accountant)</option>
+                    </select>
+                </div>
                 <div class="user-badge">
                     <div class="avatar">VR</div>
                     <div>
@@ -90,12 +100,12 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Entities Extracted</div>
-                        <div class="stat-val" id="stat-entities">59</div>
+                        <div class="stat-val" id="stat-entities">29</div>
                         <div class="stat-sub">Persons, Wallets, Vehicles</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Relationships</div>
-                        <div class="stat-val" id="stat-relationships">49</div>
+                        <div class="stat-val" id="stat-relationships">24</div>
                         <div class="stat-sub">Multi-Domain Links</div>
                     </div>
                     <div class="stat-card">
@@ -135,7 +145,10 @@
             <section id="view-evidence" class="tab-view">
                 <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Evidence Ingestion & Chain of Custody</h2>
                 <div class="card">
-                    <div class="card-title">Authorized Evidence Registry</div>
+                    <div class="card-title">
+                        <span>Authorized Evidence Registry</span>
+                        <span id="evidence-filter-indicator" class="badge badge-verified">Filtered for Selected Suspect</span>
+                    </div>
                     <table class="table-custom">
                         <thead>
                             <tr>
@@ -155,38 +168,43 @@
                 </div>
             </section>
 
-            <!-- 4. NETWORK GRAPH WITH TREE TYPE LAYOUT TOOLBAR -->
+            <!-- 4. NETWORK GRAPH WITH COMPACT SHORT-LINK TREE LAYOUT -->
             <section id="view-graph" class="tab-view">
                 <div class="card-title" style="margin-bottom: 8px;">
                     <span>Knowledge Graph Analyzer</span>
                     <div>
-                        <span class="badge badge-verified">16 Entity Classes</span>
-                        <span class="badge badge-verified">15 Relation Types</span>
+                        <span class="badge badge-verified">Compact Short-Link Tree View</span>
+                        <span class="badge badge-verified">Indian Suspect Avatars</span>
                     </div>
                 </div>
 
                 <!-- TREE & GRAPH LAYOUT TOOLBAR -->
                 <div class="graph-toolbar">
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                         <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">LAYOUT MODE:</span>
                         <button id="btn-layout-tree-ud" class="graph-layout-btn active" onclick="changeGraphLayout('tree-ud')">🌲 Tree (Top-Down)</button>
                         <button id="btn-layout-tree-lr" class="graph-layout-btn" onclick="changeGraphLayout('tree-lr')">🌲 Tree (Left-Right)</button>
-                        <button id="btn-layout-force" class="graph-layout-btn" onclick="changeGraphLayout('force')">🕸️ Force Directed</button>
+                        <button id="btn-layout-force" class="graph-layout-btn" onclick="changeGraphLayout('force')">🕸️ Compact Force</button>
                         <button id="btn-layout-circular" class="graph-layout-btn" onclick="changeGraphLayout('circular')">⭕ Circular Cluster</button>
                     </div>
-                    <div style="font-size: 11px; color: #64748b; font-weight: 600;">💡 Click any node to inspect detailed CDR, social profiles & financial transfers</div>
+                    <div style="font-size: 11px; color: #64748b; font-weight: 600;">💡 Compact links configured for quick visual understanding</div>
                 </div>
 
                 <div id="graph-canvas"></div>
 
                 <div id="entity-drawer" class="card" style="display: none; margin-top: 16px; border-left: 4px solid var(--accent-cyan);">
-                    <h3>Entity Details: <span id="drawer-entity-name" style="color: var(--accent-cyan);"></span></h3>
-                    <div style="font-size: 12px; margin-top: 6px; display: flex; gap: 16px;">
-                        <div>Type: <strong id="drawer-entity-type"></strong></div>
-                        <div>Threat Score: <strong id="drawer-entity-risk" style="color: var(--status-red);"></strong></div>
-                        <div>Status: <strong id="drawer-entity-status"></strong></div>
+                    <div style="display: flex; gap: 14px; align-items: center;">
+                        <img id="drawer-entity-avatar" src="" style="width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid #2563eb; display: none;">
+                        <div>
+                            <h3 style="font-size: 16px;">Entity Details: <span id="drawer-entity-name" style="color: var(--accent-cyan);"></span></h3>
+                            <div style="font-size: 12px; margin-top: 4px; display: flex; gap: 16px;">
+                                <div>Type: <strong id="drawer-entity-type"></strong></div>
+                                <div>Threat Score: <strong id="drawer-entity-risk" style="color: var(--status-red);"></strong></div>
+                                <div>Status: <strong id="drawer-entity-status"></strong></div>
+                            </div>
+                        </div>
                     </div>
-                    <p id="drawer-entity-details" style="font-size: 12px; color: var(--text-muted); margin-top: 8px;"></p>
+                    <p id="drawer-entity-details" style="font-size: 12px; color: var(--text-muted); margin-top: 10px;"></p>
                 </div>
             </section>
 
@@ -199,11 +217,14 @@
                 </div>
             </section>
 
-            <!-- 6. COMMUNICATIONS -->
+            <!-- 6. COMMUNICATIONS WITH SUSPECT CALL REPLAY -->
             <section id="view-communications" class="tab-view">
                 <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Communication Intelligence (CDR Analytics)</h2>
                 <div class="card">
-                    <div class="card-title">Case Communication Log & Suspect Contact Pairs</div>
+                    <div class="card-title">
+                        <span>Case Communication Log & Flagged Call Pairs</span>
+                        <span id="comm-filter-indicator" class="badge badge-verified">Filtered for Selected Suspect</span>
+                    </div>
                     <div id="comm-flagged-list">Loading CDR intelligence...</div>
                 </div>
             </section>
@@ -212,7 +233,10 @@
             <section id="view-financial" class="tab-view">
                 <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Financial Intelligence & Hawala Risk Indicators</h2>
                 <div class="card">
-                    <div class="card-title">High-Velocity Transaction Chains & Informal Value Transfer Anomalies</div>
+                    <div class="card-title">
+                        <span>High-Velocity Transaction Chains & Informal Value Transfer Anomalies</span>
+                        <span id="fin-filter-indicator" class="badge badge-verified">Filtered for Selected Suspect</span>
+                    </div>
                     <div id="fin-list">Loading financial records...</div>
                 </div>
             </section>
@@ -226,11 +250,11 @@
                 </div>
             </section>
 
-            <!-- 9. OSINT WORKSPACE WITH PRIMARY & SECONDARY SUSPECT PROFILES -->
+            <!-- 9. OSINT WORKSPACE WITH INDIAN SUSPECT PROFILES -->
             <section id="view-osint" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">OSINT Workspace & Suspect Social Profiles</h2>
+                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">OSINT Workspace & Suspect Dossiers</h2>
                 <div class="card">
-                    <div class="card-title">Case Suspect Dossiers & Social Media Profiles</div>
+                    <div class="card-title">Case Suspect Dossiers & Social Media Handles</div>
                     <div id="osint-suspects-container">Loading suspect dossiers...</div>
                 </div>
                 <div class="card">
@@ -239,16 +263,16 @@
                 </div>
             </section>
 
-            <!-- 10. DVR/NVR FORENSICS WITH 3 DUMMY SURVEILLANCE VIDEOS -->
+            <!-- 10. DVR/NVR FORENSICS WITH REALISTIC CCTV SURVEILLANCE VIDEOS -->
             <section id="view-dvr" class="tab-view">
                 <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">DVR/NVR Forensic Video Analysis</h2>
                 
                 <div class="card">
                     <div class="card-title">
-                        <span>📹 Case CCTV Evidence Streams (3 Carved Forensic Videos)</span>
-                        <span class="badge badge-verified">ANPR & Face Matched</span>
+                        <span>📹 Case CCTV Surveillance Stream Carvings (Real Footage Style)</span>
+                        <span class="badge badge-verified">ANPR & Indian Suspect Matched</span>
                     </div>
-                    <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Seized video frame carvings cross-referenced with vehicle ANPR and facial recognition logs.</p>
+                    <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Realistic CCTV video event stream carvings cross-referenced with vehicle ANPR and facial recognition logs.</p>
                     <div id="dvr-video-grid-container" class="dvr-video-grid">Loading DVR videos...</div>
                 </div>
 
@@ -415,7 +439,7 @@
         </div>
     </div>
 
-    <!-- CCTV FORENSIC VIDEO PLAYER MODAL -->
+    <!-- REALISTIC CCTV SURVEILLANCE VIDEO PLAYER MODAL -->
     <div id="cctv-video-modal" class="modal-overlay">
         <div class="modal-card" style="width: 720px;">
             <div class="modal-header">
@@ -425,19 +449,19 @@
                 </div>
                 <button type="button" class="modal-close-btn" onclick="closeCCTVVideoModal()">✕</button>
             </div>
-            <div style="background: #000; border-radius: 12px; height: 320px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
-                <img id="cctv-modal-img" src="" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.85;">
-                <div style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; font-family: monospace;">
-                    ● LIVE CCTV FORENSIC REPLAY | <span id="cctv-modal-cam">Cam C12</span>
+            <div style="background: #000; border-radius: 12px; height: 340px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; border: 2px solid #334155;">
+                <img id="cctv-modal-img" src="" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.88; filter: contrast(1.1) brightness(0.9);">
+                <div style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; font-family: monospace; letter-spacing: 0.5px;">
+                    ● LIVE CCTV FORENSIC STREAM | <span id="cctv-modal-cam">Cam C12</span>
                 </div>
-                <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(0, 0, 0, 0.75); color: #fff; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-family: monospace; display: flex; justify-content: space-between;">
+                <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(15, 23, 42, 0.85); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-family: monospace; display: flex; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1);">
                     <span id="cctv-modal-timestamp">2026-08-28 20:01:15 IST</span>
                     <span id="cctv-modal-anpr" style="color: #6ee7b7; font-weight: bold;">ANPR: MH12-RS-9988</span>
                 </div>
             </div>
-            <p id="cctv-modal-desc" style="font-size: 13px; color: #475569; margin-bottom: 16px;"></p>
+            <p id="cctv-modal-desc" style="font-size: 13px; color: #475569; margin-bottom: 16px; line-height: 1.5;"></p>
             <div style="display: flex; justify-content: flex-end;">
-                <button class="btn-pill-cancel" onclick="closeCCTVVideoModal()">CLOSE PLAYER</button>
+                <button class="btn-pill-cancel" onclick="closeCCTVVideoModal()">CLOSE FORENSIC PLAYER</button>
             </div>
         </div>
     </div>
