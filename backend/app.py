@@ -12,6 +12,7 @@ from typing import Dict, List, Any, Optional
 
 from backend.mock_data_generator import generate_synthetic_dataset
 from backend.report_generator import report_generator
+from backend.firebase_service import sync_to_firebase, fetch_from_firebase
 
 app = FastAPI(
     title="TRACE FINDERS — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
@@ -19,7 +20,10 @@ app = FastAPI(
     version="10.0.0"
 )
 
+# Initialize and Sync Datastore with Firebase Cloud Database
 DATASTORE = generate_synthetic_dataset()
+sync_to_firebase("datastore", DATASTORE)
+print("[FIREBASE] Cloud Dataset Synced Successfully to Firebase Database.")
 
 # ----------------- DATA INTEGRITY VALIDATION CHECK -----------------
 def validate_person_data():
