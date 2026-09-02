@@ -49,7 +49,7 @@
     <!-- MAIN APPLICATION WRAPPER -->
     <div class="main-wrapper">
         
-        <!-- 2. GLOBAL CONTEXT BAR HEADER (REQUIREMENT 17 & 19) -->
+        <!-- 2. GLOBAL CONTEXT BAR HEADER -->
         <header class="context-bar">
             <div style="display: flex; align-items: center; gap: 14px;">
                 <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar" style="background: transparent; border: none; font-size: 20px; color: #f8fafc; cursor: pointer;">☰</button>
@@ -75,7 +75,7 @@
                     </div>
                 </div>
 
-                <!-- PERSON SELECTOR DROPDOWN (REQUIREMENT 17 & 20) -->
+                <!-- PERSON SELECTOR DROPDOWN -->
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <select id="select-change-person" class="select-custom" onchange="changeActivePerson(this.value)">
                         <option value="P-001" selected>🔴 Arjun Sharma (Primary Subject)</option>
@@ -112,7 +112,7 @@
                     <div class="stat-card"><div class="stat-title">Financial Ledger Txs</div><div class="stat-val" id="ov-fin-count">63</div><div class="stat-sub">Bank Wire Records</div></div>
                     <div class="stat-card"><div class="stat-title">Public-Source Intel</div><div class="stat-val" id="ov-osint-count">42</div><div class="stat-sub">Crawled Records</div></div>
                     <div class="stat-card"><div class="stat-title">Blockchain Txs</div><div class="stat-val" id="ov-blk-count">18</div><div class="stat-sub">On-Chain Transactions</div></div>
-                    <div class="stat-card"><div class="stat-title">DVR Surveillance</div><div class="stat-val" id="ov-cctv-count">9</div><div class="stat-sub">Carved Stream Clips</div></div>
+                    <div class="stat-card"><div class="stat-title">DVR Surveillance</div><div class="stat-val" id="ov-cctv-count">3</div><div class="stat-sub">Carved Stream Clips</div></div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -151,7 +151,7 @@
                 </div>
             </section>
 
-            <!-- 5. LINK ANALYSIS GRAPH (REQUIREMENT 16) -->
+            <!-- 5. LINK ANALYSIS GRAPH -->
             <section id="view-graph" class="tab-view">
                 <div class="card-title" style="margin-bottom: 12px;">
                     <span>Link Analysis Knowledge Graph (<span id="graph-root-name" style="color: #38bdf8;">Root: Arjun Sharma</span>)</span>
@@ -171,7 +171,7 @@
                 <div id="graph-canvas"></div>
             </section>
 
-            <!-- 6. COMMUNICATION ANALYSIS (REQUIREMENT 6 & 7) -->
+            <!-- 6. COMMUNICATION ANALYSIS -->
             <section id="view-communications" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Communication Analysis</h2>
                 <div class="card">
@@ -208,7 +208,7 @@
                 </div>
             </section>
 
-            <!-- 7. FINANCIAL INTELLIGENCE LEDGER (REQUIREMENT 8) -->
+            <!-- 7. FINANCIAL INTELLIGENCE LEDGER -->
             <section id="view-financial" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Financial Intelligence Ledger</h2>
                 <div class="card">
@@ -238,7 +238,7 @@
                 </div>
             </section>
 
-            <!-- 8. BLOCKCHAIN ANALYSIS (REQUIREMENT 9) -->
+            <!-- 8. BLOCKCHAIN ANALYSIS -->
             <section id="view-blockchain" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Blockchain Intelligence Analysis</h2>
                 <div class="card">
@@ -264,7 +264,7 @@
                 </div>
             </section>
 
-            <!-- 9. PUBLIC-SOURCE INTELLIGENCE (REQUIREMENT 10) -->
+            <!-- 9. PUBLIC-SOURCE INTELLIGENCE -->
             <section id="view-osint" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Public-Source Intelligence</h2>
                 <div class="card">
@@ -273,19 +273,126 @@
                 </div>
             </section>
 
-            <!-- 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENT 11) -->
+            <!-- 10. CCTV / DVR FORENSICS WORKSPACE (COMPLETE POLISH - REQUIREMENTS 1 TO 23) -->
             <section id="view-dvr" class="tab-view">
-                <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">CCTV / DVR Forensics Workspace</h2>
-                <div class="card">
-                    <div class="card-title">
-                        <span>📹 Surveillance Review System (<span id="dvr-person-name" style="color: #38bdf8;">Subject: Arjun Sharma</span>)</span>
-                        <span class="badge badge-verified">VERIFIED STREAMS</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div>
+                        <h2 style="font-size: 22px; font-weight: 800;">CCTV / DVR Forensics Workspace</h2>
+                        <div style="font-size: 13px; color: #94a3b8; margin-top: 2px;">
+                            CASE: <strong style="color: #f8fafc;">TRX-2026-017</strong> | 
+                            SUBJECT: <strong id="dvr-header-subject" style="color: #38bdf8;">ARJUN SHARMA</strong> | 
+                            EVENTS: <strong id="dvr-header-events" style="color: #f8fafc;">3</strong> | 
+                            CAMERAS: <strong id="dvr-header-cameras" style="color: #f8fafc;">2</strong> | 
+                            TIME RANGE: <strong style="color: #f8fafc;">18 AUG 2026</strong>
+                        </div>
                     </div>
-                    <div id="dvr-video-grid-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">Loading surveillance clips...</div>
                 </div>
+
+                <!-- CAMERA STRIP (REQUIREMENT 9) -->
+                <div class="camera-strip" id="camera-strip-container">Loading cameras...</div>
+
+                <!-- DVR FILTER BAR (REQUIREMENT 10) -->
+                <div class="dvr-filter-bar">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: #64748b;">DATE:</span>
+                        <select class="dvr-filter-select" id="dvr-filter-date"><option value="18 Aug 2026">18 Aug 2026</option></select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: #64748b;">CAMERA:</span>
+                        <select class="dvr-filter-select" id="dvr-filter-camera" onchange="applyDVRFilters()"><option value="ALL">All Cameras</option></select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: #64748b;">EVENT TYPE:</span>
+                        <select class="dvr-filter-select" id="dvr-filter-type" onchange="applyDVRFilters()"><option value="ALL">All Event Types</option></select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: #64748b;">STATUS:</span>
+                        <select class="dvr-filter-select" id="dvr-filter-status" onchange="applyDVRFilters()"><option value="ALL">All Statuses</option></select>
+                    </div>
+                </div>
+
+                <!-- COMPACT 3 VIDEO CARDS GRID (REQUIREMENTS 4, 15, 16) -->
+                <div id="dvr-video-grid-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">Loading surveillance clips...</div>
+
+                <!-- LOWER 3-COLUMN SPLIT ANALYTICAL SECTION (REQUIREMENTS 1, 2, 3, 11, 12, 13, 14, 18) -->
+                <div class="dvr-analytics-3col">
+                    
+                    <!-- LEFT COLUMN: INVESTIGATION EVIDENCE TIMELINE (REQUIREMENT 2) -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-title" style="font-size: 15px;">⏱️ Investigation Timeline</div>
+                        <div class="timeline-list" style="font-size: 12px;" id="dvr-timeline-list">
+                            <div class="timeline-item" onclick="openEvidenceDetailModal('EV-CCTV-031')">
+                                <div style="font-size: 10px; color: #38bdf8; font-weight: 700;">20:01:00</div>
+                                <div style="font-weight: 700; color: #f8fafc;">Person Meeting</div>
+                            </div>
+                            <div class="timeline-item" onclick="openEvidenceDetailModal('EV-COM-023')">
+                                <div style="font-size: 10px; color: #38bdf8; font-weight: 700;">20:02:14</div>
+                                <div style="font-weight: 700; color: #f8fafc;">Communication Event</div>
+                            </div>
+                            <div class="timeline-item" onclick="openEvidenceDetailModal('EV-CCTV-032')">
+                                <div style="font-size: 10px; color: #38bdf8; font-weight: 700;">20:17:38</div>
+                                <div style="font-weight: 700; color: #f8fafc;">Financial Exchange Event</div>
+                            </div>
+                            <div class="timeline-item" onclick="openEvidenceDetailModal('EV-CCTV-033')">
+                                <div style="font-size: 10px; color: #38bdf8; font-weight: 700;">20:26:11</div>
+                                <div style="font-weight: 700; color: #f8fafc;">Vehicle Departure</div>
+                            </div>
+                            <div class="timeline-item" onclick="openEvidenceDetailModal('EV-FIN-014')">
+                                <div style="font-size: 10px; color: #38bdf8; font-weight: 700;">20:58:18</div>
+                                <div style="font-weight: 700; color: #f8fafc;">Financial Event</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CENTER COLUMN: SELECTED EVIDENCE & PLAYBACK CONTROLS (REQUIREMENTS 3, 11, 12, 14) -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-title" style="font-size: 15px;">
+                            <span>📹 Selected Surveillance Event</span>
+                            <span id="dvr-selected-id" style="color: #38bdf8; font-size: 13px;">EV-CCTV-031</span>
+                        </div>
+
+                        <!-- VIDEO PLAYER BOX WITH PLAYBACK CONTROLS -->
+                        <div class="dvr-player-box" style="margin-bottom: 14px;">
+                            <div style="position: relative; aspect-ratio: 16/9; background: #000;">
+                                <img id="dvr-main-img" src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800" style="width: 100%; height: 100%; object-fit: cover;">
+                                <!-- SURVEILLANCE OVERLAY (REQUIREMENT 12) -->
+                                <div style="position: absolute; top: 8px; left: 10px; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 11px; color: #10b981;">
+                                    <span id="dvr-overlay-cam">CAM-04</span> | 18 AUG 2026 | <span id="dvr-overlay-time">20:01:00 IST</span>
+                                </div>
+                            </div>
+                            <!-- PLAYBACK CONTROLS (REQUIREMENT 11) -->
+                            <div class="dvr-player-controls">
+                                <button class="dvr-btn-play" onclick="togglePlay()">▶</button>
+                                <button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;">⏮ 10s</button>
+                                <button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;">⏭ 10s</button>
+                                <div class="dvr-seeker"><div class="dvr-seeker-fill"></div></div>
+                                <span style="font-size: 10px; color: #94a3b8; font-family: monospace;">00:42 / 02:30</span>
+                            </div>
+                        </div>
+
+                        <!-- SELECTED EVIDENCE DETAILS PANEL (REQUIREMENT 3) -->
+                        <div id="dvr-selected-details-panel" style="font-size: 12px; color: #94a3b8; background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 12px;">Loading event details...</div>
+
+                        <!-- LINKED EVIDENCE BUTTONS (REQUIREMENT 14) -->
+                        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; margin-bottom: 6px;">LINKED EVIDENCE:</div>
+                        <div id="dvr-linked-evidence-btns" style="display: flex; gap: 8px; flex-wrap: wrap;">Loading linked evidence...</div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: RELATED ENTITIES & CAMERA MAP (REQUIREMENTS 13 & 18) -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-title" style="font-size: 15px;">🔗 Related Entities</div>
+                        <div id="dvr-related-entities-list" style="font-size: 12px; margin-bottom: 18px;">Loading entities...</div>
+
+                        <!-- SMALL CAMERA LOCATIONS LIST (REQUIREMENT 18) -->
+                        <div class="card-title" style="font-size: 14px; margin-bottom: 8px;">🎥 Camera Locations</div>
+                        <div id="dvr-camera-list" style="font-size: 11px;">Loading cameras...</div>
+                    </div>
+
+                </div>
+
             </section>
 
-            <!-- 11. INVESTIGATIVE CHRONOLOGY TIMELINE (REQUIREMENT 12) -->
+            <!-- 11. INVESTIGATIVE CHRONOLOGY TIMELINE -->
             <section id="view-timeline" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Investigative Chronology Timeline</h2>
                 <div class="card">
@@ -295,7 +402,7 @@
                 </div>
             </section>
 
-            <!-- 12. PATTERN ANALYTICS & XAI (REQUIREMENT 14) -->
+            <!-- 12. PATTERN ANALYTICS & XAI -->
             <section id="view-analytics" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Pattern Analytics & Centrality Metrics</h2>
                 <div class="card">
@@ -318,7 +425,7 @@
                 </div>
             </section>
 
-            <!-- 13. ENTITY RESOLUTION INTERFACE (REQUIREMENT 4) -->
+            <!-- 13. ENTITY RESOLUTION INTERFACE -->
             <section id="view-resolution" class="tab-view">
                 <h2 style="font-size: 22px; font-weight: 800; margin-bottom: 16px;">Entity Resolution Interface</h2>
                 <div class="card">
@@ -373,7 +480,6 @@
             <div style="font-size: 16px; font-weight: 800; color: #f8fafc;">PERSON PROFILE DOSSIER</div>
             <button type="button" style="background: transparent; border: none; font-size: 22px; color: #94a3b8; cursor: pointer;" onclick="closePersonDrawer()">✕</button>
         </div>
-        
         <div class="drawer-tabs">
             <button class="drawer-tab-btn active" onclick="switchDrawerTab('overview')">OVERVIEW</button>
             <button class="drawer-tab-btn" onclick="switchDrawerTab('identifiers')">IDENTIFIERS</button>
@@ -386,7 +492,6 @@
             <button class="drawer-tab-btn" onclick="switchDrawerTab('timeline')">TIMELINE</button>
             <button class="drawer-tab-btn" onclick="switchDrawerTab('evidence')">EVIDENCE</button>
         </div>
-
         <div class="drawer-body" id="drawer-content-area">Loading person dossier...</div>
     </div>
 
@@ -419,13 +524,11 @@
                 <div style="font-size: 18px; font-weight: 800; color: #f8fafc;">+ ADD NEW CASE WORKFLOW</div>
                 <button type="button" class="modal-close-btn" onclick="closeAddCaseWizard()" style="background: transparent; border: none; font-size: 22px; color: #94a3b8; cursor: pointer;">✕</button>
             </div>
-
             <div class="wizard-steps-bar">
                 <span id="wiz-step-1" class="wizard-step-item active">1. Case Information</span>
                 <span id="wiz-step-2" class="wizard-step-item">2. Primary Suspect</span>
                 <span id="wiz-step-3" class="wizard-step-item">3. Secondary Subjects</span>
             </div>
-
             <form id="wizard-form" onsubmit="submitWizardForm(event)">
                 <div id="wizard-panel-1">
                     <div class="form-group" style="margin-bottom: 12px;">
@@ -433,80 +536,37 @@
                         <input type="text" id="wiz-case-title" required class="form-field-input" placeholder="e.g. OPERATION NEXUS">
                     </div>
                     <div class="form-grid-2">
-                        <div>
-                            <label class="form-label">Investigation Type</label>
-                            <input type="text" id="wiz-case-type" class="form-field-input" value="Cyber-Financial Crime">
-                        </div>
-                        <div>
-                            <label class="form-label">Priority</label>
-                            <select id="wiz-case-priority" class="form-field-input">
-                                <option value="HIGH" selected>High Priority</option>
-                                <option value="MEDIUM">Medium Priority</option>
-                                <option value="LOW">Low Priority</option>
-                            </select>
-                        </div>
+                        <div><label class="form-label">Investigation Type</label><input type="text" id="wiz-case-type" class="form-field-input" value="Cyber-Financial Crime"></div>
+                        <div><label class="form-label">Priority</label><select id="wiz-case-priority" class="form-field-input"><option value="HIGH" selected>High Priority</option><option value="MEDIUM">Medium Priority</option><option value="LOW">Low Priority</option></select></div>
                     </div>
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label class="form-label">Lead Investigator</label>
-                        <input type="text" id="wiz-case-investigator" class="form-field-input" value="Ins. Vikramaditya Rao (#INV-7092)">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label class="form-label">Case Description</label>
-                        <textarea id="wiz-case-desc" rows="2" class="form-field-input" placeholder="Describe key investigative facts..."></textarea>
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn" onclick="goToWizardStep(2)">NEXT ➔</button>
-                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;"><label class="form-label">Lead Investigator</label><input type="text" id="wiz-case-investigator" class="form-field-input" value="Ins. Vikramaditya Rao (#INV-7092)"></div>
+                    <div class="form-group" style="margin-bottom: 12px;"><label class="form-label">Case Description</label><textarea id="wiz-case-desc" rows="2" class="form-field-input" placeholder="Describe key investigative facts..."></textarea></div>
+                    <div class="modal-actions"><button type="button" class="btn" onclick="goToWizardStep(2)">NEXT ➔</button></div>
                 </div>
-
                 <div id="wizard-panel-2" style="display: none;">
                     <div class="form-grid-2">
-                        <div>
-                            <label class="form-label">Primary Subject Full Name *</label>
-                            <input type="text" id="wiz-p-name" class="form-field-input" placeholder="e.g. Arjun Sharma">
-                        </div>
-                        <div>
-                            <label class="form-label">Alias</label>
-                            <input type="text" id="wiz-p-alias" class="form-field-input" placeholder="e.g. Arjun S.">
-                        </div>
+                        <div><label class="form-label">Primary Subject Full Name *</label><input type="text" id="wiz-p-name" class="form-field-input" placeholder="e.g. Arjun Sharma"></div>
+                        <div><label class="form-label">Alias</label><input type="text" id="wiz-p-alias" class="form-field-input" placeholder="e.g. Arjun S."></div>
                     </div>
                     <div class="form-grid-2">
-                        <div>
-                            <label class="form-label">Age & Gender</label>
-                            <input type="text" id="wiz-p-age" class="form-field-input" placeholder="34, Male">
-                        </div>
-                        <div>
-                            <label class="form-label">Phone</label>
-                            <input type="text" id="wiz-p-phone" class="form-field-input" placeholder="+91 98765 1201">
-                        </div>
+                        <div><label class="form-label">Age & Gender</label><input type="text" id="wiz-p-age" class="form-field-input" placeholder="34, Male"></div>
+                        <div><label class="form-label">Phone</label><input type="text" id="wiz-p-phone" class="form-field-input" placeholder="+91 98765 1201"></div>
                     </div>
                     <div class="form-grid-2">
-                        <div>
-                            <label class="form-label">Email</label>
-                            <input type="email" id="wiz-p-email" class="form-field-input" placeholder="arjun.sharma.demo@example.test">
-                        </div>
-                        <div>
-                            <label class="form-label">City / Location</label>
-                            <input type="text" id="wiz-p-city" class="form-field-input" placeholder="Pune, Maharashtra">
-                        </div>
+                        <div><label class="form-label">Email</label><input type="email" id="wiz-p-email" class="form-field-input" placeholder="arjun.sharma.demo@example.test"></div>
+                        <div><label class="form-label">City / Location</label><input type="text" id="wiz-p-city" class="form-field-input" placeholder="Pune, Maharashtra"></div>
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="goToWizardStep(1)">BACK</button>
                         <button type="button" class="btn" onclick="goToWizardStep(3)">NEXT ➔</button>
                     </div>
                 </div>
-
                 <div id="wizard-panel-3" style="display: none;">
                     <div style="background: #1e293b; border-radius: 8px; padding: 14px; margin-bottom: 14px;">
                         <div style="font-size: 12px; font-weight: 800; color: #38bdf8; margin-bottom: 10px;">ADD PERSON OF INTEREST / ASSOCIATE</div>
                         <div class="form-grid-2">
                             <input type="text" id="wiz-sec-name" class="form-field-input" placeholder="Name e.g. Rohan Mehta">
-                            <select id="wiz-sec-role" class="form-field-input">
-                                <option value="Business Contact">Business Contact</option>
-                                <option value="Associate">Associate</option>
-                                <option value="Person of Interest">Person of Interest</option>
-                                <option value="Employee">Employee</option>
-                            </select>
+                            <select id="wiz-sec-role" class="form-field-input"><option value="Business Contact">Business Contact</option><option value="Associate">Associate</option><option value="Person of Interest">Person of Interest</option><option value="Employee">Employee</option></select>
                         </div>
                         <input type="text" id="wiz-sec-phone" class="form-field-input" placeholder="Phone e.g. +91 98765 2002" style="margin-top: 10px;">
                     </div>

@@ -1,11 +1,13 @@
 // TRACE-X Intelligence Workstation Application Controller
 let currentCaseId = 'TRX-2026-017';
-let currentPersonId = 'P-001'; // Default P-001 (Arjun Sharma)
+let currentPersonId = 'P-001';
 let currentGraphLayout = 'tree-ud';
 let currentPersonDrawerId = null;
 let currentDrawerTab = 'overview';
 let visNetworkInstance = null;
 let currentGraphData = null;
+let currentDVRVideos = [];
+let currentSelectedDVR = null;
 
 const PERSON_ROLES = {
     'P-001': 'PRIMARY SUBJECT',
@@ -30,7 +32,6 @@ function toggleSidebar() {
 function changeActivePerson(personId) {
     currentPersonId = personId;
     
-    // Update Header Context (Requirement 19)
     const selectP = document.getElementById('select-change-person');
     const pName = selectP ? selectP.options[selectP.selectedIndex].text.split('(')[0].replace(/^[🔴🔵🟢🟡🟣⚠️]\s*/, '').trim().toUpperCase() : 'ARJUN SHARMA';
     
@@ -129,20 +130,6 @@ async function loadOverviewData() {
                 </div>
             `).join('');
         }
-
-        const leadsPanel = document.getElementById('ai-leads-panel');
-        if (leadsPanel && data.ai_leads) {
-            leadsPanel.innerHTML = data.ai_leads.map(lead => `
-                <div style="padding: 14px; background: #0f172a; border-left: 4px solid #3b82f6; border-radius: 8px; margin-bottom: 10px;">
-                    <div style="font-size: 14px; font-weight: 800; color: #38bdf8;">${lead.title}</div>
-                    <p style="font-size: 13px; color: #94a3b8; margin: 6px 0;">${lead.lead}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
-                        <span class="badge ${lead.confidence < 0.5 ? 'badge-high' : 'badge-verified'}">CONFIDENCE: ${Math.round(lead.confidence * 100)}%</span>
-                        <span style="font-size: 11px; color: #64748b; font-weight: 700;">Status: ${lead.status}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
     } catch (err) {
         console.error(err);
     }
@@ -198,7 +185,7 @@ async function loadInvestigationsData() {
     }
 }
 
-// 3. PERSON PROFILE VIEW (REQUIREMENT 3, 4, 5)
+// 3. PERSON PROFILE VIEW
 async function loadPersonsViewData() {
     const container = document.getElementById('person-profile-card-container');
     if (!container) return;
@@ -266,18 +253,6 @@ async function loadPersonsViewData() {
                         <div style="font-weight: 700; color: #38bdf8; font-size: 14px;">⛓️ ${p.wallet_address}</div>
                     </div>
                 </div>
-
-                <h4 style="font-size: 15px; color: #38bdf8; margin-bottom: 12px;">RELATIONSHIP RECORDS FOR ${p.name.toUpperCase()}:</h4>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
-                    ${data.relationships.map(r => `
-                        <div style="padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px;">
-                            <div style="font-size: 15px; font-weight: 800; color: #f8fafc;">${r.target_name}</div>
-                            <div style="font-size: 13px; color: #38bdf8; margin: 4px 0;">Relationship: <strong>${r.relation}</strong> (${r.target_role})</div>
-                            <p style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${r.explanation}</p>
-                            <button class="btn btn-secondary" style="margin-top: 8px; font-size: 11px; padding: 4px 10px;" onclick="openRelEvidenceModal('${r.id}')">VIEW RELATIONSHIP</button>
-                        </div>
-                    `).join('')}
-                </div>
             </div>
         `;
     } catch (err) {
@@ -285,54 +260,173 @@ async function loadPersonsViewData() {
     }
 }
 
-// 4. EVIDENCE ASSOCIATIONS & LEADS
-async function loadFusionData() {
+// 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENTS 1 - 23)
+async function loadDVRData() {
     try {
-        const res = await fetch(`/api/persons/${currentPersonId}`);
+        const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
         const data = await res.json();
-        const p = data.person;
-        const container = document.getElementById('fusion-chain-container');
-        if (!container) return;
+        
+        currentDVRVideos = data.dvr_videos;
 
-        container.innerHTML = `
-            <div class="xai-box">
-                <div class="xai-title">🧠 EVIDENCE CHAIN SYNTHESIS FOR ${p.name.toUpperCase()}</div>
-                <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Scoped multi-hop evidence correlation connecting ${p.name} across CDR, Financial, and Surveillance streams.</p>
-            </div>
+        // Update Person-Scoped Header (Requirement 8)
+        document.getElementById('dvr-header-subject').innerText = data.header_stats.subject_name.toUpperCase();
+        document.getElementById('dvr-header-events').innerText = data.header_stats.events_count;
+        document.getElementById('dvr-header-cameras').innerText = data.header_stats.cameras_count;
 
-            <!-- LINK ANALYSIS TREE (REQUIREMENT 16) -->
-            <h4 style="margin: 20px 0 10px 0; font-size: 15px; color: #38bdf8;">Hierarchy Tree Representation (Root: ${p.name}):</h4>
-            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 18px; font-family: monospace; font-size: 14px; margin-bottom: 20px;">
-                <div style="font-weight: 800; color: #38bdf8;">${p.name.toUpperCase()} (${p.role})</div>
-                <div>│</div>
-                <div>├── <span style="cursor: pointer; color: #38bdf8; font-weight: 700;" onclick="switchTab('communications')">PHONE (${p.phone})</span></div>
-                <div>│</div>
-                <div>├── <span style="cursor: pointer; color: #10b981; font-weight: 700;" onclick="switchTab('financial')">ACCOUNT (${p.account_number})</span></div>
-                <div>│</div>
-                <div>├── <span style="cursor: pointer; color: #f59e0b; font-weight: 700;" onclick="switchTab('blockchain')">WALLET (${p.wallet_address})</span></div>
-                <div>│</div>
-                <div>└── <span style="cursor: pointer; color: #8b5cf6; font-weight: 700;" onclick="switchTab('dvr')">VEHICLE (${p.vehicle})</span></div>
-            </div>
-
-            <h4 style="margin: 20px 0 10px 0; font-size: 15px; color: #38bdf8;">Investigative Leads for ${p.name}:</h4>
-            ${data.leads.map(lead => `
-                <div style="padding: 14px; background: #0f172a; border: 1px solid #334155; border-left: 4px solid #3b82f6; border-radius: 8px; margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 14px; font-weight: 800; color: #f8fafc;">${lead.id}: ${lead.title}</span>
-                        <span class="badge badge-verified">Confidence: ${Math.round(lead.confidence * 100)}%</span>
-                    </div>
-                    <p style="font-size: 13px; color: #94a3b8; margin: 6px 0;">${lead.lead}</p>
-                    <div style="font-size: 12px; color: #38bdf8; margin: 4px 0;"><strong>Supporting Evidence:</strong> ${(lead.supporting_evidence || []).join(', ')}</div>
-                    <div style="font-size: 12px; color: #f59e0b;"><strong>Alternative Explanation:</strong> ${lead.alternative_explanation}</div>
+        // Render Camera Strip (Requirement 9)
+        const cameraStrip = document.getElementById('camera-strip-container');
+        if (cameraStrip && data.camera_strip) {
+            cameraStrip.innerHTML = data.camera_strip.map(c => `
+                <div class="camera-chip" onclick="filterByCamera('${c.camera_id}')">
+                    <strong style="color: #38bdf8;">${c.camera_id}</strong> · ${c.location} (<span style="color: #10b981;">${c.status}</span>)
                 </div>
-            `).join('')}
-        `;
+            `).join('');
+        }
+
+        // Render Camera Filter Select Options (Requirement 10)
+        const camSelect = document.getElementById('dvr-filter-camera');
+        if (camSelect && data.camera_strip) {
+            camSelect.innerHTML = `<option value="ALL">All Cameras</option>` + data.camera_strip.map(c => `<option value="${c.camera_id}">${c.camera_id} - ${c.location}</option>`).join('');
+        }
+
+        renderDVRVideoGrid(currentDVRVideos);
+
+        // Select first video by default
+        if (currentDVRVideos.length > 0) {
+            selectDVRVideo(currentDVRVideos[0]);
+        } else {
+            document.getElementById('dvr-selected-details-panel').innerHTML = `<div style="padding: 10px; color: #94a3b8;">No surveillance clips logged for selected subject.</div>`;
+        }
+
+        // Render Camera Locations Map List (Requirement 18)
+        const camList = document.getElementById('dvr-camera-list');
+        if (camList && data.camera_strip) {
+            camList.innerHTML = data.camera_strip.map(c => `
+                <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; margin-bottom: 6px; cursor: pointer;" onclick="filterByCamera('${c.camera_id}')">
+                    <strong style="color: #38bdf8;">${c.camera_id}</strong>: ${c.location}
+                </div>
+            `).join('');
+        }
+
     } catch (err) {
         console.error(err);
     }
 }
 
-// 5. LINK ANALYSIS GRAPH (ROOT NODE IS SELECTED PERSON - REQUIREMENT 16)
+function filterByCamera(camId) {
+    const camSelect = document.getElementById('dvr-filter-camera');
+    if (camSelect) camSelect.value = camId;
+    applyDVRFilters();
+}
+
+function applyDVRFilters() {
+    const camVal = document.getElementById('dvr-filter-camera').value;
+    const statusVal = document.getElementById('dvr-filter-status').value;
+    
+    let filtered = currentDVRVideos;
+    if (camVal !== 'ALL') filtered = filtered.filter(v => v.camera_id === camVal);
+    if (statusVal !== 'ALL') filtered = filtered.filter(v => v.status === statusVal);
+
+    renderDVRVideoGrid(filtered);
+}
+
+function renderDVRVideoGrid(videos) {
+    const videoGrid = document.getElementById('dvr-video-grid-container');
+    if (!videoGrid) return;
+
+    if (videos.length === 0) {
+        videoGrid.innerHTML = `<div style="font-size: 13px; color: #94a3b8; padding: 16px; grid-column: span 3;">No surveillance clips match current filter criteria.</div>`;
+        return;
+    }
+
+    videoGrid.innerHTML = videos.map((v, idx) => `
+        <div class="dvr-card-compact ${currentSelectedDVR && currentSelectedDVR.id === v.id ? 'selected' : ''}" onclick="selectDVRVideoByIdx(${idx})">
+            <div class="dvr-card-thumb">
+                <img src="${v.video_thumbnail}" alt="CCTV Thumbnail">
+                <div style="position: absolute; top: 6px; left: 6px; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-family: monospace;">● ${v.camera_id}</div>
+                <div style="position: absolute; bottom: 6px; right: 6px; background: rgba(59,130,246,0.9); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700;">${v.timestamp.split(' ')[2] || ''}</div>
+            </div>
+            <div style="padding: 10px;">
+                <div style="font-size: 13px; font-weight: 800; color: #f8fafc;">${v.event_title}</div>
+                <div style="font-size: 11px; color: #38bdf8; font-weight: 700; margin: 2px 0;">📍 ${v.location}</div>
+                <div style="font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                    <span>Ref: <strong style="color: #f8fafc;">${v.evidence_id}</strong></span>
+                    <span class="badge ${v.status === 'VERIFIED' ? 'badge-verified' : 'badge-medium'}">${v.status}</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function selectDVRVideoByIdx(idx) {
+    if (currentDVRVideos[idx]) selectDVRVideo(currentDVRVideos[idx]);
+}
+
+function selectDVRVideo(v) {
+    currentSelectedDVR = v;
+
+    document.getElementById('dvr-selected-id').innerText = v.evidence_id;
+    document.getElementById('dvr-main-img').src = v.video_thumbnail;
+    document.getElementById('dvr-overlay-cam').innerText = v.camera_id;
+    document.getElementById('dvr-overlay-time').innerText = v.timestamp;
+
+    // Center Details Panel (Requirement 3)
+    const detailsPanel = document.getElementById('dvr-selected-details-panel');
+    if (detailsPanel) {
+        detailsPanel.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                <div>Event: <strong style="color: #f8fafc;">${v.event_title}</strong></div>
+                <div>Camera: <strong style="color: #38bdf8;">${v.camera_name}</strong></div>
+                <div>Timestamp: <strong>${v.timestamp}</strong></div>
+                <div>Location: <strong>${v.location}</strong></div>
+                <div>Persons: <strong style="color: #f8fafc;">${v.suspects_identified.join(', ')}</strong></div>
+                <div>Vehicle: <strong style="color: #38bdf8;">${v.associated_vehicle}</strong></div>
+            </div>
+            <div>Description: ${v.description}</div>
+        `;
+    }
+
+    // Linked Evidence Buttons (Requirement 14)
+    const linkedBtns = document.getElementById('dvr-linked-evidence-btns');
+    if (linkedBtns) {
+        linkedBtns.innerHTML = (v.linked_evidence || [v.evidence_id]).map(evId => `
+            <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('${evId}')">Ref: ${evId}</button>
+        `).join('') + `
+            <button class="btn" style="font-size: 11px; padding: 4px 10px;" onclick="switchTab('graph')">VIEW GRAPH</button>
+        `;
+    }
+
+    // Right Column Related Entities (Requirement 13)
+    const relEntities = document.getElementById('dvr-related-entities-list');
+    if (relEntities) {
+        relEntities.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                ${v.suspects_identified.map(pName => `
+                    <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="switchTab('persons')">
+                        👤 PERSON: <strong style="color: #38bdf8;">${pName}</strong>
+                    </div>
+                `).join('')}
+                <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="switchTab('dvr')">
+                    🚘 VEHICLE: <strong style="color: #38bdf8;">${v.associated_vehicle}</strong>
+                </div>
+                <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="switchTab('communications')">
+                    📞 COMMUNICATION: <strong style="color: #38bdf8;">${v.comm_ref || 'COM-001'}</strong>
+                </div>
+                <div style="padding: 6px 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; cursor: pointer;" onclick="switchTab('financial')">
+                    💳 FINANCIAL EVENT: <strong style="color: #38bdf8;">${v.fin_ref || 'TXN-88421'}</strong>
+                </div>
+            </div>
+        `;
+    }
+
+    renderDVRVideoGrid(currentDVRVideos);
+}
+
+function togglePlay() {
+    alert("▶ CCTV Replay initiated for selected surveillance stream segment.");
+}
+
+// 5. LINK ANALYSIS GRAPH
 async function loadGraphData() {
     try {
         const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
@@ -424,7 +518,7 @@ function renderGraphWithLayout(layoutType) {
     });
 }
 
-// 6. COMMUNICATION ANALYSIS (REQUIREMENT 6 & 7)
+// 6. COMMUNICATION ANALYSIS
 async function loadCommunicationsData() {
     try {
         const res = await fetch(`/api/communications?person_id=${currentPersonId}`);
@@ -471,7 +565,7 @@ async function loadCommunicationsData() {
     }
 }
 
-// 7. FINANCIAL INTELLIGENCE LEDGER (REQUIREMENT 8)
+// 7. FINANCIAL INTELLIGENCE LEDGER
 async function loadFinancialData() {
     try {
         const res = await fetch(`/api/financial?person_id=${currentPersonId}`);
@@ -483,22 +577,6 @@ async function loadFinancialData() {
                 <div style="padding: 16px; background: #0f172a; border: 1px solid #334155; border-radius: 10px;">
                     <div style="font-size: 15px; font-weight: 800; color: #10b981;">Account: ${data.account}</div>
                     <div style="font-size: 13px; color: #94a3b8; margin-top: 4px;">Current Balance: <strong style="color: #f8fafc;">${data.balance}</strong></div>
-                </div>
-            `;
-        }
-
-        const hawala = document.getElementById('fin-hawala-box');
-        if (hawala && data.hawala_analysis) {
-            hawala.innerHTML = `
-                <div class="xai-title">INFORMAL VALUE TRANSFER INDICATORS</div>
-                <div style="font-size: 13px; font-weight: 700; color: #f8fafc; margin-bottom: 6px;">${data.hawala_analysis.assessment}</div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
-                    ${data.hawala_analysis.indicators.map(i => `
-                        <div style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; font-size: 12px;">
-                            <div style="font-weight: 700; color: #f8fafc;">${i.name}</div>
-                            <div style="margin-top: 4px;"><span class="badge ${i.status === 'OBSERVED' ? 'badge-high' : 'badge-medium'}">${i.status}</span></div>
-                        </div>
-                    `).join('')}
                 </div>
             `;
         }
@@ -523,7 +601,7 @@ async function loadFinancialData() {
     }
 }
 
-// 8. BLOCKCHAIN ANALYSIS (REQUIREMENT 9)
+// 8. BLOCKCHAIN ANALYSIS
 async function loadBlockchainData() {
     try {
         const res = await fetch(`/api/blockchain?person_id=${currentPersonId}`);
@@ -557,7 +635,7 @@ async function loadBlockchainData() {
     }
 }
 
-// 9. PUBLIC-SOURCE INTELLIGENCE (REQUIREMENT 10)
+// 9. PUBLIC-SOURCE INTELLIGENCE
 async function loadOSINTData() {
     try {
         const res = await fetch(`/api/osint?person_id=${currentPersonId}`);
@@ -585,58 +663,7 @@ async function loadOSINTData() {
     }
 }
 
-// 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENT 11)
-async function loadDVRData() {
-    try {
-        const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
-        const data = await res.json();
-
-        const pRes = await fetch(`/api/persons/${currentPersonId}`);
-        const pData = await pRes.json();
-        document.getElementById('dvr-person-name').innerText = `Subject: ${pData.person.name}`;
-        
-        const videoGrid = document.getElementById('dvr-video-grid-container');
-        if (videoGrid) {
-            if (data.dvr_videos.length === 0) {
-                videoGrid.innerHTML = `<div style="font-size: 14px; color: #94a3b8; padding: 20px;">No CCTV surveillance clips logged for ${pData.person.name}.</div>`;
-            } else {
-                videoGrid.innerHTML = data.dvr_videos.map(v => `
-                    <div class="dvr-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
-                        <div style="position: relative; height: 180px; background: #000;">
-                            <img src="${v.video_thumbnail}" style="width: 100%; height: 100%; object-fit: cover;">
-                            <div style="position: absolute; top: 10px; left: 10px; background: rgba(220,38,38,0.9); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 800;">● STREAM | ${v.camera_id}</div>
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 48px; height: 48px; background: rgba(59,130,246,0.9); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer;" onclick="openCCTVVideoModal('${v.camera_id}', '${v.event_title}', '${v.timestamp}', '${v.anpr_license_plate}', '${v.video_thumbnail}', '${v.description.replace(/'/g, "\\'")}')">▶</div>
-                        </div>
-                        <div style="padding: 14px;">
-                            <div style="font-size: 14px; font-weight: 800; color: #f8fafc;">${v.event_title} (${v.timestamp})</div>
-                            <div style="font-size: 12px; color: #38bdf8; font-weight: 700; margin: 4px 0;">📍 ${v.location}</div>
-                            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;"><strong>Identified:</strong> ${v.suspects_identified.join(', ')}</div>
-                            <button class="btn btn-secondary" style="font-size: 11px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${v.evidence_id}')">Ref: ${v.evidence_id}</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-function openCCTVVideoModal(camId, title, timestamp, anpr, imgUrl, desc) {
-    const modal = document.getElementById('cctv-video-modal');
-    if (!modal) return;
-    document.getElementById('cctv-modal-cam').innerText = camId;
-    document.getElementById('cctv-modal-img').src = imgUrl;
-    document.getElementById('cctv-modal-desc').innerText = `${title} (${timestamp}) - ${desc}`;
-    modal.style.display = 'flex';
-}
-
-function closeCCTVVideoModal() {
-    const modal = document.getElementById('cctv-video-modal');
-    if (modal) modal.style.display = 'none';
-}
-
-// 11. TIMELINE (REQUIREMENT 12)
+// 11. TIMELINE
 async function loadTimelineData() {
     try {
         const res = await fetch(`/api/timeline?person_id=${currentPersonId}`);
@@ -645,14 +672,6 @@ async function loadTimelineData() {
         const pRes = await fetch(`/api/persons/${currentPersonId}`);
         const pData = await pRes.json();
         document.getElementById('timeline-person-name').innerText = pData.person.name;
-
-        const box = document.getElementById('temporal-assessment-box');
-        if (box && data.temporal_assessment) {
-            box.innerHTML = `
-                <div class="xai-title">⏱️ TEMPORAL CORRELATION ASSESSMENT</div>
-                <div style="font-size: 13px; font-weight: 700; color: #f8fafc;">${data.temporal_assessment}</div>
-            `;
-        }
 
         const container = document.getElementById('timeline-container');
         if (container && data.events) {
@@ -669,7 +688,7 @@ async function loadTimelineData() {
     }
 }
 
-// 13. ENTITY RESOLUTION INTERFACE (REQUIREMENT 4)
+// 13. ENTITY RESOLUTION INTERFACE
 async function loadEntityResolutionData() {
     const container = document.getElementById('entity-resolution-container');
     if (!container) return;
@@ -856,31 +875,9 @@ async function switchDrawerTab(tabName) {
     }
 }
 
-// RELATIONSHIP EVIDENCE DRAWER MODAL
-async function openRelEvidenceModal(relId) {
+function openRelEvidenceModal(relId) {
     const modal = document.getElementById('rel-evidence-modal');
-    if (!modal) return;
-    modal.style.display = 'flex';
-
-    try {
-        const res = await fetch(`/api/relationships/${relId}/evidence`);
-        const data = await res.json();
-        const r = data.relationship;
-
-        document.getElementById('rel-modal-body').innerHTML = `
-            <div style="padding: 16px; background: #0c2a4a; border-radius: 10px; margin-bottom: 16px; border: 1px solid #1e40af;">
-                <div style="font-size: 16px; font-weight: 800; color: #f8fafc;">RELATIONSHIP EVIDENCE RECORD ${relId}</div>
-                <div style="font-size: 13px; color: #38bdf8; margin: 4px 0;">First Observed: ${r.first_observed} | Last Observed: ${r.last_observed}</div>
-                <p style="font-size: 13px; color: #f8fafc; margin-top: 8px;"><strong>Analytical Explanation:</strong> ${r.explanation}</p>
-                <p style="font-size: 13px; color: #f59e0b; margin-top: 4px;"><strong>Alternative Explanation:</strong> ${r.alt_explanation}</p>
-            </div>
-            <div style="display: flex; justify-content: flex-end;">
-                <button class="btn" onclick="closeRelEvidenceModal()">CLOSE RECORD</button>
-            </div>
-        `;
-    } catch (err) {
-        console.error(err);
-    }
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeRelEvidenceModal() {
