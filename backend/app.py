@@ -16,10 +16,180 @@ from backend.report_generator import report_generator
 app = FastAPI(
     title="TRACE FINDERS — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
     description="SIH 2026 Problem Statement SIH26189 - AI-Powered Criminal Network Analysis System",
-    version="7.0.0"
+    version="8.0.0"
 )
 
 DATASTORE = generate_synthetic_dataset()
+
+# ----------------- GRAPH GENERATOR FUNCTION FOR EVERY PERSON (REQUIREMENTS 1 - 5) -----------------
+def generate_person_graph(pid: str) -> Dict[str, Any]:
+    if pid not in DATASTORE["profiles"]:
+        pid = "P-001"
+    
+    root = DATASTORE["profiles"][pid]
+    nodes = []
+    edges = []
+
+    # 1. Root Person Node (Level 0)
+    nodes.append({
+        "id": pid,
+        "label": root["name"],
+        "type": "PERSON",
+        "role": root["role"],
+        "risk_score": root["risk_score"],
+        "tree_level": 0,
+        "avatar": root["photo_url"],
+        "personId": pid
+    })
+
+    # 2. Connected Person Nodes (Level 1)
+    connected_person_ids = []
+    if pid == "P-001":
+        connected_person_ids = ["P-002", "P-003", "P-004", "P-005"]
+    elif pid == "P-002":
+        connected_person_ids = ["P-001", "P-003"]
+    elif pid == "P-003":
+        connected_person_ids = ["P-001", "P-002"]
+    elif pid == "P-004":
+        connected_person_ids = ["P-001"]
+    elif pid == "P-005":
+        connected_person_ids = ["P-001"]
+    elif pid == "P-006":
+        connected_person_ids = ["P-001"]
+
+    for other_id in connected_person_ids:
+        other = DATASTORE["profiles"][other_id]
+        nodes.append({
+            "id": other_id,
+            "label": other["name"],
+            "type": "PERSON",
+            "role": other["role"],
+            "risk_score": other["risk_score"],
+            "tree_level": 1,
+            "avatar": other["photo_url"],
+            "personId": other_id
+        })
+        edges.append({
+            "id": f"EDGE-{pid}-{other_id}",
+            "source": pid,
+            "target": other_id,
+            "relation": other["role"].upper(),
+            "confidence": "85%",
+            "evidence_id": f"EV-REL-{pid}-{other_id}"
+        })
+
+    # 3. Person Entity Identifiers (Level 1)
+    # Phone Node
+    nodes.append({
+        "id": f"PHONE-{pid}",
+        "label": f"Phone ({root['phone']})",
+        "type": "PHONE",
+        "tree_level": 1,
+        "personId": pid
+    })
+    edges.append({
+        "id": f"EDGE-{pid}-PHONE",
+        "source": pid,
+        "target": f"PHONE-{pid}",
+        "relation": "REGISTERED PHONE",
+        "evidence_id": f"EV-COM-{pid}-001"
+    })
+
+    # Vehicle Node
+    nodes.append({
+        "id": f"VEHICLE-{pid}",
+        "label": f"Vehicle ({root['vehicle']})",
+        "type": "VEHICLE",
+        "tree_level": 1,
+        "personId": pid
+    })
+    edges.append({
+        "id": f"EDGE-{pid}-VEHICLE",
+        "source": pid,
+        "target": f"VEHICLE-{pid}",
+        "relation": "REGISTERED VEHICLE",
+        "evidence_id": f"EV-LOC-{pid}-001"
+    })
+
+    # Bank Account Node
+    nodes.append({
+        "id": f"FIN-{pid}",
+        "label": f"Bank Acc ({root['account_number']})",
+        "type": "BANK_ACCOUNT",
+        "tree_level": 1,
+        "personId": pid
+    })
+    edges.append({
+        "id": f"EDGE-{pid}-FIN",
+        "source": pid,
+        "target": f"FIN-{pid}",
+        "relation": "BANK WIRE ACCOUNT",
+        "evidence_id": f"EV-FIN-{pid}-001"
+    })
+
+    # Crypto Wallet Node
+    nodes.append({
+        "id": f"WALLET-{pid}",
+        "label": f"Crypto Wallet ({root['wallet_address'][:10]}...)",
+        "type": "WALLET",
+        "tree_level": 1,
+        "personId": pid
+    })
+    edges.append({
+        "id": f"EDGE-{pid}-WALLET",
+        "source": pid,
+        "target": f"WALLET-{pid}",
+        "relation": "BLOCKCHAIN WALLET",
+        "evidence_id": f"EV-BC-{pid}-001"
+    })
+
+    # Organization Node
+    nodes.append({
+        "id": f"ORG-{pid}",
+        "label": f"Org ({root['organization']})",
+        "type": "ORGANIZATION",
+        "tree_level": 1,
+        "personId": pid
+    })
+    edges.append({
+        "id": f"EDGE-{pid}-ORG",
+        "source": pid,
+        "target": f"ORG-{pid}",
+        "relation": "EMPLOYMENT / ENTITY",
+        "evidence_id": f"EV-OSINT-{pid}-001"
+    })
+
+    # CCTV Evidence Node
+    cctv_list = DATASTORE["cctv"].get(pid, [])
+    if cctv_list:
+        cctv_ev = cctv_list[0]
+        nodes.append({
+            "id": f"EVIDENCE-{cctv_ev['id']}",
+            "label": f"CCTV ({cctv_ev['event_title']})",
+            "type": "EVIDENCE",
+            "tree_level": 2,
+            "personId": pid
+        })
+        edges.append({
+            "id": f"EDGE-{pid}-CCTV",
+            "source": pid,
+            "target": f"EVIDENCE-{cctv_ev['id']}",
+            "relation": "SURVEILLANCE SIGHTING",
+            "evidence_id": cctv_ev["id"]
+        })
+
+    return {
+        "header_stats": {
+            "case_id": "TRX-2026-017",
+            "subject_id": pid,
+            "subject_name": root["name"],
+            "entities_count": len(nodes),
+            "relationships_count": len(edges),
+            "evidence_links_count": root.get("evidence_count", 14)
+        },
+        "nodes": nodes,
+        "edges": edges
+    }
 
 # ----------------- REST API ROUTES -----------------
 
@@ -85,7 +255,12 @@ def get_person_profile(person_id: str):
         "cctv": cctv_recs
     }
 
-# ----------------- CCTV / DVR FORENSICS API -----------------
+# ----------------- PERSON-SCOPED GRAPH API (REQUIREMENTS 1 - 15) -----------------
+@app.get("/api/graph")
+def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
+    return generate_person_graph(pid)
+
 @app.get("/api/dvr")
 def get_dvr(
     person_id: Optional[str] = "P-001",
@@ -181,15 +356,6 @@ def get_timeline(person_id: Optional[str] = "P-001"):
         ]
     }
 
-@app.get("/api/graph")
-def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):
-    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
-    root = DATASTORE["profiles"][pid]
-    return {
-        "nodes": [{"id": pid, "label": root["name"], "type": "PERSON", "risk_score": root["risk_score"], "tree_level": 0, "avatar": root["photo_url"]}],
-        "edges": []
-    }
-
 @app.get("/api/evidence/{evidence_id}")
 def get_evidence_detail(evidence_id: str):
     return {
@@ -208,7 +374,6 @@ def get_evidence_detail(evidence_id: str):
         "analyst_notes": f"Surveillance video capture associated with evidence ID {evidence_id}."
     }
 
-# REPORT GENERATION ENDPOINTS (POST & GET FOR DOSSIER PREVIEW)
 @app.post("/api/reports/generate")
 @app.get("/api/reports/generate")
 def generate_report(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):

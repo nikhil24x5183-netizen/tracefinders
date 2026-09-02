@@ -29,6 +29,7 @@ function toggleTheme() {
     const isDark = document.body.classList.contains('dark-mode');
     const btn = document.getElementById('theme-toggle-btn');
     if (btn) btn.innerText = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    if (currentGraphData) renderGraphWithLayout(currentGraphLayout);
 }
 
 function toggleSidebar() {
@@ -267,6 +268,150 @@ async function loadPersonsViewData() {
     }
 }
 
+// 5. LINK ANALYSIS KNOWLEDGE GRAPH (REQUIREMENTS 1 - 15)
+async function loadGraphData() {
+    try {
+        const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
+        currentGraphData = await res.json();
+        
+        // Update Graph Header Statistics (Requirement 11)
+        if (currentGraphData.header_stats) {
+            const hs = currentGraphData.header_stats;
+            document.getElementById('graph-header-subject').innerText = hs.subject_name.toUpperCase();
+            document.getElementById('graph-header-entities').innerText = hs.entities_count;
+            document.getElementById('graph-header-rels').innerText = hs.relationships_count;
+            document.getElementById('graph-header-links').innerText = hs.evidence_links_count;
+        }
+
+        renderGraphWithLayout(currentGraphLayout);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function changeGraphLayout(layoutType) {
+    currentGraphLayout = layoutType;
+    document.querySelectorAll('.graph-layout-btn').forEach(btn => btn.classList.remove('active'));
+    
+    const activeBtn = document.getElementById(`btn-layout-${layoutType}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    renderGraphWithLayout(layoutType);
+}
+
+function focusSelectedPerson() {
+    renderGraphWithLayout(currentGraphLayout);
+}
+
+function renderGraphWithLayout(layoutType) {
+    if (!currentGraphData) return;
+    const container = document.getElementById('graph-canvas');
+    if (!container) return;
+
+    const isDark = document.body.classList.contains('dark-mode');
+
+    // Render Vis.js Nodes
+    const visNodes = currentGraphData.nodes.map(n => {
+        let nodeColor = { background: '#2563eb', border: '#1d4ed8' };
+        if (n.id === currentPersonId) {
+            nodeColor = { background: '#dc2626', border: '#b91c1c' };
+        } else if (n.type === 'PHONE') {
+            nodeColor = { background: '#0284c7', border: '#0369a1' };
+        } else if (n.type === 'VEHICLE') {
+            nodeColor = { background: '#d97706', border: '#b45309' };
+        } else if (n.type === 'BANK_ACCOUNT') {
+            nodeColor = { background: '#16a34a', border: '#15803d' };
+        } else if (n.type === 'WALLET') {
+            nodeColor = { background: '#7c3aed', border: '#6d28d9' };
+        } else if (n.type === 'ORGANIZATION') {
+            nodeColor = { background: '#475569', border: '#334155' };
+        }
+
+        return {
+            id: n.id,
+            label: `${n.label}\n[${n.type}]`,
+            shape: n.type === 'PERSON' ? 'dot' : 'square',
+            color: nodeColor,
+            font: { color: isDark ? '#f8fafc' : '#0f172a', size: 13, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff', face: 'Inter' },
+            level: n.tree_level !== undefined ? n.tree_level : 1,
+            nodeType: n.type,
+            personId: n.personId
+        };
+    });
+
+    // Render Vis.js Edges
+    const visEdges = currentGraphData.edges.map(e => ({
+        id: e.id,
+        from: e.source,
+        to: e.target,
+        label: e.relation,
+        arrows: 'to',
+        color: { color: isDark ? '#60a5fa' : '#2563eb' },
+        font: { color: isDark ? '#94a3b8' : '#475569', size: 11, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff' },
+        length: 80,
+        evidenceId: e.evidence_id
+    }));
+
+    const visData = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
+
+    let layoutConfig = {};
+    let physicsConfig = { enabled: true };
+
+    if (layoutType === 'tree-ud') {
+        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 90, levelSeparation: 100 } };
+        physicsConfig = { enabled: false };
+    } else if (layoutType === 'hierarchy') {
+        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 90, levelSeparation: 110 } };
+        physicsConfig = { enabled: false };
+    } else if (layoutType === 'compact') {
+        layoutConfig = { randomSeed: 42 };
+        physicsConfig = { barnesHut: { gravitationalConstant: -800, springLength: 40 } };
+    } else {
+        layoutConfig = { randomSeed: 42 };
+        physicsConfig = { barnesHut: { gravitationalConstant: -1400, springLength: 60 } };
+    }
+
+    const options = {
+        nodes: { borderWidth: 2 },
+        layout: layoutConfig,
+        physics: physicsConfig,
+        interaction: { hover: true }
+    };
+
+    if (visNetworkInstance) visNetworkInstance.destroy();
+    visNetworkInstance = new vis.Network(container, visData, options);
+
+    // Node & Edge Click Navigation Handlers (Requirements 9 & 10)
+    visNetworkInstance.on('selectNode', function(params) {
+        const nodeId = params.nodes[0];
+        const selectedNode = currentGraphData.nodes.find(n => n.id === nodeId);
+        if (!selectedNode) return;
+
+        if (selectedNode.type === 'PERSON') {
+            openPersonDrawer(nodeId);
+        } else if (selectedNode.type === 'PHONE') {
+            switchTab('communications');
+        } else if (selectedNode.type === 'VEHICLE') {
+            switchTab('dvr');
+        } else if (selectedNode.type === 'BANK_ACCOUNT') {
+            switchTab('financial');
+        } else if (selectedNode.type === 'WALLET') {
+            switchTab('blockchain');
+        } else if (selectedNode.type === 'ORGANIZATION') {
+            switchTab('osint');
+        } else if (selectedNode.type === 'EVIDENCE') {
+            openEvidenceDetailModal(nodeId.replace('EVIDENCE-', ''));
+        }
+    });
+
+    visNetworkInstance.on('selectEdge', function(params) {
+        if (params.edges.length > 0 && params.nodes.length === 0) {
+            const edgeId = params.edges[0];
+            openRelEvidenceModal(edgeId);
+        }
+    });
+}
+
 // 10. CCTV / DVR FORENSICS WORKSPACE
 async function loadDVRData() {
     try {
@@ -423,100 +568,6 @@ function selectDVRVideo(v) {
 
 function togglePlay() {
     alert("▶ CCTV Replay initiated for selected surveillance stream segment.");
-}
-
-// 5. LINK ANALYSIS GRAPH
-async function loadGraphData() {
-    try {
-        const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
-        currentGraphData = await res.json();
-        
-        const rootElem = document.getElementById('graph-root-name');
-        if (rootElem && currentGraphData.nodes.length > 0) {
-            rootElem.innerText = `Root: ${currentGraphData.nodes[0].label}`;
-        }
-        
-        renderGraphWithLayout(currentGraphLayout);
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-function changeGraphLayout(layoutType) {
-    currentGraphLayout = layoutType;
-    document.querySelectorAll('.graph-layout-btn').forEach(btn => btn.classList.remove('active'));
-    
-    const activeBtn = document.getElementById(`btn-layout-${layoutType}`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    renderGraphWithLayout(layoutType);
-}
-
-function focusSelectedPerson() {
-    renderGraphWithLayout(currentGraphLayout);
-}
-
-function renderGraphWithLayout(layoutType) {
-    if (!currentGraphData) return;
-    const container = document.getElementById('graph-canvas');
-    if (!container) return;
-
-    const isDark = document.body.classList.contains('dark-mode');
-
-    const visNodes = currentGraphData.nodes.map(n => ({
-        id: n.id,
-        label: `${n.label}\n[${n.type}]`,
-        shape: n.type === 'PERSON' ? 'dot' : 'square',
-        color: n.id === currentPersonId ? { background: '#dc2626', border: '#b91c1c' } : { background: '#2563eb', border: '#1d4ed8' },
-        font: { color: isDark ? '#f8fafc' : '#0f172a', size: 14, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff', face: 'Inter' },
-        level: n.tree_level !== undefined ? n.tree_level : 1
-    }));
-
-    const visEdges = currentGraphData.edges.map(e => ({
-        id: e.id,
-        from: e.source,
-        to: e.target,
-        label: e.relation,
-        arrows: 'to',
-        color: { color: '#2563eb' },
-        font: { color: isDark ? '#94a3b8' : '#475569', size: 12, strokeWidth: 2, strokeColor: isDark ? '#0b0f19' : '#ffffff' },
-        length: 60
-    }));
-
-    const visData = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
-
-    let layoutConfig = {};
-    let physicsConfig = { enabled: true };
-
-    if (layoutType === 'tree-ud') {
-        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 80, levelSeparation: 90 } };
-        physicsConfig = { enabled: false };
-    } else if (layoutType === 'hierarchy') {
-        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 80, levelSeparation: 100 } };
-        physicsConfig = { enabled: false };
-    } else {
-        layoutConfig = { randomSeed: 42 };
-        physicsConfig = { barnesHut: { gravitationalConstant: -1200, springLength: 50 } };
-    }
-
-    const options = {
-        nodes: { borderWidth: 2 },
-        layout: layoutConfig,
-        physics: physicsConfig,
-        interaction: { hover: true }
-    };
-
-    if (visNetworkInstance) visNetworkInstance.destroy();
-    visNetworkInstance = new vis.Network(container, visData, options);
-
-    visNetworkInstance.on('selectNode', function(params) {
-        const nodeId = params.nodes[0];
-        if (nodeId.startsWith('P-00')) {
-            changeActivePerson(nodeId);
-        } else {
-            openPersonDrawer(nodeId);
-        }
-    });
 }
 
 // 6. COMMUNICATION ANALYSIS

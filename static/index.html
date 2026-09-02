@@ -101,7 +101,7 @@
         <!-- MAIN CONTENT AREA -->
         <main class="content-area">
 
-            <!-- LEGAL DISCLAIMER BANNER (MATCHES SCREENSHOT media_1788343853833.png) -->
+            <!-- LEGAL DISCLAIMER BANNER -->
             <div class="disclaimer-banner">
                 ⚖️ <strong>LEGAL DISCLAIMER:</strong> TRACE FINDERS provides analytical decision support. Investigative findings represent evidence-supported associations requiring human verification. System never automatically declares criminality.
             </div>
@@ -157,10 +157,19 @@
                 </div>
             </section>
 
-            <!-- 5. LINK ANALYSIS GRAPH -->
+            <!-- 5. LINK ANALYSIS GRAPH (REQUIREMENTS 1 - 15) -->
             <section id="view-graph" class="tab-view">
-                <div class="card-title" style="margin-bottom: 12px;">
-                    <span>Link Analysis Knowledge Graph (<span id="graph-root-name" style="color: var(--accent-blue);">Root: Arjun Sharma</span>)</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div>
+                        <h2 style="font-size: 22px; font-weight: 800;">Evidence Fusion Network Graph</h2>
+                        <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                            CASE: <strong style="color: var(--text-main);">TRX-2026-017</strong> | 
+                            SUBJECT: <strong id="graph-header-subject" style="color: var(--accent-blue);">ARJUN SHARMA</strong> | 
+                            ENTITIES: <strong id="graph-header-entities" style="color: var(--text-main);">8</strong> | 
+                            RELATIONSHIPS: <strong id="graph-header-rels" style="color: var(--text-main);">7</strong> | 
+                            EVIDENCE LINKS: <strong id="graph-header-links" style="color: var(--text-main);">14</strong>
+                        </div>
+                    </div>
                     <button class="btn btn-secondary" onclick="focusSelectedPerson()">🎯 RE-CENTER ROOT</button>
                 </div>
 
@@ -170,8 +179,9 @@
                         <button id="btn-layout-tree-ud" class="graph-layout-btn active" onclick="changeGraphLayout('tree-ud')">Tree (Root Top)</button>
                         <button id="btn-layout-radial" class="graph-layout-btn" onclick="changeGraphLayout('radial')">Radial</button>
                         <button id="btn-layout-hierarchy" class="graph-layout-btn" onclick="changeGraphLayout('hierarchy')">Hierarchy</button>
+                        <button id="btn-layout-compact" class="graph-layout-btn" onclick="changeGraphLayout('compact')">Compact</button>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">💡 Click node for person drawer | Click edge for relationship evidence</div>
+                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">💡 Click Person for drawer | Click Entity to view module | Click Edge for Evidence</div>
                 </div>
 
                 <div id="graph-canvas"></div>
