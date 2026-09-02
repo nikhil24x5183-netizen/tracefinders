@@ -269,7 +269,7 @@ async function loadPersonsViewData() {
     }
 }
 
-// 5. LINK ANALYSIS KNOWLEDGE GRAPH (UNCONSTRAINED FREE MOVEMENT & CONTROLS)
+// 5. LINK ANALYSIS KNOWLEDGE GRAPH
 async function loadGraphData() {
     try {
         const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
@@ -416,7 +416,6 @@ function renderGraphWithLayout(layoutType) {
     if (visNetworkInstance) visNetworkInstance.destroy();
     visNetworkInstance = new vis.Network(container, visData, options);
 
-    // Single Click Navigation
     visNetworkInstance.on('selectNode', function(params) {
         const nodeId = params.nodes[0];
         const selectedNode = currentGraphData.nodes.find(n => n.id === nodeId);
@@ -439,7 +438,6 @@ function renderGraphWithLayout(layoutType) {
         }
     });
 
-    // Double Click Node Focus / Zoom
     visNetworkInstance.on('doubleClick', function(params) {
         if (params.nodes.length > 0) {
             const nodeId = params.nodes[0];
@@ -992,10 +990,10 @@ async function loadAuditData() {
     }
 }
 
-// 14. REPORTS
+// 14. REPORTS (100% PERSON-SCOPED DOSSIER GENERATION)
 async function loadReportData() {
     try {
-        const res = await fetch('/api/reports/generate', { method: 'POST' });
+        const res = await fetch(`/api/reports/generate?case_id=${currentCaseId}&person_id=${currentPersonId}`, { method: 'GET' });
         const data = await res.json();
         const previewer = document.getElementById('report-preview-frame');
         if (previewer) {

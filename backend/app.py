@@ -16,7 +16,7 @@ from backend.report_generator import report_generator
 app = FastAPI(
     title="TRACE FINDERS — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
     description="SIH 2026 Problem Statement SIH26189 - AI-Powered Criminal Network Analysis System",
-    version="9.0.0"
+    version="10.0.0"
 )
 
 DATASTORE = generate_synthetic_dataset()
@@ -273,7 +273,6 @@ def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] 
     pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
     return generate_person_graph(pid)
 
-# ----------------- ALL 12 CAMERAS & DVR FORENSICS REST ENDPOINTS (REQUIREMENTS 1 - 22) -----------------
 @app.get("/api/cameras")
 def get_cameras_inventory(
     search: Optional[str] = None,
@@ -330,7 +329,6 @@ def get_dvr(
     if status and status != "ALL":
         cameras = [c for c in cameras if c["status"] == status]
 
-    # Build ALL CAMERA EVENTS Table Records (Requirement 11)
     all_events_table = [
         {"time": "20:01:14", "camera_id": "CAM-04", "event": "Person Meeting", "person": "Arjun Sharma", "location": "Shivajinagar", "evidence_id": "EV-CCTV-031", "status": "Verified"},
         {"time": "20:17:38", "camera_id": "CAM-04", "event": "Physical Exchange Event", "person": "Rohan Mehta", "location": "Shivajinagar", "evidence_id": "EV-CCTV-032", "status": "Under Review"},
@@ -437,17 +435,17 @@ def get_evidence_detail(evidence_id: str):
         "analyst_notes": f"Surveillance video capture associated with evidence ID {evidence_id}."
     }
 
+# ----------------- PERSON-SCOPED REPORT REST API (REQUIREMENTS 1 - 21) -----------------
 @app.post("/api/reports/generate")
 @app.get("/api/reports/generate")
 def generate_report(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
+    person_data = DATASTORE["profiles"][pid]
+    cctv_events = DATASTORE["cctv"].get(pid, [])
     case_data = DATASTORE["cases"].get("TRX-2026-017", {})
-    fusion_data = {
-        "explainable_ai": {
-            "WHAT": "Multi-hop intelligence chain correlated across CDR, DVR, and Financial logs.",
-            "WHY": "Repeated temporal burst and account transfer correlation."
-        }
-    }
-    res = report_generator.generate_report(case_data, [], [], [], fusion_data)
+    fusion_data = {"explainable_ai": {"WHAT": "Multi-hop intelligence chain correlated across CDR, DVR, and Financial logs."}}
+    
+    res = report_generator.generate_report(case_data, person_data, cctv_events, fusion_data)
     return res
 
 @app.get("/api/search")
