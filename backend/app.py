@@ -10,505 +10,243 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 from typing import Dict, List, Any, Optional
-import time
 
-from backend.models import Case, Entity, Relationship, EvidenceItem, Anomaly, InvestigativeLead, AuditBlock, SuspectProfile
+from backend.models import Case, Entity, Relationship, EvidenceItem, InvestigativeLead, SuspectProfile
 from backend.mock_data_generator import generate_synthetic_dataset
-from backend.graph_engine import graph_engine
-from backend.nlp_extractor import nlp_engine
-from backend.anomaly_engine import anomaly_engine
-from backend.fusion_engine import fusion_engine
-from backend.blockchain_ledger import evidence_ledger
 from backend.report_generator import report_generator
 
 app = FastAPI(
     title="TRACE-X — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
     description="SIH 2026 Problem Statement SIH26189 - AI-Powered Criminal Network Analysis System",
-    version="4.0.0"
+    version="5.0.0"
 )
 
 DATASTORE = generate_synthetic_dataset()
 
-# Seed ledger
-for evd in DATASTORE["evidence_items"]:
-    evidence_ledger.add_evidence_block(
-        case_id=evd["case_id"],
-        action_type="EVIDENCE_ACQUIRED",
-        actor="INV-004",
-        data_payload={
-            "evidence_id": evd["id"],
-            "title": evd["title"],
-            "file_hash": evd["file_hash"],
-            "provenance": evd["provenance"]
-        }
-    )
-
-class CreateCaseWizardRequest(BaseModel):
-    id: Optional[str] = None
-    title: str
-    description: str
-    investigation_type: str = "Cyber-Financial Crime"
-    priority: str = "HIGH"
-    date_opened: str = "2026-09-02"
-    lead_investigator: str = "Ins. Vikramaditya Rao (#INV-7092)"
-    location: str = "Pune, Maharashtra"
-    agency: str = "Special Cyber Crime & Intelligence Cell (SCCIC)"
-    tags: List[str] = ["NEW_INVESTIGATION"]
-    primary_suspect: SuspectProfile
-    secondary_suspects: List[SuspectProfile] = []
-
-class TamperRequest(BaseModel):
-    block_index: int
-    field_to_tamper: str = "title"
-    tampered_value: str = "[EXPUNGED / ILLEGALLY MUTATED EVIDENCE]"
-
-class EntityResolutionRequest(BaseModel):
-    candidate_id: str
-    action: str  # CONFIRM, REJECT, REVIEW
-    notes: Optional[str] = ""
-
 # ----------------- REST API ROUTES -----------------
 
 @app.get("/api/overview")
-def get_overview_statistics(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "person_arjun_sharma"):
-    case_obj = DATASTORE["cases"].get(case_id, DATASTORE["cases"]["TRX-2026-017"])
-    
+def get_overview_statistics(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):
+    pid = person_id or "P-001"
+    prof = DATASTORE["profiles"].get(pid, DATASTORE["profiles"]["P-001"])
+    counts = prof.get("counts", {})
+    leads = DATASTORE["leads"].get(pid, DATASTORE["leads"]["P-001"])
+
     return {
         "case_summary": {
-            "case_id": case_obj["id"],
-            "title": case_obj["title"],
-            "primary_subject": case_obj["primary_suspect"]["name"],
-            "secondary_subjects_count": len(case_obj["secondary_suspects"]),
-            "entities_count": len(DATASTORE["nodes"]),
-            "evidence_count": case_obj.get("evidence_count", 148),
-            "relationships_count": case_obj.get("relationships_count", 37),
-            "communications_count": case_obj.get("communications_count", 421),
-            "financial_count": case_obj.get("financial_count", 63),
-            "osint_count": case_obj.get("osint_count", 42),
-            "blockchain_count": case_obj.get("blockchain_count", 18),
-            "cctv_count": case_obj.get("cctv_count", 9)
+            "case_id": case_id,
+            "title": "OPERATION NEXUS",
+            "primary_subject": prof["name"],
+            "person_id": pid,
+            "entities_count": 137,
+            "evidence_count": prof.get("evidence_count", 24),
+            "relationships_count": prof.get("relationship_count", 7),
+            "communications_count": counts.get("calls", 187) + counts.get("messages", 234),
+            "financial_count": counts.get("financial", 63),
+            "osint_count": counts.get("osint", 42),
+            "blockchain_count": counts.get("blockchain", 18),
+            "cctv_count": counts.get("cctv", 9)
         },
         "investigation_activity": [
-            {"time": "09:42", "event": "New communication cluster detected (+91 98765 1201 ➔ Rohan Mehta)", "domain": "CDR"},
-            {"time": "10:18", "event": "Financial transaction linked to Arjun Sharma (XXXX4821 ➔ ₹48,500)", "domain": "FINANCIAL"},
-            {"time": "11:03", "event": "Public-Source mention discovered (@arjun_s_demo ➔ Nexus Logistics)", "domain": "OSINT"},
-            {"time": "12:27", "event": "Potential relationship detected between Arjun Sharma and Rohan Mehta", "domain": "GRAPH"},
-            {"time": "13:41", "event": "CCTV event linked to vehicle MH12 AB 4821 (CAM-04 ANPR match)", "domain": "DVR"},
-            {"time": "15:08", "event": "Blockchain wallet activity correlated (0xDEMO...A721 ➔ 1.20 ETH)", "domain": "BLOCKCHAIN"},
-            {"time": "16:22", "event": "Evidence integrity verification completed (Verified)", "domain": "AUDIT"}
+            {"time": "09:42", "event": f"Communication activity logged for {prof['name']} ({prof['phone']})", "domain": "CDR"},
+            {"time": "10:18", "event": f"Financial transaction verified for account {prof['account_number']}", "domain": "FINANCIAL"},
+            {"time": "11:03", "event": f"Public-Source record matched for {prof['social_usernames'].get('twitter', '@user')}", "domain": "OSINT"},
+            {"time": "13:41", "event": f"CCTV sighting recorded for vehicle {prof['vehicle']}", "domain": "DVR"},
+            {"time": "15:08", "event": f"Blockchain wallet activity verified ({prof['wallet_address']})", "domain": "BLOCKCHAIN"}
         ],
-        "ai_leads": DATASTORE["leads"]
+        "ai_leads": leads
     }
 
 @app.get("/api/cases")
 def get_all_cases():
     return {"cases": list(DATASTORE["cases"].values())}
 
-@app.get("/api/cases/{case_id}")
-def get_case_details(case_id: str):
-    if case_id not in DATASTORE["cases"]:
-        raise HTTPException(status_code=404, detail="Case not found")
-    c = DATASTORE["cases"][case_id]
-    evd_cards = [e for e in DATASTORE["evidence_items"] if e["case_id"] == case_id]
-    return {
-        "case": c,
-        "evidence_cards": evd_cards
-    }
-
-@app.post("/api/cases")
-def create_case_wizard(req: CreateCaseWizardRequest):
-    case_id = req.id or f"TRX-2026-{len(DATASTORE['cases']) + 18:03d}"
-    primary = req.primary_suspect.dict()
-    secondaries = [s.dict() for s in req.secondary_suspects]
-    
-    new_case = {
-        "id": case_id,
-        "title": req.title.upper(),
-        "primary_suspect": primary,
-        "secondary_suspects": secondaries,
-        "subject_known_identifiers": {
-            "phone": [primary.get("phone", "")],
-            "email": [primary.get("email", "")],
-            "aliases": [primary.get("alias", primary.get("name"))],
-            "vehicle": [primary.get("vehicle", "")],
-            "wallet": [primary.get("wallet_address", "")]
-        },
-        "description": req.description,
-        "investigation_type": req.investigation_type,
-        "priority": req.priority,
-        "status": "ACTIVE",
-        "date_opened": req.date_opened,
-        "lead_investigator": req.lead_investigator,
-        "agency": req.agency,
-        "location": req.location,
-        "tags": req.tags,
-        "evidence_count": 5,
-        "relationships_count": 3,
-        "communications_count": 12,
-        "financial_count": 4,
-        "osint_count": 3,
-        "blockchain_count": 1,
-        "cctv_count": 1,
-        "last_activity": "18 Aug 2026 21:17"
-    }
-    
-    DATASTORE["cases"][case_id] = new_case
-    return {"success": True, "case": new_case}
-
 @app.get("/api/persons/{person_id}")
 def get_person_profile(person_id: str):
-    node = next((n for n in DATASTORE["nodes"] if n["id"] == person_id), None)
-    case_obj = DATASTORE["cases"]["TRX-2026-017"]
-    
-    person_data = None
-    if case_obj["primary_suspect"]["id"] == person_id:
-        person_data = case_obj["primary_suspect"]
-    else:
-        person_data = next((s for s in case_obj["secondary_suspects"] if s["id"] == person_id), None)
-        
-    if not person_data and person_id == DATASTORE["ambiguous_candidate"]["id"]:
-        person_data = DATASTORE["ambiguous_candidate"]
+    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
+    prof = DATASTORE["profiles"][pid]
+    comm = DATASTORE["communications"][pid]
+    fin = DATASTORE["financial"][pid]
+    blk = DATASTORE["blockchain"][pid]
+    osint_recs = DATASTORE["osint"][pid]
+    cctv_recs = DATASTORE["cctv"][pid]
+    leads_recs = DATASTORE["leads"][pid]
 
-    if not person_data:
-        person_data = {
-            "id": person_id,
-            "name": node["label"] if node else person_id,
-            "alias": node["label"] if node else person_id,
-            "role": "Person of Interest",
-            "relationship_to_primary": "Associate",
-            "age": 32,
-            "gender": "Male",
-            "photo_url": node.get("avatar") if node else "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300",
-            "phone": "+91 98765 9999",
-            "email": "contact.demo@example.test",
-            "address": "Pune, Maharashtra",
-            "city": "Pune, Maharashtra",
-            "occupation": "Associate",
-            "organization": "Nexus Logistics",
-            "vehicle": "MH12 XY 9988",
-            "social_usernames": {"telegram": "@associate_demo"},
-            "wallet_address": "0x3910...199",
-            "notes": "Person of Interest linked to primary subject.",
-            "risk_score": 65,
-            "evidence_count": 12,
-            "relationship_count": 4,
-            "status": "Person of Interest",
-            "last_updated": "18 Aug 2026 21:17"
-        }
-        
-    person_evidence = [e for e in DATASTORE["evidence_items"] if e.get("person_id") == person_id or person_id == "person_arjun_sharma"]
-    person_relationships = [e for e in DATASTORE["edges"] if e["source"] == person_id or e["target"] == person_id]
-    
-    return {
-        "person": person_data,
-        "connected_counts": {
-            "communications": 24,
-            "financial": 8,
-            "osint": 5,
-            "blockchain": 3,
-            "cctv": 4
-        },
-        "connected_people": [
-            {"name": "Rohan Mehta", "role": "Business Contact"},
-            {"name": "Priya Joshi", "role": "Associate"},
-            {"name": "Vikram Patil", "role": "Person of Interest"},
-            {"name": "Neha Kulkarni", "role": "Employee"}
-        ],
-        "evidence_items": person_evidence,
-        "relationships": person_relationships
-    }
-
-@app.get("/api/evidence/{evidence_id}")
-def get_evidence_detail(evidence_id: str):
-    evd = next((e for e in DATASTORE["evidence_items"] if e["id"] == evidence_id), None)
-    if not evd:
-        evd = {
-            "id": evidence_id,
-            "case_id": "TRX-2026-017",
-            "person_id": "person_arjun_sharma",
-            "title": f"Evidence Record {evidence_id}",
-            "evidence_type": "Communication Analysis",
-            "source": "Communication Dataset",
-            "acquisition_timestamp": "18 Aug 2026 20:02:14",
-            "acquisition_date": "18 Aug 2026",
-            "acquisition_time": "20:02:14",
-            "file_hash": "8f31c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852c91a",
-            "file_size_bytes": 1840000,
-            "integrity_status": "Verified",
-            "processing_status": "PROCESSED",
-            "provenance": "Communication Dataset",
-            "analyst_notes": "Log record associated with primary subject Arjun Sharma.",
-            "confidence": 0.95,
-            "extracted_entities": ["Arjun Sharma", "Rohan Mehta", "Pune"],
-            "related_events": ["EV-CCTV-031", "EV-FIN-014", "EV-REL-074"],
-            "duration": "04:21",
-            "direction": "Outgoing"
-        }
-    return evd
-
-@app.get("/api/relationships/{rel_id}/evidence")
-def get_relationship_evidence(rel_id: str):
-    rel = next((e for e in DATASTORE["edges"] if e["id"] == rel_id), None)
-    if not rel:
-        rel = DATASTORE["edges"][0]
-        
-    evd_items = [e for e in DATASTORE["evidence_items"] if e["id"] in rel.get("source_evidence_ids", [])]
-    if not evd_items:
-        evd_items = [DATASTORE["evidence_items"][0], DATASTORE["evidence_items"][1]]
+    # Generate person-scoped relationships (Requirement 16)
+    relationships = []
+    for other_id, other_prof in DATASTORE["profiles"].items():
+        if other_id != pid and other_id != "P-006":
+            relationships.append({
+                "id": f"REL-{pid}-{other_id}",
+                "sourcePersonId": pid,
+                "targetPersonId": other_id,
+                "relation": "BUSINESS" if other_id in ["P-002", "P-003"] else "MEETING",
+                "target_name": other_prof["name"],
+                "target_role": other_prof["role"],
+                "confidence": 0.85,
+                "domain": "COMMUNICATION",
+                "explanation": f"Observed communication & organizational link between {prof['name']} and {other_prof['name']}."
+            })
 
     return {
-        "relationship": rel,
-        "supporting_evidence": evd_items
-    }
-
-@app.get("/api/evidence")
-def get_evidence_list(case_id: Optional[str] = None, person_id: Optional[str] = None):
-    items = DATASTORE["evidence_items"]
-    if case_id:
-        items = [e for e in items if e["case_id"] == case_id]
-    return {"evidence_items": items}
-
-@app.get("/api/graph")
-def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "person_arjun_sharma"):
-    analytics = graph_engine.analyze_graph(DATASTORE["nodes"], DATASTORE["edges"])
-    return {
-        "nodes": DATASTORE["nodes"],
-        "edges": DATASTORE["edges"],
-        "analytics": analytics
-    }
-
-@app.get("/api/timeline")
-def get_timeline(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = None):
-    timeline_events = [
-        {"id": "EV-CCTV-031", "timestamp": "18 Aug 2026 20:01:14", "title": "PERSON MEETING", "domain": "DVR", "details": "CCTV CAM-04 capture of Arjun Sharma and Rohan Mehta.", "evidence_id": "EV-CCTV-031", "person": "Arjun Sharma", "location": "Pune"},
-        {"id": "EV-COM-023", "timestamp": "18 Aug 2026 20:02:07", "title": "COMMUNICATION EVENT (Outgoing 04:21)", "domain": "CDR", "details": "Cell tower connection initiated to Rohan Mehta.", "evidence_id": "EV-COM-023", "person": "Arjun Sharma", "location": "Pune"},
-        {"id": "EV-COM-024", "timestamp": "18 Aug 2026 20:11:23", "title": "COMMUNICATION EVENT (Incoming 02:44)", "domain": "CDR", "details": "Incoming call from Rohan Mehta.", "evidence_id": "EV-COM-023", "person": "Rohan Mehta", "location": "Pune"},
-        {"id": "EV-CCTV-032", "timestamp": "18 Aug 2026 20:17:38", "title": "PHYSICAL EVENT (FINANCIAL EXCHANGE)", "domain": "DVR", "details": "Surveillance CAM-04 capture of envelope exchange.", "evidence_id": "EV-CCTV-032", "person": "Arjun Sharma", "location": "Pune"},
-        {"id": "EV-COM-025", "timestamp": "18 Aug 2026 20:19:04", "title": "COMMUNICATION EVENT (Outgoing 06:12)", "domain": "CDR", "details": "Follow-up communication recorded.", "evidence_id": "EV-COM-023", "person": "Arjun Sharma", "location": "Pune"},
-        {"id": "EV-CCTV-033", "timestamp": "18 Aug 2026 20:26:11", "title": "VEHICLE DEPARTURE (MH12 AB 4821)", "domain": "DVR", "details": "ANPR sighting of SUV driven by Vikram Patil.", "evidence_id": "EV-CCTV-033", "person": "Vikram Patil", "location": "Pune"},
-        {"id": "EV-COM-026", "timestamp": "18 Aug 2026 20:42:51", "title": "PHONE EVENT (Burst)", "domain": "CDR", "details": "SIM-box tower handoff recorded.", "evidence_id": "EV-COM-001", "person": "Arjun Sharma", "location": "Pune"},
-        {"id": "EV-FIN-014", "timestamp": "18 Aug 2026 21:03:18", "title": "FINANCIAL EVENT (₹48,500 Wire)", "domain": "FINANCIAL", "details": "Account XXXX4821 wire transfer to Rohan Mehta.", "evidence_id": "EV-FIN-014", "person": "Rohan Mehta", "location": "Pune"},
-        {"id": "EV-BC-042", "timestamp": "18 Aug 2026 21:17:04", "title": "BLOCKCHAIN EVENT (1.20 ETH)", "domain": "BLOCKCHAIN", "details": "Wallet 0xDEMO...A721 transaction.", "evidence_id": "EV-BC-042", "person": "Arjun Sharma", "location": "Blockchain"}
-    ]
-    return {
-        "temporal_assessment": "TEMPORAL RELATIONSHIP DETECTED: Multiple communication, physical, and financial events occur within a short temporal window and may warrant investigator review.",
-        "events": timeline_events
+        "person": prof,
+        "connected_counts": prof["counts"],
+        "relationships": relationships,
+        "communications": comm,
+        "financial": fin,
+        "blockchain": blk,
+        "osint": osint_recs,
+        "cctv": cctv_recs,
+        "leads": leads_recs
     }
 
 @app.get("/api/communications")
-def get_communications(person_id: Optional[str] = "person_arjun_sharma"):
-    rohan_call_timeline = [
-        {"date": "18 Aug 2026", "time": "20:02:14", "direction": "Outgoing", "duration": "04:21", "evidence_id": "EV-COM-023"},
-        {"date": "18 Aug 2026", "time": "20:11:23", "direction": "Incoming", "duration": "02:44", "evidence_id": "EV-COM-023"},
-        {"date": "18 Aug 2026", "time": "20:19:04", "direction": "Outgoing", "duration": "06:12", "evidence_id": "EV-COM-023"},
-        {"date": "18 Aug 2026", "time": "20:31:18", "direction": "Incoming", "duration": "01:18", "evidence_id": "EV-COM-023"},
-        {"date": "17 Aug 2026", "time": "19:42:05", "direction": "Outgoing", "duration": "03:09", "evidence_id": "EV-COM-001"}
-    ]
-    
-    return {
-        "total_events": 421,
-        "calls": 187,
-        "messages": 234,
-        "unique_contacts": 11,
-        "active_period": "03 Aug – 18 Aug 2026",
-        "contacts": [
-            {"id": "person_rohan_mehta", "name": "Rohan Mehta", "role": "Business Contact", "calls": 27, "phone": "+91 98765 2002"},
-            {"id": "person_priya_joshi", "name": "Priya Joshi", "role": "Associate", "calls": 14, "phone": "+91 98765 3003"},
-            {"id": "person_vikram_patil", "name": "Vikram Patil", "role": "Person of Interest", "calls": 9, "phone": "+91 98765 4004"},
-            {"id": "person_neha_kulkarni", "name": "Neha Kulkarni", "role": "Employee", "calls": 6, "phone": "+91 98765 5005"},
-            {"id": "person_unknown", "name": "UNKNOWN CONTACT", "role": "Unknown", "calls": 4, "phone": "+91 98999 0000"}
-        ],
-        "rohan_call_timeline": rohan_call_timeline,
-        "communication_edges": [e for e in DATASTORE["edges"] if e.get("domain") == "COMMUNICATION"]
-    }
+def get_communications(person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["communications"] else "P-001"
+    return DATASTORE["communications"][pid]
 
 @app.get("/api/financial")
-def get_financial(person_id: Optional[str] = "person_arjun_sharma"):
-    accounts = [
-        {"bank": "HDFC Account", "account_number": "XXXX4821", "type": "Current Account", "balance": "₹14,50,000"},
-        {"bank": "Axis Account", "account_number": "XXXX7194", "type": "Corporate Account", "balance": "₹8,20,000"}
-    ]
-    
-    transactions = [
-        {"date": "18 Aug 2026", "time": "20:58", "amount": "₹48,500", "direction": "OUT", "account": "XXXX4821", "counterparty": "Rohan Mehta", "reference": "TXN-88421", "evidence_id": "EV-FIN-014", "dest_account": "XXXX7312", "correlation": "EV-COM-031", "location": "Pune", "confidence": "71%", "indicator": "Temporal proximity between communication and financial activity."},
-        {"date": "18 Aug 2026", "time": "15:20", "amount": "₹72,000", "direction": "IN", "account": "XXXX7194", "counterparty": "Priya Joshi", "reference": "TXN-88422", "evidence_id": "EV-REL-074", "dest_account": "XXXX7194", "correlation": "EV-DOC-057", "location": "Pune", "confidence": "93%", "indicator": "Corporate wire deposit."},
-        {"date": "17 Aug 2026", "time": "18:45", "amount": "₹19,800", "direction": "OUT", "account": "XXXX4821", "counterparty": "Vikram Patil", "reference": "TXN-88423", "evidence_id": "EV-FIN-014", "dest_account": "XXXX9901", "correlation": "EV-CCTV-033", "location": "Pune", "confidence": "90%", "indicator": "Logistics expense payment."},
-        {"date": "16 Aug 2026", "time": "11:10", "amount": "₹1,25,000", "direction": "IN", "account": "XXXX7194", "counterparty": "Nexus Logistics", "reference": "TXN-88424", "evidence_id": "EV-REL-074", "dest_account": "XXXX7194", "correlation": "EV-DOC-057", "location": "Pune", "confidence": "94%", "indicator": "Retainer credit transfer."},
-        {"date": "15 Aug 2026", "time": "14:30", "amount": "₹38,200", "direction": "OUT", "account": "XXXX4821", "counterparty": "Priya Joshi", "reference": "TXN-88425", "evidence_id": "EV-FIN-014", "dest_account": "XXXX5544", "correlation": "EV-FIN-014", "location": "Pune", "confidence": "91%", "indicator": "Consulting disbursement."}
-    ]
-    
-    hawala_indicators = [
-        {"name": "Repeated third-party transfers", "status": "OBSERVED", "details": "Transfers without commercial documentation observed across counterparty accounts."},
-        {"name": "Rapid account movement", "status": "OBSERVED", "details": "Movement between multiple accounts within short interval."},
-        {"name": "Multiple counterparties", "status": "OBSERVED", "details": "Multiple counterparty accounts linked within 48-hour window."},
-        {"name": "Transaction timing correlated with communication", "status": "OBSERVED", "details": "Financial activity initiated within minutes of CDR call burst."},
-        {"name": "Geographical separation", "status": "NOT OBSERVED", "details": "Counterparties located within Western Maharashtra corridor."},
-        {"name": "Unusual settlement pattern", "status": "INCONCLUSIVE", "details": "Requires ongoing ledger observation."}
-    ]
+def get_financial(person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["financial"] else "P-001"
+    fin_data = DATASTORE["financial"][pid]
     
     return {
-        "accounts": accounts,
-        "transactions": transactions,
+        "account": fin_data["account"],
+        "balance": fin_data["balance"],
+        "transactions": fin_data["transactions"],
         "hawala_analysis": {
             "title": "INFORMAL VALUE TRANSFER INDICATORS",
-            "assessment": "Potential informal value transfer pattern",
+            "assessment": f"Informal value transfer analysis for {DATASTORE['profiles'][pid]['name']}",
             "status": "Requires investigative verification",
-            "indicators": hawala_indicators
+            "indicators": [
+                {"name": "Repeated third-party transfers", "status": "OBSERVED", "details": "Transfers logged across counterparty accounts."},
+                {"name": "Rapid account movement", "status": "OBSERVED" if pid in ["P-001", "P-002"] else "NOT OBSERVED", "details": "Account activity within short window."},
+                {"name": "Transaction timing correlated with communication", "status": "OBSERVED" if pid in ["P-001", "P-004"] else "NOT OBSERVED", "details": "Financial activity correlated with CDR bursts."}
+            ]
         }
     }
 
 @app.get("/api/blockchain")
-def get_blockchain(person_id: Optional[str] = "person_arjun_sharma"):
-    wallet_info = {
-        "address": "0xDEMO...A721",
-        "associated_evidence": "EV-BC-042",
-        "balance": "8.42 ETH",
-        "incoming": 23,
-        "outgoing": 24,
-        "total_observed": 47,
-        "disclaimer": "Wallet association based on available evidence."
-    }
-    
-    transactions = [
-        {"id": "TX-DEMO-001", "hash": "TX-DEMO-001", "from_addr": "0x3910...199", "to_addr": "0xDEMO...A721", "value": "0.84 ETH", "time": "18 Aug 2026 21:17:04", "evidence_id": "EV-BC-042"},
-        {"id": "TX-DEMO-002", "hash": "TX-DEMO-002", "from_addr": "0xDEMO...A721", "to_addr": "0xDEMO...F921", "value": "1.20 ETH", "time": "18 Aug 2026 21:40:12", "evidence_id": "EV-BC-042"},
-        {"id": "TX-DEMO-003", "hash": "TX-DEMO-003", "from_addr": "0xDEMO...A721", "to_addr": "0x9910...E22", "value": "0.42 ETH", "time": "17 Aug 2026 14:10:00", "evidence_id": "EV-BC-042"},
-        {"id": "TX-DEMO-004", "hash": "TX-DEMO-004", "from_addr": "0x44a1...B01", "to_addr": "0xDEMO...A721", "value": "2.10 ETH", "time": "16 Aug 2026 09:25:30", "evidence_id": "EV-BC-042"}
-    ]
-    
-    return {
-        "wallet": wallet_info,
-        "transactions": transactions
-    }
+def get_blockchain(person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["blockchain"] else "P-001"
+    return DATASTORE["blockchain"][pid]
 
 @app.get("/api/osint")
-def get_osint(person_id: Optional[str] = "person_arjun_sharma"):
-    records = [
-        {
-            "id": "PSI-023",
-            "subject": "Arjun Sharma",
-            "source": "Public Web",
-            "last_observed": "18 Aug 2026",
-            "entity": "Rohan Mehta",
-            "location": "Pune",
-            "evidence_id": "EV-OSINT-023",
-            "confidence": "76%",
-            "value": "@arjun_s_demo profile & forum post"
-        },
-        {
-            "id": "PSI-024",
-            "subject": "Arjun Sharma",
-            "source": "Public Web Directory",
-            "last_observed": "18 Aug 2026",
-            "entity": "Nexus Logistics",
-            "location": "Pune",
-            "evidence_id": "EV-DOC-057",
-            "confidence": "91%",
-            "value": "Nexus Logistics MCA Registration reference"
-        },
-        {
-            "id": "PSI-025",
-            "subject": "Arjun Sharma",
-            "source": "Public Mapping Directory",
-            "last_observed": "18 Aug 2026",
-            "entity": "Pune Junction Hub",
-            "location": "Pune",
-            "evidence_id": "EV-LOC-061",
-            "confidence": "90%",
-            "value": "Public Location Mention"
-        },
-        {
-            "id": "PSI-026",
-            "subject": "Arjun Sharma",
-            "source": "Public Blockchain Explorer",
-            "last_observed": "18 Aug 2026",
-            "entity": "0xDEMO...A721",
-            "location": "Blockchain",
-            "evidence_id": "EV-BC-042",
-            "confidence": "94%",
-            "value": "Public Wallet Reference"
-        }
-    ]
-    return {"records": records}
+def get_osint(person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["osint"] else "P-001"
+    return {"records": DATASTORE["osint"][pid]}
 
 @app.get("/api/dvr")
-def get_dvr(person_id: Optional[str] = "person_arjun_sharma"):
-    return {
-        "dvr_videos": DATASTORE["dvr_videos"]
-    }
+def get_dvr(person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["cctv"] else "P-001"
+    return {"dvr_videos": DATASTORE["cctv"][pid]}
 
-@app.get("/api/fusion")
-def get_evidence_fusion(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "person_arjun_sharma"):
-    return fusion_engine.generate_fusion_analysis(case_id, DATASTORE["nodes"], DATASTORE["edges"], DATASTORE["evidence_items"])
+@app.get("/api/timeline")
+def get_timeline(person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
+    prof = DATASTORE["profiles"][pid]
 
-@app.get("/api/analytics")
-def get_analytics():
+    events = [
+        {"id": f"EV-TIM-{pid}-01", "timestamp": "18 Aug 2026 20:01:14", "title": f"CCTV SIGHTING ({prof['name']})", "domain": "DVR", "details": f"CAM-04 sighting of {prof['name']} with vehicle {prof['vehicle']}.", "evidence_id": f"EV-CCTV-{pid}-001", "person": prof["name"], "location": prof["city"]},
+        {"id": f"EV-TIM-{pid}-02", "timestamp": "18 Aug 2026 20:02:07", "title": f"COMMUNICATION EVENT ({prof['phone']})", "domain": "CDR", "details": f"CDR call event logged for {prof['name']}.", "evidence_id": f"EV-COM-{pid}-001", "person": prof["name"], "location": prof["city"]},
+        {"id": f"EV-TIM-{pid}-03", "timestamp": "18 Aug 2026 20:58:18", "title": f"FINANCIAL WIRE ({prof['account_number']})", "domain": "FINANCIAL", "details": f"Transaction recorded for account {prof['account_number']}.", "evidence_id": f"EV-FIN-{pid}-001", "person": prof["name"], "location": prof["city"]},
+        {"id": f"EV-TIM-{pid}-04", "timestamp": "18 Aug 2026 21:17:04", "title": f"BLOCKCHAIN TRANSACTION ({prof['wallet_address']})", "domain": "BLOCKCHAIN", "details": f"On-chain transfer from wallet {prof['wallet_address']}.", "evidence_id": f"EV-BC-{pid}-001", "person": prof["name"], "location": "Blockchain"}
+    ]
+
     return {
-        "communication_analytics": {
-            "peak_window": "18 Aug 2026 20:00–21:00",
-            "total_calls": 187,
-            "total_messages": 234
-        },
-        "financial_analytics": {
-            "transactions": 63,
-            "unusual_transactions": 8,
-            "high_value_transactions": 5
-        },
-        "relationship_analytics": {
-            "strong_relationships": 7,
-            "potential_relationships": 12,
-            "needs_review": 6
-        },
-        "influential_entities": graph_engine.analyze_graph(DATASTORE["nodes"], DATASTORE["edges"]).get("influential_entities", [])
+        "temporal_assessment": f"TEMPORAL RELATIONSHIP DETECTED for {prof['name']}: Multiple events occur within a short temporal window.",
+        "events": events
     }
 
 @app.get("/api/leads")
-def get_investigative_leads():
-    return {"leads": DATASTORE["leads"]}
+def get_investigative_leads(person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["leads"] else "P-001"
+    return {"leads": DATASTORE["leads"][pid]}
 
-@app.get("/api/audit")
-def get_audit_trail():
+@app.get("/api/graph")
+def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
+    root = DATASTORE["profiles"][pid]
+
+    nodes = [
+        {"id": pid, "label": root["name"], "type": "PERSON", "risk_score": root["risk_score"], "tree_level": 0, "avatar": root["photo_url"]},
+        {"id": f"{pid}_phone", "label": root["phone"], "type": "PHONE", "risk_score": 85, "tree_level": 1},
+        {"id": f"{pid}_acc", "label": root["account_number"], "type": "BANK_ACCOUNT", "risk_score": 80, "tree_level": 1},
+        {"id": f"{pid}_wallet", "label": root["wallet_address"], "type": "CRYPTO_WALLET", "risk_score": 88, "tree_level": 1},
+        {"id": f"{pid}_vehicle", "label": root["vehicle"], "type": "VEHICLE", "risk_score": 75, "tree_level": 1}
+    ]
+
+    edges = [
+        {"id": f"REL-{pid}-1", "source": pid, "target": f"{pid}_phone", "relation": "CALL", "domain": "COMMUNICATION"},
+        {"id": f"REL-{pid}-2", "source": pid, "target": f"{pid}_acc", "relation": "TRANSFER", "domain": "FINANCIAL"},
+        {"id": f"REL-{pid}-3", "source": pid, "target": f"{pid}_wallet", "relation": "WALLET", "domain": "BLOCKCHAIN"},
+        {"id": f"REL-{pid}-4", "source": pid, "target": f"{pid}_vehicle", "relation": "VEHICLE", "domain": "PHYSICAL"}
+    ]
+
+    # Connect other people to root node
+    for other_id, other_prof in DATASTORE["profiles"].items():
+        if other_id != pid and other_id != "P-006":
+            nodes.append({
+                "id": other_id,
+                "label": other_prof["name"],
+                "type": "PERSON",
+                "risk_score": other_prof["risk_score"],
+                "tree_level": 1,
+                "avatar": other_prof["photo_url"]
+            })
+            edges.append({
+                "id": f"REL-{pid}-{other_id}",
+                "source": pid,
+                "target": other_id,
+                "relation": "BUSINESS" if other_id in ["P-002", "P-003"] else "MEETING",
+                "domain": "COMMUNICATION"
+            })
+
+    return {"nodes": nodes, "edges": edges}
+
+@app.get("/api/evidence/{evidence_id}")
+def get_evidence_detail(evidence_id: str):
     return {
-        "audit_events": DATASTORE["audit_events"],
-        "blockchain_audit": [b.to_dict() for b in evidence_ledger.chain]
+        "id": evidence_id,
+        "case_id": "TRX-2026-017",
+        "personId": "P-001",
+        "title": f"Evidence Record {evidence_id}",
+        "evidence_type": "Communication Analysis",
+        "source": "Communication Dataset",
+        "acquisition_timestamp": "18 Aug 2026 20:02:14",
+        "acquisition_date": "18 Aug 2026",
+        "acquisition_time": "20:02:14",
+        "file_hash": "8f31c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852c91a",
+        "file_size_bytes": 1840000,
+        "integrity_status": "Verified",
+        "processing_status": "PROCESSED",
+        "provenance": "Communication Dataset",
+        "analyst_notes": "Standardized analytical evidence record.",
+        "confidence": 0.95,
+        "extracted_entities": ["Arjun Sharma", "Rohan Mehta", "Pune"],
+        "related_events": ["EV-CCTV-031", "EV-FIN-014"]
     }
 
-@app.post("/api/entity-resolution/action")
-def handle_entity_resolution(req: EntityResolutionRequest):
-    cand = DATASTORE["ambiguous_candidate"]
-    cand["status"] = f"Actioned: {req.action}"
-    return {"success": True, "candidate": cand, "message": f"Candidate match {req.candidate_id} actioned as {req.action}."}
-
-@app.post("/api/audit/tamper")
-def tamper_audit_ledger(req: TamperRequest):
-    tamper_res = evidence_ledger.simulate_tamper(req.block_index, req.field_to_tamper, req.tampered_value)
-    verification = evidence_ledger.verify_integrity()
+@app.get("/api/relationships/{rel_id}/evidence")
+def get_relationship_evidence(rel_id: str):
     return {
-        "tamper_action": tamper_res,
-        "audit_verification": verification
+        "relationship": {"id": rel_id, "first_observed": "03 Aug 2026", "last_observed": "18 Aug 2026", "explanation": "Observed communication & organizational correlation.", "alt_explanation": "Legitimate business coordination."},
+        "supporting_evidence": [
+            {"id": "EV-SUP-001", "title": "Supporting CDR Call Log"},
+            {"id": "EV-SUP-002", "title": "Supporting Bank Transfer Receipt"}
+        ]
     }
-
-@app.post("/api/reports/generate")
-def generate_report(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "person_arjun_sharma"):
-    case_data = DATASTORE["cases"].get(case_id, DATASTORE["cases"]["TRX-2026-017"])
-    fusion_data = fusion_engine.generate_fusion_analysis(case_id, DATASTORE["nodes"], DATASTORE["edges"], DATASTORE["evidence_items"])
-    res = report_generator.generate_report(case_data, DATASTORE["nodes"], DATASTORE["edges"], DATASTORE["evidence_items"], fusion_data)
-    return res
 
 @app.get("/api/search")
 def global_search(q: str = Query(...)):
     query = q.lower()
-    matched_nodes = [n for n in DATASTORE["nodes"] if query in n["label"].lower() or query in n.get("details", "").lower()]
-    matched_evidence = [e for e in DATASTORE["evidence_items"] if query in e["title"].lower() or query in e.get("analyst_notes", "").lower() or query in e["id"].lower()]
-    matched_edges = [e for e in DATASTORE["edges"] if query in e.get("details", "").lower() or query in e.get("relation", "").lower()]
-    matched_cases = [c for c in DATASTORE["cases"].values() if query in c["title"].lower() or query in c["id"].lower()]
-    
+    matched_profiles = [p for p in DATASTORE["profiles"].values() if query in p["name"].lower() or query in p["phone"].lower() or query in p["email"].lower()]
     return {
         "query": q,
-        "matched_cases": matched_cases,
-        "matched_nodes": matched_nodes,
-        "matched_evidence": matched_evidence,
-        "matched_relationships": matched_edges
+        "matched_cases": [DATASTORE["cases"]["TRX-2026-017"]],
+        "matched_nodes": matched_profiles,
+        "matched_evidence": [{"id": "EV-COM-ARJ-001", "title": f"Evidence Record matching '{q}'"}],
+        "matched_relationships": []
     }
 
 # Serve Static Files

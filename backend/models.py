@@ -2,10 +2,10 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 
 class SuspectProfile(BaseModel):
-    id: str = "person_arjun_sharma"
+    id: str = "P-001"
     name: str = "Arjun Sharma"
     alias: Optional[str] = "Arjun S."
-    role: str = "Primary Subject"  # Primary Subject, Associate, Business Contact, Employee, Person of Interest, Unknown
+    role: str = "Primary Subject"  # Primary Subject, Business Contact, Associate, Person of Interest, Employee, Candidate Match
     relationship_to_primary: Optional[str] = "Self"
     age: Optional[int] = 34
     gender: Optional[str] = "Male"
@@ -17,8 +17,9 @@ class SuspectProfile(BaseModel):
     occupation: Optional[str] = "Logistics Consultant"
     organization: Optional[str] = "Nexus Logistics"
     vehicle: Optional[str] = "MH12 AB 4821"
-    social_usernames: Dict[str, str] = {"twitter": "@arjun_s_demo", "telegram": "@cipher_king", "instagram": "@arjun_cyber"}
+    social_usernames: Dict[str, str] = {"twitter": "@arjun_s_demo", "telegram": "@cipher_king"}
     wallet_address: Optional[str] = "0xDEMO...A721"
+    account_number: Optional[str] = "XXXX4821"
     notes: Optional[str] = "Primary subject under investigation for Operation Nexus."
     risk_score: int = 92
     evidence_count: int = 24
@@ -31,7 +32,6 @@ class Case(BaseModel):
     title: str = "OPERATION NEXUS"
     primary_suspect: SuspectProfile
     secondary_suspects: List[SuspectProfile] = []
-    subject_known_identifiers: Dict[str, List[str]] = {}
     description: str = "Cross-domain intelligence fusion investigating an illicit financial transfer syndicate coordinating extortion, money laundering through informal channels, and crypto off-ramping connected to cyber incident #1042."
     investigation_type: str = "Cyber-Financial Crime"
     priority: str = "HIGH"
@@ -65,8 +65,8 @@ class Entity(BaseModel):
 
 class Relationship(BaseModel):
     id: str
-    source: str
-    target: str
+    sourcePersonId: str
+    targetPersonId: str
     relation: str
     timestamp: str = ""
     confidence: float = Field(default=0.85, ge=0.0, le=1.0)
@@ -84,9 +84,9 @@ class Relationship(BaseModel):
     temporal_correlation: Optional[str] = ""
 
 class EvidenceItem(BaseModel):
-    id: str  # e.g., EV-COM-001, EV-FIN-014, EV-OSINT-023, EV-CCTV-031, EV-BC-042
+    id: str
     case_id: str = "TRX-2026-017"
-    person_id: Optional[str] = "person_arjun_sharma"
+    personId: str = "P-001"
     title: str
     evidence_type: str
     source: str
@@ -102,40 +102,15 @@ class EvidenceItem(BaseModel):
     confidence: float = 0.95
     extracted_entities: List[str] = []
     related_events: List[str] = []
-    duration: Optional[str] = None
-    direction: Optional[str] = None
-
-class Anomaly(BaseModel):
-    id: str
-    category: str
-    title: str
-    severity: str
-    timestamp: str
-    affected_entity_ids: List[str]
-    explanation: str
-    evidence_ids: List[str]
-    confidence: float
-    analyst_status: str = "Requires Human Review"
 
 class InvestigativeLead(BaseModel):
     id: str
+    personId: str
     title: str
     lead: str
     confidence: float
-    evidence_chain: List[Dict[str, Any]]
-    recommended_actions: List[str]
     supporting_evidence: List[str] = []
     observed_pattern: str = ""
     alternative_explanation: Optional[str] = ""
+    recommended_actions: List[str] = []
     status: str = "Needs Review"
-    human_review_required: bool = True
-
-class AuditBlock(BaseModel):
-    index: int
-    case_id: str
-    timestamp: str
-    action_type: str
-    actor: str
-    previous_hash: str
-    block_hash: str
-    data_payload: Dict[str, Any]
