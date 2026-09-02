@@ -20,6 +20,10 @@ const PERSON_ROLES = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('app-sidebar');
+        if (sidebar) sidebar.classList.add('collapsed');
+    }
     initNavigation();
     initGlobalSearch();
     loadOverviewData();
@@ -72,6 +76,11 @@ function initNavigation() {
         item.addEventListener('click', () => {
             navItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
+
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('app-sidebar');
+                if (sidebar) sidebar.classList.add('collapsed');
+            }
 
             const targetTab = item.getAttribute('data-tab');
             switchTab(targetTab);
