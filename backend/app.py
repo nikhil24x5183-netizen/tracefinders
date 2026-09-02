@@ -21,7 +21,7 @@ app = FastAPI(
 
 DATASTORE = generate_synthetic_dataset()
 
-# ----------------- DATA INTEGRITY VALIDATION CHECK (REQUIREMENT 19) -----------------
+# ----------------- DATA INTEGRITY VALIDATION CHECK -----------------
 def validate_person_data():
     profiles = DATASTORE["profiles"]
     phone_set, email_set, vehicle_set, account_set, wallet_set = set(), set(), set(), set(), set()
@@ -273,6 +273,33 @@ def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] 
     pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
     return generate_person_graph(pid)
 
+@app.get("/api/fusion")
+def get_evidence_fusion(person_id: Optional[str] = "P-001"):
+    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
+    prof = DATASTORE["profiles"][pid]
+    
+    return {
+        "person_id": pid,
+        "person_name": prof["name"],
+        "role": prof["role"],
+        "multi_hop_chain": [
+            {"step": 1, "domain": "PERSON PROFILE", "label": prof["name"], "detail": f"ID: {pid} | Role: {prof['role']}", "badge": "SUBJECT"},
+            {"step": 2, "domain": "TELECOM CDR", "label": f"Phone ({prof['phone']})", "detail": f"{prof['counts'].get('calls', 187)} calls & {prof['counts'].get('messages', 234)} msgs", "badge": f"EV-COM-{pid}-001"},
+            {"step": 3, "domain": "SURVEILLANCE DVR", "label": f"Vehicle ({prof['vehicle']})", "detail": f"ANPR capture at {prof['city']}", "badge": f"EV-CCTV-{pid}-001"},
+            {"step": 4, "domain": "FINANCIAL LEDGER", "label": f"Bank Acc ({prof['account_number']})", "detail": f"NPCI wire transfer to counterparty", "badge": f"EV-FIN-{pid}-001"},
+            {"step": 5, "domain": "BLOCKCHAIN", "label": f"Wallet ({prof['wallet_address'][:10]}...)", "detail": "On-chain crypto movement verified", "badge": f"EV-BC-{pid}-001"}
+        ],
+        "explainable_ai": {
+            "title": f"MULTI-HOP INTELLIGENCE CORRELATION FOR {prof['name'].upper()}",
+            "confidence_score": "88%",
+            "what": f"Cross-domain correlation links {prof['name']} across telecommunication CDR logs, vehicle ANPR sightings, bank wire ledgers, and crypto wallet transactions.",
+            "why": f"Temporal burst activity logged within 45 minutes across Pune/Mumbai nodes.",
+            "supporting_evidence": [f"EV-COM-{pid}-001", f"EV-CCTV-{pid}-001", f"EV-FIN-{pid}-001", f"EV-BC-{pid}-001"],
+            "alternative_explanation": "Legitimate business travel and corporate vendor logistics payments.",
+            "action_status": "Requires Human Analyst Review under Sec 65B"
+        }
+    }
+
 @app.get("/api/cameras")
 def get_cameras_inventory(
     search: Optional[str] = None,
@@ -435,7 +462,7 @@ def get_evidence_detail(evidence_id: str):
         "analyst_notes": f"Surveillance video capture associated with evidence ID {evidence_id}."
     }
 
-# ----------------- PERSON-SCOPED REPORT REST API (REQUIREMENTS 1 - 21) -----------------
+# ----------------- PERSON-SCOPED REPORT REST API -----------------
 @app.post("/api/reports/generate")
 @app.get("/api/reports/generate")
 def generate_report(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):

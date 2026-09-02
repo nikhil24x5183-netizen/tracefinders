@@ -269,6 +269,59 @@ async function loadPersonsViewData() {
     }
 }
 
+// 4. EVIDENCE ASSOCIATIONS & LEADS
+async function loadFusionData() {
+    try {
+        const res = await fetch(`/api/fusion?person_id=${currentPersonId}`);
+        const data = await res.json();
+        const container = document.getElementById('fusion-chain-container');
+        if (!container) return;
+
+        const chain = data.multi_hop_chain || [];
+        const xai = data.explainable_ai || {};
+
+        container.innerHTML = `
+            <div style="margin-bottom: 24px;">
+                <div style="font-size: 14px; font-weight: 800; color: var(--accent-blue); margin-bottom: 12px; text-transform: uppercase;">
+                    🔗 Multi-Hop Cross-Domain Correlated Evidence Chain (${data.person_name})
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                    ${chain.map((c, idx) => `
+                        <div style="padding: 14px; background: var(--bg-card-hover); border: 1.5px solid var(--border-color); border-top: 3px solid var(--accent-blue); border-radius: 10px; min-width: 180px; flex: 1;">
+                            <div style="font-size: 10px; color: var(--text-muted); font-weight: 800; font-family: monospace;">STEP 0${c.step} // ${c.domain}</div>
+                            <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin: 4px 0;">${c.label}</div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">${c.detail}</div>
+                            <button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;" onclick="openEvidenceDetailModal('${c.badge}')">Ref: ${c.badge}</button>
+                        </div>
+                        ${idx < chain.length - 1 ? '<div style="font-size: 18px; color: var(--accent-blue); font-weight: 800;">➔</div>' : ''}
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="xai-box">
+                <div style="font-size: 15px; font-weight: 800; color: var(--accent-blue); margin-bottom: 10px;">
+                    🧠 EXPLAINABLE AI (XAI) INTELLIGENCE ASSESSMENT
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px; margin-bottom: 12px;">
+                    <div>Confidence Score: <span class="badge badge-verified" style="font-size: 12px;">${xai.confidence_score}</span></div>
+                    <div>Status: <span class="badge badge-medium" style="font-size: 12px;">${xai.action_status}</span></div>
+                </div>
+                <div style="font-size: 13px; color: var(--text-main); margin-bottom: 8px;">
+                    <strong>CORRELATION RATIONALE:</strong> ${xai.what}
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+                    <strong>FLAGGING RATIONALE:</strong> ${xai.why}
+                </div>
+                <div style="font-size: 12px; color: var(--status-amber);">
+                    <strong>ALTERNATIVE HYPOTHESIS:</strong> ${xai.alternative_explanation}
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 // 5. LINK ANALYSIS KNOWLEDGE GRAPH
 async function loadGraphData() {
     try {
