@@ -6,6 +6,7 @@ let currentPersonDrawerId = null;
 let currentDrawerTab = 'overview';
 let visNetworkInstance = null;
 let currentGraphData = null;
+let allCameraInventoryData = [];
 let currentDVRVideos = [];
 let currentSelectedDVR = null;
 
@@ -268,13 +269,12 @@ async function loadPersonsViewData() {
     }
 }
 
-// 5. LINK ANALYSIS KNOWLEDGE GRAPH (REQUIREMENTS 1 - 15)
+// 5. LINK ANALYSIS KNOWLEDGE GRAPH
 async function loadGraphData() {
     try {
         const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
         currentGraphData = await res.json();
         
-        // Update Graph Header Statistics (Requirement 11)
         if (currentGraphData.header_stats) {
             const hs = currentGraphData.header_stats;
             document.getElementById('graph-header-subject').innerText = hs.subject_name.toUpperCase();
@@ -310,7 +310,6 @@ function renderGraphWithLayout(layoutType) {
 
     const isDark = document.body.classList.contains('dark-mode');
 
-    // Render Vis.js Nodes
     const visNodes = currentGraphData.nodes.map(n => {
         let nodeColor = { background: '#2563eb', border: '#1d4ed8' };
         if (n.id === currentPersonId) {
@@ -339,7 +338,6 @@ function renderGraphWithLayout(layoutType) {
         };
     });
 
-    // Render Vis.js Edges
     const visEdges = currentGraphData.edges.map(e => ({
         id: e.id,
         from: e.source,
@@ -381,7 +379,6 @@ function renderGraphWithLayout(layoutType) {
     if (visNetworkInstance) visNetworkInstance.destroy();
     visNetworkInstance = new vis.Network(container, visData, options);
 
-    // Node & Edge Click Navigation Handlers (Requirements 9 & 10)
     visNetworkInstance.on('selectNode', function(params) {
         const nodeId = params.nodes[0];
         const selectedNode = currentGraphData.nodes.find(n => n.id === nodeId);
@@ -412,45 +409,41 @@ function renderGraphWithLayout(layoutType) {
     });
 }
 
-// 10. CCTV / DVR FORENSICS WORKSPACE
+// 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENTS 1 - 22)
 async function loadDVRData() {
     try {
         const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
         const data = await res.json();
         
-        currentDVRVideos = data.dvr_videos;
+        allCameraInventoryData = data.camera_inventory || [];
+        currentDVRVideos = data.dvr_videos || [];
 
-        document.getElementById('dvr-header-subject').innerText = data.header_stats.subject_name.toUpperCase();
-        document.getElementById('dvr-header-events').innerText = data.header_stats.events_count;
-        document.getElementById('dvr-header-cameras').innerText = data.header_stats.cameras_count;
+        const selectP = document.getElementById('select-change-person');
+        const pName = selectP ? selectP.options[selectP.selectedIndex].text.split('(')[0].replace(/^[🔴🔵🟢🟡🟣⚠️]\s*/, '').trim() : 'Arjun Sharma';
+        
+        document.getElementById('dvr-header-subject').innerText = pName.toUpperCase();
+        document.getElementById('dvr-person-clips-title').innerText = pName;
 
-        const cameraStrip = document.getElementById('camera-strip-container');
-        if (cameraStrip && data.camera_strip) {
-            cameraStrip.innerHTML = data.camera_strip.map(c => `
-                <div class="camera-chip" onclick="filterByCamera('${c.camera_id}')">
-                    <strong style="color: var(--accent-blue);">${c.camera_id}</strong> · ${c.location} (<span style="color: var(--status-green);">${c.status}</span>)
-                </div>
-            `).join('');
-        }
+        // Render All 12 Camera Inventory Grid (Requirements 1 & 4)
+        renderCameraInventoryGrid(allCameraInventoryData);
 
-        const camSelect = document.getElementById('dvr-filter-camera');
-        if (camSelect && data.camera_strip) {
-            camSelect.innerHTML = `<option value="ALL">All Cameras</option>` + data.camera_strip.map(c => `<option value="${c.camera_id}">${c.camera_id} - ${c.location}</option>`).join('');
-        }
+        // Render All Camera Surveillance Events Table (Requirement 11)
+        renderAllCameraEventsTable(data.all_camera_events || []);
 
+        // Render Person-Scoped Clips (Requirements 12 & 19)
         renderDVRVideoGrid(currentDVRVideos);
 
         if (currentDVRVideos.length > 0) {
             selectDVRVideo(currentDVRVideos[0]);
         } else {
-            document.getElementById('dvr-selected-details-panel').innerHTML = `<div style="padding: 10px; color: var(--text-muted);">No surveillance clips logged for selected subject.</div>`;
+            document.getElementById('dvr-selected-details-panel').innerHTML = `<div style="padding: 10px; color: var(--text-muted);">No associated surveillance events for ${pName} on selected camera.</div>`;
         }
 
         const camList = document.getElementById('dvr-camera-list');
-        if (camList && data.camera_strip) {
-            camList.innerHTML = data.camera_strip.map(c => `
-                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 6px; cursor: pointer;" onclick="filterByCamera('${c.camera_id}')">
-                    <strong style="color: var(--accent-blue);">${c.camera_id}</strong>: ${c.location}
+        if (camList && allCameraInventoryData) {
+            camList.innerHTML = allCameraInventoryData.map(c => `
+                <div style="padding: 6px 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 6px; cursor: pointer;" onclick="openCameraDetailModal('${c.id}')">
+                    <strong style="color: var(--accent-blue);">${c.id}</strong>: ${c.name} (${c.location})
                 </div>
             `).join('');
         }
@@ -460,21 +453,163 @@ async function loadDVRData() {
     }
 }
 
-function filterByCamera(camId) {
-    const camSelect = document.getElementById('dvr-filter-camera');
-    if (camSelect) camSelect.value = camId;
-    applyDVRFilters();
+// CAMERA INVENTORY GRID RENDERER (REQUIREMENTS 1, 3, 4, 5, 6, 18, 20)
+function renderCameraInventoryGrid(cameras) {
+    const grid = document.getElementById('camera-inventory-grid-container');
+    if (!grid) return;
+
+    if (cameras.length === 0) {
+        grid.innerHTML = `<div style="padding: 16px; color: var(--text-muted); grid-column: 1/-1;">No cameras found matching search or filter parameters.</div>`;
+        return;
+    }
+
+    grid.innerHTML = cameras.map(c => `
+        <div class="camera-card-full">
+            <div class="camera-card-thumb">
+                <img src="${c.image_url}" alt="${c.name} Stream">
+                <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.8); color: #fff; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-size: 11px; font-weight: 800;">● ${c.id}</div>
+                <div style="position: absolute; top: 8px; right: 8px; background: ${c.status === 'Active Recording' ? 'rgba(22,163,74,0.9)' : 'rgba(217,119,6,0.9)'}; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 800;">● ${c.status.toUpperCase()}</div>
+                <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px;">${c.location}</div>
+            </div>
+            <div style="padding: 14px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 14px; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">${c.name}</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+                        <div>📍 Location: <strong>${c.location}</strong></div>
+                        <div>⏱️ Window: <strong>${c.recording_window}</strong> (${c.date})</div>
+                        <div>🕒 Last Event: <strong style="color: var(--accent-blue);">${c.last_event_time}</strong></div>
+                    </div>
+                    <div style="display: flex; gap: 12px; background: var(--bg-card-hover); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 11px; margin-bottom: 12px;">
+                        <div>EVENTS: <strong style="color: var(--accent-blue); font-size: 13px;">${c.events_count}</strong></div>
+                        <div>EVIDENCE: <strong style="color: var(--status-green); font-size: 13px;">${c.evidence_links}</strong></div>
+                        <div>PERSONS: <strong style="color: var(--text-main); font-size: 13px;">${c.associated_persons_count}</strong></div>
+                    </div>
+                </div>
+                <button class="btn" style="width: 100%; font-size: 12px; padding: 8px;" onclick="openCameraDetailModal('${c.id}')">🔍 OPEN CAMERA</button>
+            </div>
+        </div>
+    `).join('');
 }
 
-function applyDVRFilters() {
-    const camVal = document.getElementById('dvr-filter-camera').value;
-    const statusVal = document.getElementById('dvr-filter-status').value;
-    
-    let filtered = currentDVRVideos;
-    if (camVal !== 'ALL') filtered = filtered.filter(v => v.camera_id === camVal);
-    if (statusVal !== 'ALL') filtered = filtered.filter(v => v.status === statusVal);
+// CAMERA SEARCH & FILTERS FUNCTION (REQUIREMENTS 7 & 8)
+function filterCameraGrid() {
+    const searchVal = (document.getElementById('camera-search-input')?.value || '').toLowerCase();
+    const statusVal = document.getElementById('cam-filter-status')?.value || 'ALL';
+    const locVal = document.getElementById('cam-filter-location')?.value || 'ALL';
+    const typeVal = document.getElementById('cam-filter-type')?.value || 'ALL';
 
-    renderDVRVideoGrid(filtered);
+    let filtered = allCameraInventoryData;
+
+    if (searchVal) {
+        filtered = filtered.filter(c => c.id.toLowerCase().includes(searchVal) || c.name.toLowerCase().includes(searchVal) || c.location.toLowerCase().includes(searchVal));
+    }
+    if (statusVal !== 'ALL') {
+        filtered = filtered.filter(c => c.status === statusVal);
+    }
+    if (locVal !== 'ALL') {
+        filtered = filtered.filter(c => c.location.toLowerCase().includes(locVal.toLowerCase()));
+    }
+    if (typeVal !== 'ALL') {
+        filtered = filtered.filter(c => c.camera_type.toLowerCase().includes(typeVal.toLowerCase()));
+    }
+
+    renderCameraInventoryGrid(filtered);
+}
+
+// ALL CAMERA EVENTS TABLE (REQUIREMENT 11)
+function renderAllCameraEventsTable(events) {
+    const tbody = document.getElementById('all-camera-events-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = events.map(e => `
+        <tr>
+            <td><strong style="color: var(--accent-blue); font-family: monospace;">${e.time}</strong></td>
+            <td><span class="badge badge-verified">${e.camera_id}</span></td>
+            <td><strong>${e.event}</strong></td>
+            <td>${e.person}</td>
+            <td>${e.location}</td>
+            <td><button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;" onclick="openEvidenceDetailModal('${e.evidence_id}')">Ref: ${e.evidence_id}</button></td>
+            <td><span class="badge ${e.status === 'Verified' ? 'badge-verified' : 'badge-medium'}">${e.status}</span></td>
+        </tr>
+    `).join('');
+}
+
+// CAMERA DETAIL & 24H RECORDING TIMELINE MODAL (REQUIREMENTS 9 & 10)
+function openCameraDetailModal(camId) {
+    const modal = document.getElementById('camera-detail-modal');
+    if (!modal) return;
+
+    const cam = allCameraInventoryData.find(c => c.id === camId) || allCameraInventoryData[0];
+    if (!cam) return;
+
+    document.getElementById('cam-modal-id').innerText = cam.id;
+    document.getElementById('cam-modal-name').innerText = `${cam.name} (${cam.location})`;
+
+    document.getElementById('cam-modal-body').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div style="background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; position: relative;">
+                <img src="${cam.image_url}" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #10b981; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 11px;">● LIVE STREAM | ${cam.id} | ${cam.date}</div>
+            </div>
+            
+            <div style="background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; font-size: 13px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="font-size: 12px; font-weight: 800; color: var(--accent-blue); margin-bottom: 8px;">CAMERA METADATA SPECIFICATIONS</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div>Status: <span class="badge ${cam.status === 'Active Recording' ? 'badge-verified' : 'badge-medium'}">${cam.status}</span></div>
+                        <div>Resolution: <strong>${cam.resolution}</strong></div>
+                        <div>Camera Type: <strong>${cam.camera_type}</strong></div>
+                        <div>Source: <strong>${cam.source}</strong></div>
+                        <div>Storage NVR: <strong>${cam.storage}</strong></div>
+                        <div>Retention: <strong>${cam.retention}</strong></div>
+                        <div>Window: <strong>${cam.recording_window}</strong></div>
+                        <div>Last Activity: <strong style="color: var(--accent-blue);">${cam.last_event_time}</strong></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; background: var(--bg-card); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 12px;">
+                    <div>TOTAL EVENTS: <strong style="font-size: 14px; color: var(--accent-blue);">${cam.events_count}</strong></div>
+                    <div>EVIDENCE LINKS: <strong style="font-size: 14px; color: var(--status-green);">${cam.evidence_links}</strong></div>
+                    <div>PERSONS: <strong style="font-size: 14px; color: var(--text-main);">${cam.associated_persons_count}</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <h4 style="font-size: 15px; color: var(--accent-blue); margin-bottom: 10px;">⏱️ 24-HOUR RECORDING EVENT MARKER TIMELINE (18 AUG 2026):</h4>
+        <div style="background: var(--bg-card-hover); padding: 16px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-weight: 800; font-family: monospace; margin-bottom: 8px;">
+                <span>00:00 IST</span><span>06:00 IST</span><span>12:00 IST</span><span>18:00 IST</span><span>23:59 IST</span>
+            </div>
+            <div style="height: 8px; background: var(--border-color); border-radius: 4px; position: relative; margin-bottom: 16px;">
+                <div style="position: absolute; left: 34%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-blue); cursor: pointer;" title="08:14 Person Detection"></div>
+                <div style="position: absolute; left: 52%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-blue); cursor: pointer;" title="12:43 Vehicle Detection"></div>
+                <div style="position: absolute; left: 77%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="18:32 Person Entry"></div>
+                <div style="position: absolute; left: 83%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="20:01 Meeting Event"></div>
+                <div style="position: absolute; left: 85%; top: -4px; width: 16px; height: 16px; border-radius: 50%; background: var(--status-red); cursor: pointer;" title="20:26 Vehicle Departure"></div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">⏱️ 08:14 Person Detection</button>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">⏱️ 12:43 Vehicle Detection</button>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">⏱️ 18:32 Person Entry</button>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-031')">⏱️ 20:01 Meeting Event</button>
+                <button class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" onclick="openEvidenceDetailModal('EV-CCTV-033')">⏱️ 20:26 Vehicle Departure</button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-secondary" onclick="alert('Viewing full raw stream playback for ${cam.id}...')">▶ VIEW RECORDINGS</button>
+            <button class="btn btn-secondary" onclick="alert('Filtering all events for ${cam.id}...')">📋 VIEW EVENTS</button>
+            <button class="btn btn-secondary" onclick="openEvidenceDetailModal('EV-CCTV-031'); closeCameraDetailModal();">📄 VIEW EVIDENCE</button>
+            <button class="btn" onclick="switchTab('timeline'); closeCameraDetailModal();">⏱️ VIEW TIMELINE</button>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+}
+
+function closeCameraDetailModal() {
+    const modal = document.getElementById('camera-detail-modal');
+    if (modal) modal.style.display = 'none';
 }
 
 function renderDVRVideoGrid(videos) {
@@ -482,7 +617,9 @@ function renderDVRVideoGrid(videos) {
     if (!videoGrid) return;
 
     if (videos.length === 0) {
-        videoGrid.innerHTML = `<div style="font-size: 13px; color: var(--text-muted); padding: 16px; grid-column: span 3;">No surveillance clips match current filter criteria.</div>`;
+        const selectP = document.getElementById('select-change-person');
+        const pName = selectP ? selectP.options[selectP.selectedIndex].text.split('(')[0].replace(/^[🔴🔵🟢🟡🟣⚠️]\s*/, '').trim() : 'selected person';
+        videoGrid.innerHTML = `<div style="font-size: 13px; color: var(--text-muted); padding: 16px; grid-column: span 3; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px;">No associated surveillance clips logged for ${pName} on this camera. (Full camera inventory remains active above).</div>`;
         return;
     }
 
@@ -562,8 +699,6 @@ function selectDVRVideo(v) {
             </div>
         `;
     }
-
-    renderDVRVideoGrid(currentDVRVideos);
 }
 
 function togglePlay() {

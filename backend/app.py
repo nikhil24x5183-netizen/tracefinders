@@ -16,12 +16,34 @@ from backend.report_generator import report_generator
 app = FastAPI(
     title="TRACE FINDERS — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
     description="SIH 2026 Problem Statement SIH26189 - AI-Powered Criminal Network Analysis System",
-    version="8.0.0"
+    version="9.0.0"
 )
 
 DATASTORE = generate_synthetic_dataset()
 
-# ----------------- GRAPH GENERATOR FUNCTION FOR EVERY PERSON (REQUIREMENTS 1 - 5) -----------------
+# ----------------- DATA INTEGRITY VALIDATION CHECK (REQUIREMENT 19) -----------------
+def validate_person_data():
+    profiles = DATASTORE["profiles"]
+    phone_set, email_set, vehicle_set, account_set, wallet_set = set(), set(), set(), set(), set()
+    
+    for pid, p in profiles.items():
+        assert p["phone"] not in phone_set, f"Duplicate phone for {pid}"
+        assert p["email"] not in email_set, f"Duplicate email for {pid}"
+        assert p["vehicle"] not in vehicle_set, f"Duplicate vehicle for {pid}"
+        assert p["account_number"] not in account_set, f"Duplicate account for {pid}"
+        assert p["wallet_address"] not in wallet_set, f"Duplicate wallet for {pid}"
+        
+        phone_set.add(p["phone"])
+        email_set.add(p["email"])
+        vehicle_set.add(p["vehicle"])
+        account_set.add(p["account_number"])
+        wallet_set.add(p["wallet_address"])
+    
+    print("[OK] DATA INTEGRITY VALIDATION PASSED: All 6 profiles have 100% isolated identifiers.")
+
+validate_person_data()
+
+# ----------------- GRAPH GENERATOR FUNCTION -----------------
 def generate_person_graph(pid: str) -> Dict[str, Any]:
     if pid not in DATASTORE["profiles"]:
         pid = "P-001"
@@ -30,7 +52,6 @@ def generate_person_graph(pid: str) -> Dict[str, Any]:
     nodes = []
     edges = []
 
-    # 1. Root Person Node (Level 0)
     nodes.append({
         "id": pid,
         "label": root["name"],
@@ -42,7 +63,6 @@ def generate_person_graph(pid: str) -> Dict[str, Any]:
         "personId": pid
     })
 
-    # 2. Connected Person Nodes (Level 1)
     connected_person_ids = []
     if pid == "P-001":
         connected_person_ids = ["P-002", "P-003", "P-004", "P-005"]
@@ -78,8 +98,6 @@ def generate_person_graph(pid: str) -> Dict[str, Any]:
             "evidence_id": f"EV-REL-{pid}-{other_id}"
         })
 
-    # 3. Person Entity Identifiers (Level 1)
-    # Phone Node
     nodes.append({
         "id": f"PHONE-{pid}",
         "label": f"Phone ({root['phone']})",
@@ -95,7 +113,6 @@ def generate_person_graph(pid: str) -> Dict[str, Any]:
         "evidence_id": f"EV-COM-{pid}-001"
     })
 
-    # Vehicle Node
     nodes.append({
         "id": f"VEHICLE-{pid}",
         "label": f"Vehicle ({root['vehicle']})",
@@ -111,7 +128,6 @@ def generate_person_graph(pid: str) -> Dict[str, Any]:
         "evidence_id": f"EV-LOC-{pid}-001"
     })
 
-    # Bank Account Node
     nodes.append({
         "id": f"FIN-{pid}",
         "label": f"Bank Acc ({root['account_number']})",
@@ -127,7 +143,6 @@ def generate_person_graph(pid: str) -> Dict[str, Any]:
         "evidence_id": f"EV-FIN-{pid}-001"
     })
 
-    # Crypto Wallet Node
     nodes.append({
         "id": f"WALLET-{pid}",
         "label": f"Crypto Wallet ({root['wallet_address'][:10]}...)",
@@ -143,7 +158,6 @@ def generate_person_graph(pid: str) -> Dict[str, Any]:
         "evidence_id": f"EV-BC-{pid}-001"
     })
 
-    # Organization Node
     nodes.append({
         "id": f"ORG-{pid}",
         "label": f"Org ({root['organization']})",
@@ -159,7 +173,6 @@ def generate_person_graph(pid: str) -> Dict[str, Any]:
         "evidence_id": f"EV-OSINT-{pid}-001"
     })
 
-    # CCTV Evidence Node
     cctv_list = DATASTORE["cctv"].get(pid, [])
     if cctv_list:
         cctv_ev = cctv_list[0]
@@ -255,43 +268,93 @@ def get_person_profile(person_id: str):
         "cctv": cctv_recs
     }
 
-# ----------------- PERSON-SCOPED GRAPH API (REQUIREMENTS 1 - 15) -----------------
 @app.get("/api/graph")
 def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "P-001"):
     pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
     return generate_person_graph(pid)
 
+# ----------------- ALL 12 CAMERAS & DVR FORENSICS REST ENDPOINTS (REQUIREMENTS 1 - 22) -----------------
+@app.get("/api/cameras")
+def get_cameras_inventory(
+    search: Optional[str] = None,
+    status: Optional[str] = None,
+    location: Optional[str] = None,
+    camera_type: Optional[str] = None
+):
+    cameras = DATASTORE["camera_inventory"]
+
+    if search:
+        q = search.lower()
+        cameras = [c for c in cameras if q in c["id"].lower() or q in c["name"].lower() or q in c["location"].lower()]
+    if status and status != "ALL":
+        cameras = [c for c in cameras if c["status"] == status]
+    if location and location != "ALL":
+        cameras = [c for c in cameras if location.lower() in c["location"].lower()]
+    if camera_type and camera_type != "ALL":
+        cameras = [c for c in cameras if camera_type.lower() in c["camera_type"].lower()]
+
+    active_cnt = len([c for c in DATASTORE["camera_inventory"] if c["status"] == "Active Recording"])
+    archived_cnt = len([c for c in DATASTORE["camera_inventory"] if c["status"] == "Archived"])
+    total_events = sum([c["events_count"] for c in DATASTORE["camera_inventory"]])
+    total_evidence = sum([c["evidence_links"] for c in DATASTORE["camera_inventory"]])
+
+    return {
+        "summary": {
+            "total_cameras": len(DATASTORE["camera_inventory"]),
+            "active_cameras": active_cnt,
+            "archived_cameras": archived_cnt,
+            "total_events": total_events,
+            "evidence_links": total_evidence
+        },
+        "cameras": cameras
+    }
+
 @app.get("/api/dvr")
 def get_dvr(
     person_id: Optional[str] = "P-001",
     camera_id: Optional[str] = None,
-    event_type: Optional[str] = None,
+    search: Optional[str] = None,
     status: Optional[str] = None
 ):
-    pid = person_id if person_id in DATASTORE["cctv"] else "P-001"
+    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
     prof = DATASTORE["profiles"][pid]
-    videos = DATASTORE["cctv"].get(pid, [])
 
+    person_cctv_events = DATASTORE["cctv"].get(pid, [])
     if camera_id and camera_id != "ALL":
-        videos = [v for v in videos if v["camera_id"] == camera_id]
-    if event_type and event_type != "ALL":
-        videos = [v for v in videos if event_type.lower() in v["event_title"].lower()]
-    if status and status != "ALL":
-        videos = [v for v in videos if v["status"] == status]
+        person_cctv_events = [v for v in person_cctv_events if v["camera_id"] == camera_id]
 
-    unique_cameras = list(set([v["camera_id"] for v in DATASTORE["cctv"].get(pid, [])]))
+    cameras = DATASTORE["camera_inventory"]
+    if search:
+        q = search.lower()
+        cameras = [c for c in cameras if q in c["id"].lower() or q in c["name"].lower() or q in c["location"].lower()]
+    if status and status != "ALL":
+        cameras = [c for c in cameras if c["status"] == status]
+
+    # Build ALL CAMERA EVENTS Table Records (Requirement 11)
+    all_events_table = [
+        {"time": "20:01:14", "camera_id": "CAM-04", "event": "Person Meeting", "person": "Arjun Sharma", "location": "Shivajinagar", "evidence_id": "EV-CCTV-031", "status": "Verified"},
+        {"time": "20:17:38", "camera_id": "CAM-04", "event": "Physical Exchange Event", "person": "Rohan Mehta", "location": "Shivajinagar", "evidence_id": "EV-CCTV-032", "status": "Under Review"},
+        {"time": "20:26:11", "camera_id": "CAM-04", "event": "Vehicle Departure", "person": "Vikram Patil", "location": "Shivajinagar", "evidence_id": "EV-CCTV-033", "status": "Verified"},
+        {"time": "20:42:51", "camera_id": "CAM-01", "event": "Office Entry", "person": "Neha Kulkarni", "location": "Viman Nagar", "evidence_id": "EV-CCTV-NEH-001", "status": "Verified"},
+        {"time": "15:15:00", "camera_id": "CAM-02", "event": "Security Scan Log", "person": "Priya Joshi", "location": "Baner", "evidence_id": "EV-CCTV-PRI-001", "status": "Verified"},
+        {"time": "18:10:00", "camera_id": "CAM-12", "event": "Toll ANPR Reader", "person": "Vikram Patil", "location": "Expressway", "evidence_id": "EV-CCTV-VIK-001", "status": "Verified"}
+    ]
 
     return {
         "header_stats": {
             "case_id": "TRX-2026-017",
             "subject_id": pid,
             "subject_name": prof["name"],
-            "events_count": len(DATASTORE["cctv"].get(pid, [])),
-            "cameras_count": len(unique_cameras),
-            "time_range": "18 AUG 2026"
+            "total_cameras": 12,
+            "active_cameras": 10,
+            "archived_cameras": 2,
+            "total_events": 87,
+            "evidence_links": 54,
+            "person_events_count": len(DATASTORE["cctv"].get(pid, []))
         },
-        "camera_strip": DATASTORE["camera_locations"],
-        "dvr_videos": videos
+        "camera_inventory": cameras,
+        "dvr_videos": person_cctv_events,
+        "all_camera_events": all_events_table
     }
 
 @app.get("/api/communications")

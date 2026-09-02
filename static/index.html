@@ -157,7 +157,7 @@
                 </div>
             </section>
 
-            <!-- 5. LINK ANALYSIS GRAPH (REQUIREMENTS 1 - 15) -->
+            <!-- 5. LINK ANALYSIS GRAPH -->
             <section id="view-graph" class="tab-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <div>
@@ -289,7 +289,7 @@
                 </div>
             </section>
 
-            <!-- 10. CCTV / DVR FORENSICS WORKSPACE -->
+            <!-- 10. CCTV / DVR FORENSICS WORKSPACE (REQUIREMENTS 1 - 22) -->
             <section id="view-dvr" class="tab-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                     <div>
@@ -297,43 +297,70 @@
                         <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
                             CASE: <strong style="color: var(--text-main);">TRX-2026-017</strong> | 
                             SUBJECT: <strong id="dvr-header-subject" style="color: var(--accent-blue);">ARJUN SHARMA</strong> | 
-                            EVENTS: <strong id="dvr-header-events" style="color: var(--text-main);">3</strong> | 
-                            CAMERAS: <strong id="dvr-header-cameras" style="color: var(--text-main);">2</strong> | 
-                            TIME RANGE: <strong style="color: var(--text-main);">18 AUG 2026</strong>
+                            CAMERAS: <strong id="dvr-header-total-cams" style="color: var(--text-main);">12</strong> (ACTIVE: <strong style="color: var(--status-green);">10</strong> | ARCHIVED: <strong style="color: var(--status-amber);">2</strong>) | 
+                            TOTAL EVENTS: <strong style="color: var(--text-main);">87</strong> | 
+                            EVIDENCE LINKS: <strong style="color: var(--text-main);">54</strong>
                         </div>
                     </div>
                 </div>
 
-                <!-- CAMERA STRIP -->
-                <div class="camera-strip" id="camera-strip-container">Loading cameras...</div>
-
-                <!-- DVR FILTER BAR -->
+                <!-- CAMERA SEARCH & FILTERS BAR (REQUIREMENTS 7 & 8) -->
                 <div class="dvr-filter-bar">
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">DATE:</span>
-                        <select class="dvr-filter-select" id="dvr-filter-date"><option value="18 Aug 2026">18 Aug 2026</option></select>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">CAMERA:</span>
-                        <select class="dvr-filter-select" id="dvr-filter-camera" onchange="applyDVRFilters()"><option value="ALL">All Cameras</option></select>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">EVENT TYPE:</span>
-                        <select class="dvr-filter-select" id="dvr-filter-type" onchange="applyDVRFilters()"><option value="ALL">All Event Types</option></select>
+                    <div class="search-box" style="width: 280px;">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="camera-search-input" class="search-input" placeholder="Search Camera ID, Name, Location..." onkeyup="filterCameraGrid()">
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px;">
                         <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">STATUS:</span>
-                        <select class="dvr-filter-select" id="dvr-filter-status" onchange="applyDVRFilters()"><option value="ALL">All Statuses</option></select>
+                        <select class="dvr-filter-select" id="cam-filter-status" onchange="filterCameraGrid()"><option value="ALL">All Statuses</option><option value="Active Recording">Active Recording</option><option value="Archived">Archived</option></select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">LOCATION:</span>
+                        <select class="dvr-filter-select" id="cam-filter-location" onchange="filterCameraGrid()"><option value="ALL">All Locations</option><option value="Pune">Pune</option><option value="Mumbai">Mumbai</option></select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">TYPE:</span>
+                        <select class="dvr-filter-select" id="cam-filter-type" onchange="filterCameraGrid()"><option value="ALL">All Camera Types</option><option value="Fixed">Fixed CCTV</option><option value="PTZ">PTZ Dome</option><option value="ANPR">ANPR Traffic</option></select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; font-weight: 800; color: var(--text-muted);">DATE:</span>
+                        <select class="dvr-filter-select" id="cam-filter-date"><option value="18 Aug 2026">18 Aug 2026</option></select>
                     </div>
                 </div>
 
-                <!-- COMPACT 3 VIDEO CARDS GRID -->
+                <!-- ALL 12 CAMERAS RESPONSIVE INVENTORY GRID (REQUIREMENTS 1, 3, 4, 5, 6, 18, 20) -->
+                <div class="card-title" style="font-size: 16px; margin-bottom: 12px;">📷 Camera Inventory (All 12 Monitored Locations)</div>
+                <div class="camera-inventory-grid" id="camera-inventory-grid-container">Loading camera inventory...</div>
+
+                <!-- ALL CAMERA EVENTS TABLE (REQUIREMENT 11) -->
+                <div class="card">
+                    <div class="card-title" style="font-size: 16px;">📋 All Camera Surveillance Events Log</div>
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>CAMERA</th>
+                                <th>SURVEILLANCE EVENT</th>
+                                <th>IDENTIFIED PERSON</th>
+                                <th>LOCATION</th>
+                                <th>EVIDENCE RECORD</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-camera-events-tbody">
+                            <tr><td colspan="7">Loading events...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- SELECTED PERSON CCTV SURVEILLANCE EVENTS (REQUIREMENTS 12, 19) -->
+                <div class="card-title" style="font-size: 16px; margin: 24px 0 12px 0;">
+                    <span>🎥 Person-Scoped Surveillance Clips (<strong id="dvr-person-clips-title" style="color: var(--accent-blue);">Arjun Sharma</strong>)</span>
+                </div>
                 <div id="dvr-video-grid-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px;">Loading surveillance clips...</div>
 
                 <!-- LOWER 3-COLUMN SPLIT ANALYTICAL SECTION -->
                 <div class="dvr-analytics-3col">
-                    
-                    <!-- LEFT COLUMN: INVESTIGATION EVIDENCE TIMELINE -->
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title" style="font-size: 15px;">⏱️ Investigation Timeline</div>
                         <div class="timeline-list" style="font-size: 12px;" id="dvr-timeline-list">
@@ -353,14 +380,9 @@
                                 <div style="font-size: 10px; color: var(--accent-blue); font-weight: 700;">20:26:11</div>
                                 <div style="font-weight: 700; color: var(--text-main);">Vehicle Departure</div>
                             </div>
-                            <div class="timeline-item" onclick="openEvidenceDetailModal('EV-FIN-014')">
-                                <div style="font-size: 10px; color: var(--accent-blue); font-weight: 700;">20:58:18</div>
-                                <div style="font-weight: 700; color: var(--text-main);">Financial Event</div>
-                            </div>
                         </div>
                     </div>
 
-                    <!-- CENTER COLUMN: SELECTED EVIDENCE & PLAYBACK CONTROLS -->
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title" style="font-size: 15px;">
                             <span>📹 Selected Surveillance Event</span>
@@ -389,15 +411,13 @@
                         <div id="dvr-linked-evidence-btns" style="display: flex; gap: 8px; flex-wrap: wrap;">Loading linked evidence...</div>
                     </div>
 
-                    <!-- RIGHT COLUMN: RELATED ENTITIES & CAMERA MAP -->
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title" style="font-size: 15px;">🔗 Related Entities</div>
                         <div id="dvr-related-entities-list" style="font-size: 12px; margin-bottom: 18px;">Loading entities...</div>
 
-                        <div class="card-title" style="font-size: 14px; margin-bottom: 8px;">🎥 Camera Locations</div>
+                        <div class="card-title" style="font-size: 14px; margin-bottom: 8px;">🎥 Monitored Locations</div>
                         <div id="dvr-camera-list" style="font-size: 11px;">Loading cameras...</div>
                     </div>
-
                 </div>
 
             </section>
@@ -482,6 +502,21 @@
             </section>
 
         </main>
+    </div>
+
+    <!-- CAMERA DETAIL & 24H RECORDING TIMELINE MODAL (REQUIREMENTS 9 & 10) -->
+    <div id="camera-detail-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
+                <div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--accent-blue);" id="cam-modal-id">CAM-04</div>
+                    <div style="font-size: 13px; color: var(--text-main);" id="cam-modal-name">Pune Central Zone</div>
+                </div>
+                <button type="button" class="modal-close-btn" onclick="closeCameraDetailModal()" style="background: transparent; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer;">✕</button>
+            </div>
+            
+            <div id="cam-modal-body">Loading camera details...</div>
+        </div>
     </div>
 
     <!-- RIGHT-SIDE SLIDING PERSON DETAIL DRAWER -->
@@ -583,26 +618,6 @@
                     </div>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- CCTV SURVEILLANCE VIDEO PLAYER MODAL -->
-    <div id="cctv-video-modal" class="modal-overlay">
-        <div class="modal-card">
-            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
-                <div style="font-size: 18px; font-weight: 800; color: var(--accent-blue);">CCTV SURVEILLANCE REVIEW STREAM</div>
-                <button type="button" class="modal-close-btn" onclick="closeCCTVVideoModal()" style="background: transparent; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer;">✕</button>
-            </div>
-            <div style="background: #000; border-radius: 10px; height: 340px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
-                <img id="cctv-modal-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
-                <div style="position: absolute; top: 12px; left: 12px; background: rgba(220,38,38,0.9); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; font-family: monospace;">
-                    ● REPLAY | <span id="cctv-modal-cam">CAM-04</span> | 18 AUG 2026 20:17:32
-                </div>
-            </div>
-            <p id="cctv-modal-desc" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;"></p>
-            <div style="display: flex; justify-content: flex-end;">
-                <button class="btn btn-secondary" onclick="closeCCTVVideoModal()">CLOSE PLAYER</button>
-            </div>
         </div>
     </div>
 

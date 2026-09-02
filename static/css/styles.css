@@ -1,7 +1,7 @@
 /* TRACE FINDERS — CRISP LIGHT / DARK INTELLIGENCE WORKSTATION THEME */
 
 :root {
-  /* LIGHT MODE DEFAULT (Matches screenshot media_1788343853833.png) */
+  /* LIGHT MODE DEFAULT */
   --bg-dark: #f8fafc;
   --bg-card: #ffffff;
   --bg-card-hover: #f1f5f9;
@@ -421,30 +421,61 @@ body.dark-mode .badge-high { background-color: #450a0a; color: #fca5a5; border: 
 body.dark-mode .badge-medium { background-color: #451a03; color: #fde047; border: 1px solid #78350f; }
 body.dark-mode .badge-verified { background-color: #064e3b; color: #6ee7b7; border: 1px solid #047857; }
 
-/* CCTV / DVR WORKSTATION SPECIFIC POLISH */
-.camera-strip {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  margin-bottom: 16px;
+/* ALL 12 CAMERAS RESPONSIVE INVENTORY GRID (REQUIREMENTS 1, 4, 18) */
+.camera-inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+  width: 100%;
 }
 
-.camera-chip {
+@media (max-width: 1280px) {
+  .camera-inventory-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .camera-inventory-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .camera-inventory-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.camera-card-full {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 12px;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 12px;
+  overflow: hidden;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
-.camera-chip:hover, .camera-chip.active {
-  background: var(--bg-card-hover);
+.camera-card-full:hover {
   border-color: var(--accent-blue);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.camera-card-thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.camera-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .dvr-filter-bar {
@@ -485,19 +516,6 @@ body.dark-mode .badge-verified { background-color: #064e3b; color: #6ee7b7; bord
   border-color: var(--accent-blue);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-}
-
-.dvr-card-thumb {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  background: #000;
-}
-
-.dvr-card-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .dvr-analytics-3col {
@@ -752,7 +770,7 @@ body.dark-mode .xai-box {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   color: var(--text-main);
-  width: 720px;
+  width: 760px;
   max-width: 94vw;
   max-height: 88vh;
   overflow-y: auto;
