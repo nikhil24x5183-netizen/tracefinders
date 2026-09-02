@@ -5,23 +5,25 @@ class SuspectProfile(BaseModel):
     id: str = "person_arjun_sharma"
     name: str = "Arjun Sharma"
     alias: Optional[str] = "Cipher King"
-    role: str = "Primary Subject"  # Primary Subject, Secondary Subject, Person of Interest, Associate
+    role: str = "Primary Subject"  # Primary Subject, Secondary Subject, Person of Interest, Associate, Business Contact, Employee
     relationship_to_primary: Optional[str] = "Self"
     age: Optional[int] = 34
     gender: Optional[str] = "Male"
     photo_url: Optional[str] = "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300"
-    phone: Optional[str] = "+91-98765-10001"
-    email: Optional[str] = "arjun.sharma@protonmail.com"
+    phone: Optional[str] = "+91 98765 1201"
+    email: Optional[str] = "arjun.sharma.demo@example.test"
     address: Optional[str] = "Flat 402, Shivajinagar"
     city: Optional[str] = "Pune"
-    occupation: Optional[str] = "Software Consultant / Tech Lead"
-    organization: Optional[str] = "Apex Global Solutions"
-    vehicle: Optional[str] = "MH12-AB-1234"
-    social_usernames: Dict[str, str] = {"telegram": "@cipher_king", "twitter": "@arjun_s89", "instagram": "@arjun_cyber"}
-    wallet_address: Optional[str] = "0x82a9b4fe82c19a...9b4"
+    occupation: Optional[str] = "Logistics Consultant"
+    organization: Optional[str] = "Nexus Logistics Demo"
+    vehicle: Optional[str] = "MH12 AB 4821"
+    social_usernames: Dict[str, str] = {"telegram": "@cipher_king", "twitter": "@arjun_s_demo", "instagram": "@arjun_cyber"}
+    wallet_address: Optional[str] = "0xDEMO...A721"
     notes: Optional[str] = "Primary subject under investigation for Operation Nexus."
     risk_score: int = 92
-    evidence_count: int = 14
+    evidence_count: int = 24
+    relationship_count: int = 7
+    status: str = "Under Investigation"
 
 class Case(BaseModel):
     id: str = "TRX-2026-017"
@@ -32,13 +34,19 @@ class Case(BaseModel):
     description: str = "Cross-domain intelligence fusion investigating an illicit financial transfer syndicate coordinating extortion, money laundering through informal channels, and crypto off-ramping connected to cyber incident #1042."
     investigation_type: str = "Cyber-Financial Crime"
     priority: str = "High"
-    status: str = "Active"
+    status: str = "Active Investigation"
     date_opened: str = "2026-08-15"
     lead_investigator: str = "Ins. Vikramaditya Rao (#INV-7092)"
     location: str = "Pune, Maharashtra"
     agency: str = "Special Cyber Crime & Intelligence Cell (SCCIC)"
     tags: List[str] = ["EXTORTION", "HAWALA_INDICATORS", "CRYPTO_FLOW", "DVR_FORENSIC"]
-    evidence_count: int = 82
+    evidence_count: int = 148
+    relationships_count: int = 37
+    communications_count: int = 421
+    financial_count: int = 63
+    osint_count: int = 42
+    blockchain_count: int = 18
+    cctv_count: int = 9
     last_activity: str = "10 mins ago"
 
 class Entity(BaseModel):
@@ -67,6 +75,9 @@ class Relationship(BaseModel):
     call_count: Optional[int] = 0
     first_observed: Optional[str] = ""
     last_observed: Optional[str] = ""
+    explanation: Optional[str] = ""
+    alt_explanation: Optional[str] = ""
+    temporal_correlation: Optional[str] = ""
 
 class EvidenceItem(BaseModel):
     id: str
@@ -82,6 +93,8 @@ class EvidenceItem(BaseModel):
     processing_status: str = "PROCESSED"
     provenance: str
     analyst_notes: str = ""
+    confidence: float = 0.95
+    extracted_entities: List[str] = []
 
 class Anomaly(BaseModel):
     id: str
@@ -93,7 +106,7 @@ class Anomaly(BaseModel):
     explanation: str
     evidence_ids: List[str]
     confidence: float
-    analyst_status: str = "Requires Review"
+    analyst_status: str = "Requires Human Review"
 
 class InvestigativeLead(BaseModel):
     id: str
@@ -102,6 +115,9 @@ class InvestigativeLead(BaseModel):
     confidence: float
     evidence_chain: List[Dict[str, Any]]
     recommended_actions: List[str]
+    supporting_evidence: List[str] = []
+    alternative_explanation: Optional[str] = ""
+    status: str = "Needs Review"
     human_review_required: bool = True
 
 class AuditBlock(BaseModel):

@@ -20,7 +20,6 @@ function toggleSidebar() {
 
 function changeActiveCase(caseId) {
     currentCaseId = caseId;
-    document.getElementById('ctx-case-id').innerText = caseId;
     updateBreadcrumb();
     refreshActiveView();
 }
@@ -33,19 +32,19 @@ function changeActivePerson(personId) {
         'person_rohan_mehta': 'Rohan Mehta',
         'person_priya_joshi': 'Priya Joshi',
         'person_vikram_patil': 'Vikram Patil',
-        'person_neha_kulkarni': 'Neha Kulkarni'
+        'person_neha_kulkarni': 'Neha Kulkarni',
+        'person_arjun_s_candidate': 'Arjun S. (Ambiguous Match)'
     };
     const pName = personNames[personId] || personId;
-    document.getElementById('ctx-subject-name').innerText = pName;
-    
     updateBreadcrumb();
     refreshActiveView();
 }
 
 function updateBreadcrumb() {
-    const pName = document.getElementById('ctx-subject-name').innerText.toUpperCase();
     const activeNav = document.querySelector('.nav-item.active');
-    const moduleName = activeNav ? activeNav.innerText.trim().toUpperCase() : 'DASHBOARD';
+    const moduleName = activeNav ? activeNav.innerText.trim().toUpperCase() : 'OVERVIEW';
+    const selectP = document.getElementById('select-change-person');
+    const pName = selectP ? selectP.options[selectP.selectedIndex].text.split('(')[0].trim().toUpperCase() : 'ARJUN SHARMA';
     
     document.getElementById('breadcrumb-text').innerText = `CASE > ${currentCaseId} > ${pName} > ${moduleName}`;
 }
@@ -102,31 +101,26 @@ async function loadOverviewData() {
         const res = await fetch(`/api/overview?case_id=${currentCaseId}&person_id=${currentPersonId}`);
         const data = await res.json();
 
-        const s = data.case_summary;
-        document.getElementById('overview-primary-name').innerText = s.primary_subject;
-        document.getElementById('stat-sec-count').innerText = s.secondary_subjects_count;
-        document.getElementById('stat-entities').innerText = s.entities_count;
-        document.getElementById('stat-evidence').innerText = s.evidence_count;
-        document.getElementById('stat-relationships').innerText = s.relationships_count;
-        document.getElementById('stat-events').innerText = s.temporal_events_count;
-
         const actList = document.getElementById('activity-feed');
-        if (actList) {
-            actList.innerHTML = data.recent_activity.map(act => `
-                <div style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 11px;">
-                    <span>⚡ <strong style="color: #0f172a;">${act.event}</strong></span>
-                    <span style="color: #64748b;">${act.time}</span>
+        if (actList && data.investigation_activity) {
+            actList.innerHTML = data.investigation_activity.map(act => `
+                <div style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 11px;">
+                    <span>⚡ <strong style="color: #0f172a;">[${act.time}]</strong> ${act.event}</span>
+                    <span class="badge badge-verified">${act.domain}</span>
                 </div>
             `).join('');
         }
 
         const leadsPanel = document.getElementById('ai-leads-panel');
-        if (leadsPanel) {
+        if (leadsPanel && data.ai_leads) {
             leadsPanel.innerHTML = data.ai_leads.map(lead => `
                 <div style="padding: 12px; background: #f0f9ff; border-left: 3px solid #0284c7; border-radius: 8px; margin-bottom: 8px;">
                     <div style="font-size: 12px; font-weight: 800; color: #0369a1;">${lead.title}</div>
                     <p style="font-size: 11px; color: #475569; margin: 4px 0;">${lead.summary}</p>
-                    <span class="badge badge-verified">CONFIDENCE: ${lead.confidence * 100}%</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                        <span class="badge ${lead.confidence < 0.5 ? 'badge-high' : 'badge-verified'}">CONFIDENCE: ${Math.round(lead.confidence * 100)}%</span>
+                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Status: ${lead.status}</span>
+                    </div>
                 </div>
             `).join('');
         }
@@ -135,7 +129,7 @@ async function loadOverviewData() {
     }
 }
 
-// 2. CASES SECTION
+// 2. INVESTIGATIONS SECTION (6 SEEDED CASES)
 async function loadInvestigationsData() {
     try {
         const res = await fetch('/api/cases');
@@ -150,8 +144,8 @@ async function loadInvestigationsData() {
             return `
                 <div class="card" style="border-left: 4px solid ${c.priority === 'High' ? '#dc2626' : '#2563eb'};">
                     <div class="card-title">
-                        <span>${c.id}: ${c.title}</span>
-                        <span class="badge ${c.priority === 'High' ? 'badge-high' : 'badge-verified'}">${c.priority} Priority</span>
+                        <span>${c.id}: ${c.title} (${c.location})</span>
+                        <span class="badge ${c.priority === 'High' ? 'badge-high' : 'badge-verified'}">${c.status}</span>
                     </div>
 
                     <!-- PRIMARY SUBJECT IDENTITY CARD -->
@@ -159,14 +153,14 @@ async function loadInvestigationsData() {
                         <img src="${primary.photo_url || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300'}" class="suspect-avatar">
                         <div>
                             <div style="font-size: 14px; font-weight: 800; color: #0f172a;">${primary.name} <span class="badge badge-high" style="font-size: 9px;">Primary Subject</span></div>
-                            <div style="font-size: 11px; color: #475569; margin: 2px 0;">Age: <strong>${primary.age || 34}</strong> | Location: <strong>${primary.city || 'Pune'}</strong> | Occupation: <strong>${primary.occupation || 'Consultant'}</strong></div>
+                            <div style="font-size: 11px; color: #475569; margin: 2px 0;">Age: <strong>${primary.age || 34}</strong> | City: <strong>${primary.city || 'Pune'}</strong> | Occupation: <strong>${primary.occupation || 'Consultant'}</strong></div>
                             <div style="font-size: 11px; color: #2563eb;">📞 ${primary.phone} | ✉️ ${primary.email}</div>
                         </div>
                     </div>
 
                     <!-- SECONDARY SUBJECTS -->
                     ${secondaries.length > 0 ? `
-                        <div style="font-size: 10px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin: 10px 0 6px 0;">👥 Secondary Subjects & Persons of Interest (${secondaries.length}):</div>
+                        <div style="font-size: 10px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin: 10px 0 6px 0;">👥 Persons of Interest & Associates (${secondaries.length}):</div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-bottom: 10px;">
                             ${secondaries.map(sec => `
                                 <div style="padding: 8px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; gap: 8px; align-items: center; cursor: pointer;" onclick="openPersonDrawer('${sec.id}')">
@@ -179,6 +173,15 @@ async function loadInvestigationsData() {
                             `).join('')}
                         </div>
                     ` : ''}
+
+                    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; font-size: 11px; color: #475569; margin: 8px 0;">
+                        <div>Evidence: <strong>${c.evidence_count || 148}</strong></div>
+                        <div>Relationships: <strong>${c.relationships_count || 37}</strong></div>
+                        <div>Calls: <strong>${c.communications_count || 421}</strong></div>
+                        <div>Financial: <strong>${c.financial_count || 63}</strong></div>
+                        <div>OSINT: <strong>${c.osint_count || 42}</strong></div>
+                        <div>CCTV: <strong>${c.cctv_count || 9}</strong></div>
+                    </div>
 
                     <p style="font-size: 11px; color: #475569; margin-bottom: 10px;">${c.description}</p>
                     <div style="display: flex; gap: 8px;">
@@ -195,124 +198,86 @@ async function loadInvestigationsData() {
 function selectCaseAndPerson(caseId, personId) {
     currentCaseId = caseId;
     currentPersonId = personId;
-    document.getElementById('ctx-case-id').innerText = caseId;
     document.getElementById('select-change-case').value = caseId;
     changeActivePerson(personId);
     switchTab('fusion');
 }
 
-// MULTI-STEP ADD CASE WIZARD HANDLERS
-function openAddCaseWizard() {
-    const modal = document.getElementById('add-case-wizard-modal');
-    if (modal) modal.style.display = 'flex';
-    goToWizardStep(1);
-}
-
-function closeAddCaseWizard() {
-    const modal = document.getElementById('add-case-wizard-modal');
-    if (modal) modal.style.display = 'none';
-}
-
-function goToWizardStep(step) {
-    document.querySelectorAll('.wizard-step-item').forEach(el => el.classList.remove('active'));
-    document.getElementById(`wiz-step-${step}`).classList.add('active');
-
-    document.getElementById('wizard-panel-1').style.display = step === 1 ? 'block' : 'none';
-    document.getElementById('wizard-panel-2').style.display = step === 2 ? 'block' : 'none';
-    document.getElementById('wizard-panel-3').style.display = step === 3 ? 'block' : 'none';
-}
-
-async function submitWizardForm(e) {
-    e.preventDefault();
-    const title = document.getElementById('wiz-case-title').value.trim();
-    const type = document.getElementById('wiz-case-type').value;
-    const priority = document.getElementById('wiz-case-priority').value;
-    const investigator = document.getElementById('wiz-case-investigator').value.trim();
-    const desc = document.getElementById('wiz-case-desc').value.trim();
-
-    const p_name = document.getElementById('wiz-p-name').value.trim();
-    const p_alias = document.getElementById('wiz-p-alias').value.trim();
-    const p_phone = document.getElementById('wiz-p-phone').value.trim();
-    const p_email = document.getElementById('wiz-p-email').value.trim();
-    const p_city = document.getElementById('wiz-p-city').value.trim();
-
-    const primary_suspect = {
-        id: `person_${p_name.toLowerCase().replace(/\s+/g, '_')}`,
-        name: p_name || 'Primary Subject',
-        alias: p_alias,
-        role: 'Primary Subject',
-        relationship_to_primary: 'Self',
-        age: 34,
-        gender: 'Male',
-        photo_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300',
-        phone: p_phone,
-        email: p_email,
-        city: p_city,
-        occupation: 'Subject',
-        organization: 'Under Investigation',
-        vehicle: '',
-        social_usernames: {},
-        wallet_address: '',
-        notes: desc,
-        risk_score: 85,
-        evidence_count: 5
-    };
-
-    const sec_name = document.getElementById('wiz-sec-name').value.trim();
-    const sec_role = document.getElementById('wiz-sec-role').value;
-    const sec_phone = document.getElementById('wiz-sec-phone').value.trim();
-
-    const secondary_suspects = [];
-    if (sec_name) {
-        secondary_suspects.push({
-            id: `person_${sec_name.toLowerCase().replace(/\s+/g, '_')}`,
-            name: sec_name,
-            alias: sec_name,
-            role: sec_role,
-            relationship_to_primary: 'Associate',
-            age: 30,
-            photo_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300',
-            phone: sec_phone,
-            email: '',
-            city: 'Pune',
-            occupation: 'Associate',
-            organization: '',
-            vehicle: '',
-            social_usernames: {},
-            wallet_address: '',
-            notes: '',
-            risk_score: 70,
-            evidence_count: 3
-        });
-    }
-
+// 3. EVIDENCE CENTER
+async function loadEvidenceData() {
     try {
-        const res = await fetch('/api/cases', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                title,
-                description: desc,
-                investigation_type: type,
-                priority,
-                lead_investigator: investigator,
-                primary_suspect,
-                secondary_suspects
-            })
-        });
+        const res = await fetch(`/api/evidence?case_id=${currentCaseId}`);
         const data = await res.json();
-        if (data.success) {
-            alert(`✅ Case ${data.case.id} Created Successfully!\nPrimary Subject: ${p_name}\nLogged on SHA-256 Audit Ledger.`);
-            closeAddCaseWizard();
-            loadInvestigationsData();
-            loadOverviewData();
-        }
+        const tbody = document.getElementById('evidence-tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = data.evidence_items.map(e => `
+            <tr style="cursor: pointer;" onclick="openEvidenceDetailModal('${e.id}')">
+                <td><strong style="color: #2563eb;">${e.id}</strong></td>
+                <td><span class="badge badge-verified">${e.evidence_type}</span></td>
+                <td><strong>${e.title}</strong></td>
+                <td>${e.source}</td>
+                <td><code style="font-size: 10px; color: #2563eb;">${e.file_hash.substring(0, 14)}...</code></td>
+                <td><span class="badge badge-verified">${e.integrity_status}</span></td>
+                <td><button class="btn btn-secondary" style="padding: 2px 8px; font-size: 10px;" onclick="event.stopPropagation(); openEvidenceDetailModal('${e.id}')">View Drawer</button></td>
+            </tr>
+        `).join('');
     } catch (err) {
         console.error(err);
     }
 }
 
-// 3. EVIDENCE FUSION WORKSPACE
+// STANDARDIZED EVIDENCE DETAIL DRAWER MODAL (MASTER PROMPT REQUIREMENT 22)
+async function openEvidenceDetailModal(evidenceId) {
+    const modal = document.getElementById('evidence-detail-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    try {
+        const res = await fetch(`/api/evidence/${evidenceId}`);
+        const e = await res.json();
+
+        document.getElementById('evidence-modal-body').innerHTML = `
+            <div style="padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 14px; font-weight: 800; color: #2563eb;">${e.id}: ${e.title}</span>
+                    <span class="badge badge-verified">${e.evidence_type}</span>
+                </div>
+                <div style="font-size: 11px; color: #475569; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                    <div><strong>Case:</strong> ${e.case_id}</div>
+                    <div><strong>Associated Person:</strong> Arjun Sharma</div>
+                    <div><strong>Source:</strong> ${e.source}</div>
+                    <div><strong>Timestamp:</strong> ${e.acquisition_timestamp}</div>
+                    <div><strong>SHA-256 Hash:</strong> <code style="color: #2563eb;">${e.file_hash.substring(0, 16)}...</code></div>
+                    <div><strong>Integrity Status:</strong> <span class="badge badge-verified">${e.integrity_status}</span></div>
+                </div>
+                <p style="font-size: 11px; color: #0f172a;"><strong>Analyst Notes / Description:</strong> ${e.analyst_notes}</p>
+                <div style="margin-top: 8px; font-size: 10px; color: #64748b;">
+                    <strong>AI Extracted Entities:</strong> ${(e.extracted_entities || []).join(', ')}
+                </div>
+            </div>
+
+            <!-- BUTTONS REQUIRED BY POINT 22 -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;">
+                <button class="btn btn-secondary" onclick="alert('Viewing original SHA-256 file payload for ${e.id}...')">📄 View Original</button>
+                <button class="btn btn-secondary" onclick="switchTab('graph'); closeEvidenceDetailModal();">🕸️ View Graph Connection</button>
+                <button class="btn btn-secondary" onclick="switchTab('timeline'); closeEvidenceDetailModal();">⏱️ View Timeline</button>
+                <button class="btn btn-secondary" onclick="alert('Note added to ${e.id} on SHA-256 ledger.')">✏️ Add Note</button>
+                <button class="btn" style="background: #16a34a;" onclick="alert('Evidence ${e.id} Marked Verified!')">✅ Mark Verified</button>
+                <button class="btn" style="background: #d97706;" onclick="alert('Evidence ${e.id} Flagged for Review!')">⚠️ Mark Needs Review</button>
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function closeEvidenceDetailModal() {
+    const modal = document.getElementById('evidence-detail-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// 4. EVIDENCE FUSION WORKSPACE & AI LEADS
 async function loadFusionData() {
     try {
         const res = await fetch(`/api/fusion?case_id=${currentCaseId}&person_id=${currentPersonId}`);
@@ -330,22 +295,53 @@ async function loadFusionData() {
                 </div>
             </div>
 
-            <h4 style="margin: 16px 0 8px 0; font-size: 13px; color: #0284c7;">Concise Investigation Chain:</h4>
-            ${data.evidence_chain.map(c => `
-                <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #2563eb; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
-                    <div style="font-size: 11px; font-weight: 700; color: #2563eb;">Step ${c.step_index}: [${c.domain}] ${c.title}</div>
-                    <div style="font-size: 12px; margin: 2px 0; color: #0f172a;"><strong>${c.from_entity}</strong> ➔ <strong>${c.to_entity}</strong></div>
-                    <div style="font-size: 11px; color: #475569;">${c.details}</div>
-                    <span class="badge badge-verified" style="margin-top: 4px;">Ref: ${c.evidence_ref}</span>
-                </div>
-            `).join('')}
+            <!-- DEFAULT TREE VISUALIZATION (MASTER PROMPT REQUIREMENT 8) -->
+            <h4 style="margin: 16px 0 8px 0; font-size: 13px; color: #0284c7;">Default Investigation Tree Representation:</h4>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; font-family: monospace; font-size: 12px; margin-bottom: 16px;">
+                <div style="font-weight: 800; color: #2563eb;">ARJUN SHARMA (Primary Subject)</div>
+                <div>│</div>
+                <div>├── <span style="cursor: pointer; color: #0284c7; font-weight: 700;" onclick="openRelEvidenceModal('rel_1')">ROHAN MEHTA (Business Contact - 27 Calls logged)</span></div>
+                <div>│</div>
+                <div>├── <span style="cursor: pointer; color: #0284c7; font-weight: 700;" onclick="openRelEvidenceModal('rel_2')">PRIYA JOSHI (Associate - Senior Accountant)</span></div>
+                <div>│</div>
+                <div>├── <span style="cursor: pointer; color: #0284c7; font-weight: 700;" onclick="openRelEvidenceModal('rel_3')">MH12 AB 4821 (SUV Vehicle - ANPR Match)</span></div>
+                <div>│</div>
+                <div>├── <span style="cursor: pointer; color: #16a34a; font-weight: 700;" onclick="switchTab('financial')">BANK ACCOUNT (HDFC Acc XXXX 4821)</span></div>
+                <div>│</div>
+                <div>├── <span style="cursor: pointer; color: #d97706; font-weight: 700;" onclick="switchTab('blockchain')">CRYPTO WALLET (0xDEMO...A721 - Balance 8.42 ETH)</span></div>
+                <div>│</div>
+                <div>├── <span style="cursor: pointer; color: #db2777; font-weight: 700;" onclick="switchTab('dvr')">LOCATIONS (Synthetic Pune Location A)</span></div>
+                <div>│</div>
+                <div>└── <span style="cursor: pointer; color: #dc2626; font-weight: 700;" onclick="switchTab('timeline')">INCIDENTS (Cyber Incident #1042)</span></div>
+            </div>
+
+            <h4 style="margin: 16px 0 8px 0; font-size: 13px; color: #0284c7;">5 Seeded AI Investigative Leads:</h4>
+            ${DATASTORE ? '' : ''}
         `;
+
+        // Render AI leads
+        const leadsRes = await fetch('/api/leads');
+        const leadsData = await leadsRes.json();
+        
+        container.innerHTML += leadsData.leads.map(lead => `
+            <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid ${lead.confidence < 0.5 ? '#dc2626' : '#2563eb'}; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; font-weight: 800; color: #0f172a;">${lead.id}: ${lead.title}</span>
+                    <span class="badge ${lead.confidence < 0.5 ? 'badge-high' : 'badge-verified'}">Confidence: ${Math.round(lead.confidence * 100)}%</span>
+                </div>
+                <p style="font-size: 11px; color: #475569; margin: 4px 0;">${lead.summary}</p>
+                <div style="font-size: 10px; color: #2563eb; margin: 4px 0;"><strong>Supporting Evidence:</strong> ${(lead.supporting_evidence || []).join(', ')}</div>
+                <div style="font-size: 10px; color: #d97706;"><strong>Alternative Explanation:</strong> ${lead.alternative_explanation || 'Business coordination.'}</div>
+                <div style="margin-top: 6px; font-size: 10px; color: #64748b; font-weight: 700;">Status: ${lead.status}</div>
+            </div>
+        `).join('');
+
     } catch (err) {
         console.error(err);
     }
 }
 
-// 4. NETWORK GRAPH — TREE VIEW DEFAULT & LAYOUT SWITCHER
+// 5. NETWORK GRAPH — TREE VIEW DEFAULT & LAYOUT SWITCHER
 async function loadGraphData() {
     try {
         const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
@@ -480,7 +476,283 @@ function getDomainColor(domain) {
     return '#64748b';
 }
 
-// 7. RIGHT-SIDE SLIDING PERSON DETAIL DRAWER
+// 6. COMMUNICATIONS (POPULATED)
+async function loadCommunicationsData() {
+    try {
+        const res = await fetch(`/api/communications?person_id=${currentPersonId}`);
+        const data = await res.json();
+
+        document.getElementById('comm-stat-calls').innerText = data.total_calls;
+        document.getElementById('comm-stat-msgs').innerText = data.total_messages;
+        document.getElementById('comm-stat-contacts').innerText = data.unique_contacts;
+        document.getElementById('comm-stat-last').innerText = data.last_contact;
+
+        const tree = document.getElementById('comm-contact-tree');
+        if (tree && data.contacts) {
+            tree.innerHTML = data.contacts.map(c => `
+                <div style="padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 3px solid #0284c7; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 12px; color: #0f172a;">${c.name}</strong> (${c.role})
+                        <div style="font-size: 10px; color: #0284c7;">📞 ${c.phone}</div>
+                    </div>
+                    <span class="badge badge-verified">${c.calls} Calls Logged</span>
+                </div>
+            `).join('');
+        }
+
+        const timeline = document.getElementById('comm-rohan-timeline');
+        if (timeline && data.rohan_call_timeline) {
+            timeline.innerHTML = data.rohan_call_timeline.map(t => `
+                <div style="padding: 8px 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between; font-size: 11px;">
+                    <span>⏱️ <strong>${t.timestamp}</strong></span>
+                    <span style="color: ${t.direction === 'Outgoing' ? '#2563eb' : '#16a34a'}; font-weight: 700;">${t.direction} (Duration: ${t.duration})</span>
+                    <span class="badge badge-verified" style="cursor: pointer;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</span>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 7. FINANCIAL INTELLIGENCE & HAWALA ANALYSIS
+async function loadFinancialData() {
+    try {
+        const res = await fetch(`/api/financial?person_id=${currentPersonId}`);
+        const data = await res.json();
+
+        const grid = document.getElementById('fin-accounts-grid');
+        if (grid && data.accounts) {
+            grid.innerHTML = data.accounts.map(a => `
+                <div style="padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #166534;">${a.bank} (${a.account_number})</div>
+                    <div style="font-size: 11px; color: #475569;">Type: ${a.type} | Current Balance: <strong style="color: #16a34a;">${a.balance}</strong></div>
+                </div>
+            `).join('');
+        }
+
+        const hawala = document.getElementById('fin-hawala-box');
+        if (hawala && data.hawala_analysis) {
+            hawala.innerHTML = `
+                <div class="xai-title">⚠️ INFORMAL VALUE TRANSFER INDICATORS (HAWALA ANALYSIS)</div>
+                <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Assessment: ${data.hawala_analysis.title} (Confidence: ${data.hawala_analysis.confidence})</div>
+                <p style="font-size: 11px; color: #475569; margin-bottom: 8px;">${data.hawala_analysis.explanation}</p>
+                <div style="font-size: 11px; color: #0284c7; display: flex; flex-direction: column; gap: 4px;">
+                    ${data.hawala_analysis.indicators.map(i => `<div>● ${i}</div>`).join('')}
+                </div>
+            `;
+        }
+
+        const txList = document.getElementById('fin-transactions-list');
+        if (txList && data.transactions) {
+            txList.innerHTML = data.transactions.map(t => `
+                <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid ${t.type === 'Outgoing' ? '#dc2626' : '#16a34a'}; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 12px; font-weight: 800; color: #0f172a;">${t.id}: ${t.amount} (${t.type})</div>
+                        <div style="font-size: 11px; color: #475569;">Date: ${t.date} ${t.time} | Related Person: <strong>${t.related_person}</strong> | Account: ${t.account}</div>
+                        <div style="font-size: 10px; color: #64748b;">${t.notes}</div>
+                    </div>
+                    <button class="btn btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${t.evidence_id}')">Ref: ${t.evidence_id}</button>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 8. BLOCKCHAIN WORKSPACE
+async function loadBlockchainData() {
+    try {
+        const res = await fetch(`/api/blockchain?person_id=${currentPersonId}`);
+        const data = await res.json();
+
+        const summary = document.getElementById('blk-summary');
+        if (summary && data.wallet) {
+            summary.innerHTML = `
+                <div style="font-size: 13px; font-weight: 800; color: #d97706;">Wallet Address: ${data.wallet.address}</div>
+                <div style="font-size: 11px; color: #475569; margin-top: 2px;">Balance: <strong>${data.wallet.balance}</strong> | Total Txs: ${data.wallet.total_transactions} (In: ${data.wallet.incoming}, Out: ${data.wallet.outgoing})</div>
+                <div style="font-size: 10px; color: #92400e; margin-top: 4px; font-weight: 700;">⚠️ ${data.wallet.disclaimer}</div>
+            `;
+        }
+
+        const list = document.getElementById('blk-list');
+        if (list && data.transactions) {
+            list.innerHTML = data.transactions.map(t => `
+                <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #d97706; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 12px; color: #d97706;">${t.id}: ${t.amount} (${t.type})</strong>
+                        <div style="font-size: 11px; color: #475569;">Sender: ${t.sender} ➔ Recipient: ${t.recipient}</div>
+                        <code style="font-size: 10px; color: #2563eb;">Hash: ${t.hash} | Timestamp: ${t.timestamp}</code>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 9. OSINT WORKSPACE
+async function loadOSINTData() {
+    try {
+        const res = await fetch(`/api/osint?person_id=${currentPersonId}`);
+        const data = await res.json();
+
+        const list = document.getElementById('osint-list');
+        if (list && data.records) {
+            list.innerHTML = data.records.map(o => `
+                <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #7c3aed; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span class="badge badge-verified" style="background: #f3e8ff; color: #6b21a8; border-color: #d8b4fe;">${o.type}</span>
+                        <strong style="font-size: 12px; color: #0f172a; margin-left: 6px;">${o.value}</strong>
+                        <div style="font-size: 11px; color: #475569; margin-top: 2px;">Source: ${o.source} | Last Observed: ${o.last_observed}</div>
+                    </div>
+                    <button class="btn btn-secondary" style="font-size: 10px; padding: 3px 8px;" onclick="openEvidenceDetailModal('${o.evidence_id}')">Ref: ${o.evidence_id}</button>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 10. CCTV / DVR / NVR FORENSICS (3 SYNTHETIC DEMO VIDEOS)
+async function loadDVRData() {
+    try {
+        const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
+        const data = await res.json();
+        
+        const videoGrid = document.getElementById('dvr-video-grid-container');
+        if (videoGrid && data.dvr_videos) {
+            videoGrid.innerHTML = data.dvr_videos.map(v => `
+                <div class="dvr-card">
+                    <div class="dvr-thumb-wrapper">
+                        <img src="${v.video_thumbnail}" class="dvr-thumb-img" alt="CCTV Stream">
+                        <div class="dvr-rec-badge">● STREAM | ${v.camera_id}</div>
+                        <div class="dvr-play-overlay" onclick="openCCTVVideoModal('${v.camera_id}', '${v.event_title}', '${v.timestamp}', '${v.anpr_license_plate}', '${v.video_thumbnail}', '${v.description.replace(/'/g, "\\'")}')">▶</div>
+                    </div>
+                    <div class="dvr-info-body">
+                        <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">${v.event_title}</div>
+                        <div style="font-size: 10px; color: #2563eb; font-weight: 700; margin-bottom: 4px;">📍 ${v.location}</div>
+                        <div style="font-size: 11px; color: #475569; margin-bottom: 6px;"><strong>Identified Subjects:</strong> ${v.suspects_identified.join(', ')}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="synthetic-banner" style="font-size: 9px;">${v.label}</span>
+                            <button class="btn btn-secondary" style="font-size: 9px; padding: 2px 6px;" onclick="openEvidenceDetailModal('${v.evidence_id}')">Ref: ${v.evidence_id}</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function openCCTVVideoModal(camId, title, timestamp, anpr, imgUrl, desc) {
+    const modal = document.getElementById('cctv-video-modal');
+    if (!modal) return;
+    document.getElementById('cctv-modal-cam').innerText = camId;
+    document.getElementById('cctv-modal-img').src = imgUrl;
+    document.getElementById('cctv-modal-desc').innerText = `${title} (${timestamp}) - ${desc}`;
+    modal.style.display = 'flex';
+}
+
+function closeCCTVVideoModal() {
+    const modal = document.getElementById('cctv-video-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// 11. TIMELINE & TEMPORAL CORRELATION
+async function loadTimelineData() {
+    try {
+        const res = await fetch(`/api/timeline?case_id=${currentCaseId}`);
+        const data = await res.json();
+
+        const box = document.getElementById('temporal-assessment-box');
+        if (box && data.temporal_assessment) {
+            box.innerHTML = `
+                <div class="xai-title">⏱️ TEMPORAL CORRELATION ASSESSMENT</div>
+                <div style="font-size: 12px; font-weight: 700; color: #0f172a;">${data.temporal_assessment}</div>
+            `;
+        }
+
+        const container = document.getElementById('timeline-container');
+        if (container && data.events) {
+            container.innerHTML = data.events.map(ev => `
+                <div class="timeline-item" style="cursor: pointer;" onclick="openEvidenceDetailModal('${ev.evidence_id}')">
+                    <div style="font-size: 10px; color: #2563eb; font-weight: 700;">[${ev.domain}] ${ev.timestamp}</div>
+                    <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 2px 0;">${ev.title}</div>
+                    <div style="font-size: 11px; color: #475569;">${ev.details}</div>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 12. ANALYTICS
+async function loadAnalyticsData() {
+    try {
+        const res = await fetch('/api/analytics');
+        const data = await res.json();
+        const tbody = document.getElementById('analytics-tbody');
+        if (tbody && data.influential_entities) {
+            tbody.innerHTML = data.influential_entities.map(e => `
+                <tr>
+                    <td><strong>${e.label}</strong></td>
+                    <td>${e.type}</td>
+                    <td>${e.degree_centrality}</td>
+                    <td>${e.betweenness_centrality}</td>
+                    <td>${e.pagerank}</td>
+                    <td><span class="badge badge-verified">${e.assessment}</span></td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 13. AUDIT
+async function loadAuditData() {
+    try {
+        const res = await fetch('/api/audit');
+        const data = await res.json();
+
+        const tbody = document.getElementById('audit-tbody');
+        if (tbody && data.audit_events) {
+            tbody.innerHTML = data.audit_events.map(b => `
+                <tr>
+                    <td><strong>${b.timestamp}</strong></td>
+                    <td>${b.actor}</td>
+                    <td><span class="badge badge-verified">${b.action_type}</span></td>
+                    <td>${b.object}</td>
+                    <td><span class="badge badge-verified" style="background: #f0fdf4; color: #166534;">${b.result}</span></td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 14. REPORTS
+async function loadReportData() {
+    try {
+        const res = await fetch('/api/reports/generate', { method: 'POST' });
+        const data = await res.json();
+        const previewer = document.getElementById('report-preview-frame');
+        if (previewer) {
+            previewer.srcdoc = data.html_content;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// RIGHT-SIDE SLIDING PERSON DETAIL DRAWER
 async function openPersonDrawer(personId) {
     currentPersonDrawerId = personId;
     const drawer = document.getElementById('person-detail-drawer');
@@ -511,7 +783,7 @@ async function switchDrawerTab(tabName) {
                     <img src="${p.photo_url || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300'}" class="suspect-avatar">
                     <div>
                         <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${p.name}</div>
-                        <div style="font-size: 11px; color: #2563eb; font-weight: 700;">${p.role}</div>
+                        <div style="font-size: 11px; color: #2563eb; font-weight: 700;">Role: ${p.role}</div>
                         <div style="font-size: 11px; color: #475569; margin-top: 2px;">Age: ${p.age || 34} | Location: ${p.city || 'Pune'}</div>
                     </div>
                 </div>
@@ -522,6 +794,15 @@ async function switchDrawerTab(tabName) {
                     <div><strong>Vehicle:</strong> ${p.vehicle || 'N/A'}</div>
                     <div><strong>Wallet:</strong> ${p.wallet_address || 'N/A'}</div>
                     <div><strong>Notes:</strong> ${p.notes}</div>
+                </div>
+
+                <div style="font-size: 11px; color: #2563eb; font-weight: 700; margin: 10px 0 4px 0;">Connected Intelligence Summary:</div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px; margin-bottom: 12px;">
+                    <div>Communications: <strong>${data.connected_counts.communications}</strong></div>
+                    <div>Financial Events: <strong>${data.connected_counts.financial}</strong></div>
+                    <div>OSINT Records: <strong>${data.connected_counts.osint}</strong></div>
+                    <div>Blockchain Txs: <strong>${data.connected_counts.blockchain}</strong></div>
+                    <div>CCTV References: <strong>${data.connected_counts.cctv}</strong></div>
                 </div>
 
                 <h4 style="font-size: 12px; color: #2563eb; margin: 14px 0 6px 0;">Connected Relationships (${data.relationships.length}):</h4>
@@ -535,7 +816,7 @@ async function switchDrawerTab(tabName) {
             content.innerHTML = `
                 <h4 style="font-size: 12px; color: #2563eb; margin-bottom: 8px;">Associated Evidence Items (${data.evidence_items.length}):</h4>
                 ${data.evidence_items.map(e => `
-                    <div style="padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; font-size: 11px;">
+                    <div style="padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; font-size: 11px; cursor: pointer;" onclick="openEvidenceDetailModal('${e.id}')">
                         <div style="font-weight: 700; color: #0f172a;">${e.id}: ${e.title}</div>
                         <div style="color: #64748b; margin-top: 2px;">Type: ${e.evidence_type} | Source: ${e.source}</div>
                         <span class="badge badge-verified" style="margin-top: 4px;">Hash Verified</span>
@@ -543,7 +824,7 @@ async function switchDrawerTab(tabName) {
                 `).join('')}
             `;
         } else {
-            content.innerHTML = `<div style="font-size: 12px; color: #64748b;">Displaying ${tabName.toUpperCase()} records scoped to ${p.name}...</div>`;
+            content.innerHTML = `<div style="font-size: 12px; color: #64748b; padding: 12px;">Displaying ${tabName.toUpperCase()} records scoped to ${p.name}...</div>`;
         }
     } catch (err) {
         console.error(err);
@@ -563,19 +844,17 @@ async function openRelEvidenceModal(relId) {
 
         document.getElementById('rel-modal-body').innerHTML = `
             <div style="padding: 12px; background: #f0f9ff; border-radius: 8px; margin-bottom: 12px; border: 1px solid #bae6fd;">
-                <div style="font-size: 13px; font-weight: 800; color: #0284c7;">[${r.domain}] ${r.relation}</div>
+                <div style="font-size: 13px; font-weight: 800; color: #0284c7;">Relationship: ${r.relation}</div>
                 <div style="font-size: 12px; color: #0f172a; margin: 4px 0;"><strong>${r.source}</strong> ➔ <strong>${r.target}</strong></div>
-                <div style="font-size: 11px; color: #475569;">${r.details}</div>
-                <div style="font-size: 11px; color: #64748b; margin-top: 6px; display: flex; gap: 14px;">
-                    <div>Calls Logged: <strong style="color: #0f172a;">${r.call_count || 14}</strong></div>
-                    <div>First Observed: <strong style="color: #0f172a;">${r.first_observed || '04 Aug 2026'}</strong></div>
-                    <div>Last Observed: <strong style="color: #0f172a;">${r.last_observed || '17 Aug 2026'}</strong></div>
-                </div>
+                <div style="font-size: 11px; color: #475569; margin-top: 4px;"><strong>Temporal Correlation:</strong> ${r.temporal_correlation || '3 events within 42 minutes'}</div>
+                <div style="font-size: 11px; color: #16a34a; margin-top: 2px;"><strong>Confidence:</strong> ${Math.round(r.confidence * 100)}%</div>
+                <p style="font-size: 11px; color: #0f172a; margin-top: 6px;"><strong>Explanation:</strong> ${r.explanation || 'Repeated communication and shared temporal activity.'}</p>
+                <p style="font-size: 11px; color: #d97706; margin-top: 2px;"><strong>Alternative Explanation:</strong> ${r.alt_explanation || 'Business coordination may explain activity.'}</p>
             </div>
 
             <h4 style="font-size: 12px; color: #2563eb; margin-bottom: 8px;">Supporting Evidence References (${data.supporting_evidence.length}):</h4>
             ${data.supporting_evidence.map(e => `
-                <div style="padding: 8px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; font-size: 11px;">
+                <div style="padding: 8px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 6px; font-size: 11px; cursor: pointer;" onclick="openEvidenceDetailModal('${e.id}')">
                     <strong style="color: #2563eb;">${e.id}</strong>: ${e.title}
                 </div>
             `).join('')}
@@ -594,247 +873,111 @@ function closeRelEvidenceModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// 5. COMMUNICATIONS
-async function loadCommunicationsData() {
-    try {
-        const res = await fetch(`/api/communications?person_id=${currentPersonId}`);
-        const data = await res.json();
-
-        document.getElementById('comm-stat-calls').innerText = data.total_calls;
-        document.getElementById('comm-stat-msgs').innerText = data.total_messages;
-        document.getElementById('comm-stat-contacts').innerText = data.unique_contacts;
-        document.getElementById('comm-stat-last').innerText = data.last_contact;
-
-        const container = document.getElementById('comm-contact-tree');
-        if (container) {
-            container.innerHTML = data.communication_edges.map(c => `
-                <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #0284c7; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);" onclick="openRelEvidenceModal('${c.id}')">
-                    <div style="font-size: 12px; font-weight: 800; color: #0284c7;">📞 ${c.source} ➔ ${c.target}</div>
-                    <div style="font-size: 11px; color: #475569; margin-top: 2px;">${c.details}</div>
-                    <span class="badge badge-medium" style="margin-top: 4px;">Temporal Relationship Detected</span>
-                </div>
-            `).join('');
-        }
-    } catch (err) {
-        console.error(err);
-    }
+// MULTI-STEP ADD CASE WIZARD HANDLERS
+function openAddCaseWizard() {
+    const modal = document.getElementById('add-case-wizard-modal');
+    if (modal) modal.style.display = 'flex';
+    goToWizardStep(1);
 }
 
-// 6. FINANCIAL
-async function loadFinancialData() {
-    try {
-        const res = await fetch(`/api/financial?person_id=${currentPersonId}`);
-        const data = await res.json();
-        const container = document.getElementById('fin-transactions-list');
-        if (container) {
-            container.innerHTML = data.financial_edges.map(f => `
-                <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #16a34a; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
-                    <div style="font-size: 12px; font-weight: 800; color: #16a34a;">💳 ${f.source} ➔ ${f.target}</div>
-                    <div style="font-size: 11px; color: #475569; margin-top: 2px;">${f.details}</div>
-                    <span class="badge badge-high" style="margin-top: 4px;">Hawala Cash Transfer Indicator</span>
-                </div>
-            `).join('');
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// 7. BLOCKCHAIN
-async function loadBlockchainData() {
-    try {
-        const res = await fetch(`/api/blockchain?person_id=${currentPersonId}`);
-        const data = await res.json();
-        const container = document.getElementById('blk-list');
-        if (container) {
-            container.innerHTML = data.blockchain_edges.map(b => `
-                <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #d97706; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
-                    <div style="font-size: 12px; font-weight: 800; color: #d97706;">⛓️ ${b.source} ➔ ${b.target}</div>
-                    <div style="font-size: 11px; color: #475569; margin-top: 2px;">${b.details}</div>
-                </div>
-            `).join('');
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// 8. OSINT
-async function loadOSINTData() {
-    try {
-        const res = await fetch(`/api/osint?person_id=${currentPersonId}`);
-        const data = await res.json();
-        const container = document.getElementById('osint-list');
-        if (container) {
-            container.innerHTML = data.osint_edges.map(o => `
-                <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 3px solid #7c3aed; border-radius: 8px; margin-bottom: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
-                    <div style="font-size: 12px; font-weight: 800; color: #7c3aed;">🌐 ${o.source} ➔ ${o.target}</div>
-                    <div style="font-size: 11px; color: #475569; margin-top: 2px;">${o.details}</div>
-                </div>
-            `).join('');
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// 9. CCTV / DVR / NVR (3 SYNTHETIC DEMO VIDEOS)
-async function loadDVRData() {
-    try {
-        const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
-        const data = await res.json();
-        
-        const videoGrid = document.getElementById('dvr-video-grid-container');
-        if (videoGrid && data.dvr_videos) {
-            videoGrid.innerHTML = data.dvr_videos.map(v => `
-                <div class="dvr-card">
-                    <div class="dvr-thumb-wrapper">
-                        <img src="${v.video_thumbnail}" class="dvr-thumb-img" alt="CCTV Stream">
-                        <div class="dvr-rec-badge">● STREAM | ${v.camera_id}</div>
-                        <div class="dvr-play-overlay" onclick="openCCTVVideoModal('${v.camera_id}', '${v.event_title}', '${v.timestamp}', '${v.anpr_license_plate}', '${v.video_thumbnail}', '${v.description.replace(/'/g, "\\'")}')">▶</div>
-                    </div>
-                    <div class="dvr-info-body">
-                        <div style="font-size: 13px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">${v.event_title}</div>
-                        <div style="font-size: 10px; color: #2563eb; font-weight: 700; margin-bottom: 4px;">📍 ${v.location}</div>
-                        <div style="font-size: 11px; color: #475569; margin-bottom: 6px;"><strong>Identified Subjects:</strong> ${v.suspects_identified.join(', ')}</div>
-                        <span class="synthetic-banner" style="font-size: 9px;">${v.label}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-function openCCTVVideoModal(camId, title, timestamp, anpr, imgUrl, desc) {
-    const modal = document.getElementById('cctv-video-modal');
-    if (!modal) return;
-    document.getElementById('cctv-modal-cam').innerText = camId;
-    document.getElementById('cctv-modal-img').src = imgUrl;
-    document.getElementById('cctv-modal-desc').innerText = `${title} (${timestamp}) - ${desc}`;
-    modal.style.display = 'flex';
-}
-
-function closeCCTVVideoModal() {
-    const modal = document.getElementById('cctv-video-modal');
+function closeAddCaseWizard() {
+    const modal = document.getElementById('add-case-wizard-modal');
     if (modal) modal.style.display = 'none';
 }
 
-// 10. TIMELINE
-async function loadTimelineData() {
-    try {
-        const res = await fetch(`/api/timeline?case_id=${currentCaseId}`);
-        const data = await res.json();
-        const container = document.getElementById('timeline-container');
-        if (!container) return;
+function goToWizardStep(step) {
+    document.querySelectorAll('.wizard-step-item').forEach(el => el.classList.remove('active'));
+    document.getElementById(`wiz-step-${step}`).classList.add('active');
 
-        container.innerHTML = data.events.map(ev => `
-            <div class="timeline-item">
-                <div style="font-size: 10px; color: #2563eb; font-weight: 700;">[${ev.domain}] ${ev.timestamp}</div>
-                <div style="font-size: 12px; font-weight: 700; color: #0f172a; margin: 2px 0;">${ev.title}</div>
-                <div style="font-size: 11px; color: #475569;">${ev.details}</div>
-            </div>
-        `).join('');
-    } catch (err) {
-        console.error(err);
-    }
+    document.getElementById('wizard-panel-1').style.display = step === 1 ? 'block' : 'none';
+    document.getElementById('wizard-panel-2').style.display = step === 2 ? 'block' : 'none';
+    document.getElementById('wizard-panel-3').style.display = step === 3 ? 'block' : 'none';
 }
 
-// 11. EVIDENCE
-async function loadEvidenceData() {
-    try {
-        const res = await fetch(`/api/evidence?case_id=${currentCaseId}`);
-        const data = await res.json();
-        const tbody = document.getElementById('evidence-tbody');
-        if (!tbody) return;
+async function submitWizardForm(e) {
+    e.preventDefault();
+    const title = document.getElementById('wiz-case-title').value.trim();
+    const type = document.getElementById('wiz-case-type').value;
+    const priority = document.getElementById('wiz-case-priority').value;
+    const investigator = document.getElementById('wiz-case-investigator').value.trim();
+    const desc = document.getElementById('wiz-case-desc').value.trim();
 
-        tbody.innerHTML = data.evidence_items.map(e => `
-            <tr>
-                <td><strong>${e.id}</strong></td>
-                <td><span class="badge badge-verified">${e.evidence_type}</span></td>
-                <td>${e.title}</td>
-                <td>${e.source}</td>
-                <td><code style="font-size: 10px; color: #2563eb;">${e.file_hash.substring(0, 14)}...</code></td>
-                <td><span class="badge badge-verified">${e.integrity_status}</span></td>
-                <td>${e.provenance}</td>
-            </tr>
-        `).join('');
-    } catch (err) {
-        console.error(err);
+    const p_name = document.getElementById('wiz-p-name').value.trim();
+    const p_alias = document.getElementById('wiz-p-alias').value.trim();
+    const p_phone = document.getElementById('wiz-p-phone').value.trim();
+    const p_email = document.getElementById('wiz-p-email').value.trim();
+    const p_city = document.getElementById('wiz-p-city').value.trim();
+
+    const primary_suspect = {
+        id: `person_${p_name.toLowerCase().replace(/\s+/g, '_')}`,
+        name: p_name || 'Primary Subject',
+        alias: p_alias,
+        role: 'Primary Subject',
+        relationship_to_primary: 'Self',
+        age: 34,
+        gender: 'Male',
+        photo_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300',
+        phone: p_phone,
+        email: p_email,
+        city: p_city,
+        occupation: 'Subject',
+        organization: 'Under Investigation',
+        vehicle: '',
+        social_usernames: {},
+        wallet_address: '',
+        notes: desc,
+        risk_score: 85,
+        evidence_count: 5
+    };
+
+    const sec_name = document.getElementById('wiz-sec-name').value.trim();
+    const sec_role = document.getElementById('wiz-sec-role').value;
+    const sec_phone = document.getElementById('wiz-sec-phone').value.trim();
+
+    const secondary_suspects = [];
+    if (sec_name) {
+        secondary_suspects.push({
+            id: `person_${sec_name.toLowerCase().replace(/\s+/g, '_')}`,
+            name: sec_name,
+            alias: sec_name,
+            role: sec_role,
+            relationship_to_primary: 'Associate',
+            age: 30,
+            photo_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300',
+            phone: sec_phone,
+            email: '',
+            city: 'Pune',
+            occupation: 'Associate',
+            organization: '',
+            vehicle: '',
+            social_usernames: {},
+            wallet_address: '',
+            notes: '',
+            risk_score: 70,
+            evidence_count: 3
+        });
     }
-}
 
-// 12. ANALYTICS
-async function loadAnalyticsData() {
     try {
-        const res = await fetch('/api/graph');
-        const data = await res.json();
-        const tbody = document.getElementById('analytics-tbody');
-        if (tbody && data.analytics && data.analytics.influential_entities) {
-            tbody.innerHTML = data.analytics.influential_entities.map(e => `
-                <tr>
-                    <td><strong>${e.label}</strong></td>
-                    <td>${e.type}</td>
-                    <td>${e.degree_centrality}</td>
-                    <td>${e.betweenness_centrality}</td>
-                    <td>${e.pagerank}</td>
-                    <td><span class="badge badge-verified">${e.assessment}</span></td>
-                </tr>
-            `).join('');
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// 13. AUDIT
-async function loadAuditData() {
-    try {
-        const res = await fetch('/api/audit');
-        const data = await res.json();
-
-        const tbody = document.getElementById('audit-tbody');
-        if (tbody) {
-            tbody.innerHTML = data.blockchain_audit.map(b => `
-                <tr>
-                    <td>#${b.index}</td>
-                    <td>${b.timestamp}</td>
-                    <td><strong>${b.action_type}</strong></td>
-                    <td>${b.actor}</td>
-                    <td><code style="font-size: 10px; color: #2563eb;">${b.block_hash.substring(0, 14)}...</code></td>
-                    <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="simulateBlockTamper(${b.index})">Corrupt Payload</button></td>
-                </tr>
-            `).join('');
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-async function simulateBlockTamper(blockIndex) {
-    try {
-        const res = await fetch('/api/audit/tamper', {
+        const res = await fetch('/api/cases', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ block_index: blockIndex, field_to_tamper: 'title', tampered_value: '[TAMPERED]' })
+            body: JSON.stringify({
+                title,
+                description: desc,
+                investigation_type: type,
+                priority,
+                lead_investigator: investigator,
+                primary_suspect,
+                secondary_suspects
+            })
         });
         const data = await res.json();
-        alert(`🚨 TAMPER SIMULATION EXECUTED ON BLOCK #${blockIndex}!\nAudit Status: ${data.audit_verification.is_valid ? 'VALID' : 'FAILED - TAMPER DETECTED'}`);
-        loadAuditData();
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// 14. REPORTS
-async function loadReportData() {
-    try {
-        const res = await fetch('/api/reports/generate', { method: 'POST' });
-        const data = await res.json();
-        const previewer = document.getElementById('report-preview-frame');
-        if (previewer) {
-            previewer.srcdoc = data.html_content;
+        if (data.success) {
+            alert(`✅ Case ${data.case.id} Created Successfully!\nPrimary Subject: ${p_name}\nLogged on SHA-256 Audit Ledger.`);
+            closeAddCaseWizard();
+            loadInvestigationsData();
+            loadOverviewData();
         }
     } catch (err) {
         console.error(err);
@@ -852,7 +995,7 @@ function initGlobalSearch() {
             if (!query) return;
             const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
             const data = await res.json();
-            alert(`🔍 Search Results for "${query}":\nEntities Found: ${data.matched_nodes.length}\nEvidence Items: ${data.matched_evidence.length}\nRelationships: ${data.matched_relationships.length}`);
+            alert(`🔍 Global Search Results for "${query}":\nCases Found: ${data.matched_cases.length}\nEntities Found: ${data.matched_nodes.length}\nEvidence Items: ${data.matched_evidence.length}\nRelationships: ${data.matched_relationships.length}`);
         }
     });
 }

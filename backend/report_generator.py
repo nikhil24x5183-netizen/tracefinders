@@ -1,120 +1,124 @@
 import time
 from typing import Dict, List, Any
 
-class InvestigationReportGenerator:
+class ReportGenerator:
     def __init__(self):
         pass
 
-    def generate_report(self, case_data: Dict[str, Any], nodes: List[Dict[str, Any]], edges: List[Dict[str, Any]], evidence_items: List[Dict[str, Any]], fusion_data: Dict[str, Any]) -> Dict[str, Any]:
-        report_html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>TRACE-X Official Investigation Report - {case_data['id']}</title>
-            <style>
-                body {{ font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #1e293b; background: #ffffff; line-height: 1.6; }}
-                .header {{ border-bottom: 3px solid #0f172a; padding-bottom: 20px; margin-bottom: 30px; }}
-                .header h1 {{ margin: 0; color: #0f172a; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }}
-                .header p {{ margin: 5px 0 0 0; color: #64748b; font-size: 14px; }}
-                .disclaimer {{ background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px 16px; font-size: 13px; color: #991b1b; margin-bottom: 25px; }}
-                .section {{ margin-bottom: 30px; }}
-                .section h2 {{ font-size: 18px; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; color: #1e293b; }}
-                table {{ width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }}
-                th, td {{ border: 1px solid #cbd5e1; padding: 8px 12px; text-align: left; }}
-                th {{ background: #f1f5f9; font-weight: 600; color: #334155; }}
-                .lead-card {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; margin-top: 10px; }}
-                .badge {{ display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #e2e8f0; color: #334155; }}
-                .badge-high {{ background: #fee2e2; color: #991b1b; }}
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h1>TRACE-X — AI-Powered Criminal Network Intelligence Report</h1>
-                <p>CONFIDENTIAL // LAW ENFORCEMENT & INVESTIGATIVE USE ONLY // GENERATED ON {time.strftime('%Y-%m-%d %H:%M:%S IST')}</p>
-            </div>
-
-            <div class="disclaimer">
-                <strong>LEGAL DISCLAIMER:</strong> TRACE-X provides analytical decision support. Investigative findings represent evidence-supported associations requiring human verification and appropriate legal authorization. The system never automatically declares guilt or criminality.
-            </div>
-
-            <div class="section">
-                <h2>1. Case Metadata & Overview</h2>
-                <table>
-                    <tr><th>Case ID</th><td>{case_data['id']}</td><th>Priority</th><td><span class="badge badge-high">{case_data.get('priority', 'HIGH')}</span></td></tr>
-                    <tr><th>Title</th><td colspan="3">{case_data['title']}</td></tr>
-                    <tr><th>Subject Name</th><td>{case_data['subject_name']}</td><th>Status</th><td>{case_data['status']}</td></tr>
-                    <tr><th>Lead Investigator</th><td>{case_data.get('investigator', 'Ins. V. Rao')}</td><th>Agency</th><td>{case_data.get('agency', 'SCCIC')}</td></tr>
-                </table>
-            </div>
-
-            <div class="section">
-                <h2>2. Primary Subject Identifiers</h2>
-                <p><strong>Known Identifiers:</strong></p>
-                <ul>
-                    <li><strong>Phone:</strong> {", ".join(case_data['subject_known_identifiers'].get('phone', []))}</li>
-                    <li><strong>Email:</strong> {", ".join(case_data['subject_known_identifiers'].get('email', []))}</li>
-                    <li><strong>Aliases:</strong> {", ".join(case_data['subject_known_identifiers'].get('aliases', []))}</li>
-                    <li><strong>Vehicles:</strong> {", ".join(case_data['subject_known_identifiers'].get('vehicle', []))}</li>
-                    <li><strong>Wallets:</strong> {", ".join(case_data['subject_known_identifiers'].get('wallet', []))}</li>
-                </ul>
-            </div>
-
-            <div class="section">
-                <h2>3. Evidence Summary & Chain of Custody</h2>
-                <table>
-                    <thead>
-                        <tr><th>Evidence ID</th><th>Type</th><th>Title</th><th>Source</th><th>File Hash (SHA-256)</th><th>Status</th></tr>
-                    </thead>
-                    <tbody>
-                        {"".join([f"<tr><td>{e['id']}</td><td>{e['evidence_type']}</td><td>{e['title']}</td><td>{e['source']}</td><td><code>{e['file_hash'][:16]}...</code></td><td>{e['integrity_status']}</td></tr>" for e in evidence_items])}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="section">
-                <h2>4. Cross-Domain Evidence Fusion Lead</h2>
-                <div class="lead-card">
-                    <h3>{fusion_data.get('fusion_title', 'Cross-Domain Lead')}</h3>
-                    <p><strong>Overall Confidence:</strong> {fusion_data.get('explainable_ai', {}).get('CONFIDENCE', '93.4%')}</p>
-                    <p><strong>Explainable AI Synthesis (WHAT & WHY):</strong></p>
-                    <p>{fusion_data.get('explainable_ai', {}).get('WHAT', '')}</p>
-                    <p><em>{fusion_data.get('explainable_ai', {}).get('WHY', '')}</em></p>
-                    <h4>Recommended Human Review Actions:</h4>
-                    <ul>
-                        {"".join([f"<li>{action}</li>" for action in fusion_data.get('recommended_actions', [])])}
-                    </ul>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>5. Signatures & Approvals</h2>
-                <br><br>
-                <table style="border: none;">
-                    <tr style="border: none;">
-                        <td style="border: none; width: 50%;">
-                            ___________________________________<br>
-                            <strong>Lead Investigator Signature</strong><br>
-                            Date: 
-                        </td>
-                        <td style="border: none; width: 50%;">
-                            ___________________________________<br>
-                            <strong>Forensic Examiner / Supervisor</strong><br>
-                            Date: 
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </body>
-        </html>
-        """
+    def generate_report(
+        self,
+        case_data: Dict[str, Any],
+        nodes: List[Dict[str, Any]],
+        edges: List[Dict[str, Any]],
+        evidence_items: List[Dict[str, Any]],
+        fusion_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         
+        timestamp_str = time.strftime("%Y-%m-%d %H:%M:%S IST")
+        
+        primary_name = "Arjun Sharma"
+        if "primary_suspect" in case_data and isinstance(case_data["primary_suspect"], dict):
+            primary_name = case_data["primary_suspect"].get("name", "Arjun Sharma")
+        elif "subject_name" in case_data:
+            primary_name = case_data["subject_name"]
+
+        case_id = case_data.get("id", "TRX-2026-017")
+        case_title = case_data.get("title", "Operation Nexus")
+        status = case_data.get("status", "Active Investigation")
+        priority = case_data.get("priority", "High")
+        lead = case_data.get("lead_investigator", "Ins. Vikramaditya Rao (#INV-7092)")
+
+        explainable_ai = fusion_data.get('explainable_ai', {}) if isinstance(fusion_data, dict) else {}
+        what_str = explainable_ai.get('WHAT', 'Multi-hop chain correlated across CDR, DVR, and Financial logs.')
+        why_str = explainable_ai.get('WHY', 'Repeated temporal burst and account transfer correlation.')
+
+        evd_rows = ""
+        for e in evidence_items[:8]:
+            eid = e.get('id', '')
+            etype = e.get('evidence_type', '')
+            etitle = e.get('title', '')
+            esrc = e.get('source', '')
+            ehash = e.get('file_hash', '')[:14]
+            evd_rows += f"<tr><td><strong>{eid}</strong></td><td>{etype}</td><td>{etitle}</td><td>{esrc}</td><td><span class='badge'>{ehash}...</span></td></tr>"
+
+        html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TRACE-X Official Investigation Dossier - {case_id}</title>
+    <style>
+        body {{ font-family: 'Segoe UI', Arial, sans-serif; color: #0f172a; padding: 24px; line-height: 1.5; font-size: 13px; }}
+        h1, h2, h3 {{ color: #1e3a8a; font-weight: 800; border-bottom: 2px solid #2563eb; padding-bottom: 4px; }}
+        .meta-table, .data-table {{ width: 100%; border-collapse: collapse; margin-bottom: 16px; }}
+        .meta-table th, .meta-table td, .data-table th, .data-table td {{ padding: 8px 12px; border: 1px solid #cbd5e1; text-align: left; }}
+        .meta-table th, .data-table th {{ background-color: #f1f5f9; color: #334155; font-weight: 800; text-transform: uppercase; font-size: 11px; }}
+        .badge {{ background-color: #eff6ff; color: #2563eb; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px; }}
+        .disclaimer {{ background-color: #fffbeb; border: 1px solid #fde68a; padding: 12px; border-radius: 6px; font-size: 11px; margin-bottom: 20px; }}
+    </style>
+</head>
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 style="margin:0;">TRACE-X OFFICIAL INVESTIGATION REPORT</h1>
+            <div style="font-size: 11px; color: #64748b;">CONFIDENTIAL // SIH26189 CRIMINAL NETWORK ANALYSIS SYSTEM</div>
+        </div>
+        <div style="text-align: right; font-size: 11px; color: #64748b;">
+            <div>Generated: {timestamp_str}</div>
+            <div>Dossier Ref: {case_id}-DOSSIER</div>
+        </div>
+    </div>
+
+    <hr style="margin: 16px 0; border: none; border-top: 1px solid #cbd5e1;">
+
+    <div class="disclaimer">
+        <strong>⚖️ LEGAL NOTICE & COMPLIANCE STATEMENT:</strong><br>
+        This dossier is generated by the TRACE-X AI Evidence Fusion Workstation under SIH26189. All investigative leads are analytical decision support findings and require manual human verification under Sec 91 & Sec 65B of the Indian Evidence Act.
+    </div>
+
+    <h2>1. Executive Summary</h2>
+    <table class="meta-table">
+        <tr><th>Case Reference</th><td>{case_id}</td><th>Case Title</th><td>{case_title}</td></tr>
+        <tr><th>Primary Subject</th><td><strong>{primary_name}</strong></td><th>Status</th><td><span class="badge">{status}</span></td></tr>
+        <tr><th>Priority</th><td>{priority}</td><th>Lead Investigator</th><td>{lead}</td></tr>
+        <tr><th>Jurisdiction</th><td>Pune, Maharashtra</td><th>Agency</th><td>Special Cyber Crime Cell</td></tr>
+    </table>
+
+    <h2>2. Key Evidence & Correlated Entities</h2>
+    <table class="data-table">
+        <thead>
+            <tr><th>Evidence ID</th><th>Type</th><th>Title</th><th>Source</th><th>Hash Verification</th></tr>
+        </thead>
+        <tbody>
+            {evd_rows}
+        </tbody>
+    </table>
+
+    <h2>3. AI Evidence Fusion Findings</h2>
+    <p><strong>Primary Multi-Hop Chain:</strong> {what_str}</p>
+    <p><strong>Flagging Rationale:</strong> {why_str}</p>
+
+    <h2>4. Investigator Sign-Off</h2>
+    <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+        <div>
+            <div>__________________________________</div>
+            <div><strong>Ins. Vikramaditya Rao (#INV-7092)</strong></div>
+            <div>Lead Investigator, SCCIC</div>
+        </div>
+        <div>
+            <div>__________________________________</div>
+            <div><strong>Superintendent of Police</strong></div>
+            <div>Cyber Crime Division</div>
+        </div>
+    </div>
+
+</body>
+</html>"""
+
         return {
-            "case_id": case_data['id'],
-            "report_title": f"TRACE-X Investigation Report - {case_data['id']}",
-            "generated_timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "section_count": 16,
-            "html_content": report_html
+            "case_id": case_id,
+            "generated_at": timestamp_str,
+            "html_content": html_content
         }
 
-report_generator = InvestigationReportGenerator()
+report_generator = ReportGenerator()
