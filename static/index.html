@@ -631,6 +631,29 @@
         </div>
     </div>
 
+    <!-- Firebase Web SDK Integration (tracefinders-daa12) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyDEN_-jW6C8eVkVJQGEHxteklCW7xVxaEY",
+          authDomain: "tracefinders-daa12.firebaseapp.com",
+          databaseURL: "https://tracefinders-daa12-default-rtdb.firebaseio.com",
+          projectId: "tracefinders-daa12",
+          storageBucket: "tracefinders-daa12.firebasestorage.app",
+          messagingSenderId: "51041091595",
+          appId: "1:51041091595:web:19532f331086647418470e",
+          measurementId: "G-17YM10KS5V"
+        };
+        if (!window.firebaseAppInitialized && typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            if (firebase.analytics) firebase.analytics();
+            window.firebaseAppInitialized = true;
+            console.log("[FIREBASE] Web SDK Initialized for Project: tracefinders-daa12");
+        }
+    </script>
+
     <!-- JS Application Controller -->
     <script src="/static/js/app.js"></script>
 </body>
