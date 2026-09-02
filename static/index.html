@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRACE-X — AI Criminal Network Intelligence & Evidence Fusion System</title>
+    <title>TRACE-X — AI Criminal Network Intelligence & Evidence Fusion Workstation</title>
     <!-- CSS & Fonts -->
     <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,454 +14,493 @@
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
+    <!-- 1. GLOBAL LEFT SIDEBAR -->
     <aside class="sidebar" id="app-sidebar">
         <div class="brand">
             <div class="brand-icon">X</div>
             <div>
                 <div class="brand-text">TRACE-X</div>
-                <div class="sih-badge">SIH26189 // CYBER INTELLIGENCE</div>
+                <div class="sih-badge">AI CRIMINAL NETWORK INTELLIGENCE</div>
             </div>
         </div>
         <ul class="nav-list">
-            <li class="nav-item active" data-tab="overview"><span class="nav-icon">📊</span> Overview</li>
-            <li class="nav-item" data-tab="investigations"><span class="nav-icon">📁</span> Investigations</li>
-            <li class="nav-item" data-tab="evidence"><span class="nav-icon">📑</span> Evidence Center</li>
-            <li class="nav-item" data-tab="graph"><span class="nav-icon">🕸️</span> Network Graph</li>
-            <li class="nav-item" data-tab="timeline"><span class="nav-icon">⏱️</span> Multi-Domain Timeline</li>
+            <li class="nav-item active" data-tab="overview"><span class="nav-icon">📊</span> Dashboard</li>
+            <li class="nav-item" data-tab="investigations"><span class="nav-icon">📁</span> Cases</li>
+            <li class="nav-item" data-tab="fusion"><span class="nav-icon">🔗</span> Evidence Fusion</li>
+            <li class="nav-item" data-tab="graph"><span class="nav-icon">🕸️</span> Network</li>
             <li class="nav-item" data-tab="communications"><span class="nav-icon">📞</span> Communications</li>
-            <li class="nav-item" data-tab="financial"><span class="nav-icon">💳</span> Financial Intelligence</li>
-            <li class="nav-item" data-tab="blockchain"><span class="nav-icon">⛓️</span> Blockchain Workspace</li>
+            <li class="nav-item" data-tab="financial"><span class="nav-icon">💳</span> Financial</li>
+            <li class="nav-item" data-tab="blockchain"><span class="nav-icon">⛓️</span> Blockchain</li>
             <li class="nav-item" data-tab="osint"><span class="nav-icon">🌐</span> OSINT Workspace</li>
-            <li class="nav-item" data-tab="dvr"><span class="nav-icon">📹</span> DVR/NVR Forensics</li>
-            <li class="nav-item" data-tab="analytics"><span class="nav-icon">🧠</span> Analytics & XAI</li>
-            <li class="nav-item" data-tab="fusion"><span class="nav-icon">🔗</span> Evidence Fusion & Leads</li>
-            <li class="nav-item" data-tab="audit"><span class="nav-icon">🛡️</span> Audit & Chain of Custody</li>
-            <li class="nav-item" data-tab="reports"><span class="nav-icon">📄</span> Reports & Settings</li>
+            <li class="nav-item" data-tab="dvr"><span class="nav-icon">📹</span> CCTV / DVR / NVR</li>
+            <li class="nav-item" data-tab="timeline"><span class="nav-icon">⏱️</span> Timeline</li>
+            <li class="nav-item" data-tab="analytics"><span class="nav-icon">🧠</span> Analytics</li>
+            <li class="nav-item" data-tab="reports"><span class="nav-icon">📄</span> Reports</li>
+            <li class="nav-item" data-tab="audit"><span class="nav-icon">🛡️</span> Audit Trail</li>
+            <li class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span> Settings</li>
         </ul>
+        <div class="sidebar-footer">
+            <div style="font-weight: 700; color: #f8fafc; margin-bottom: 2px;">Ins. Vikramaditya Rao</div>
+            <div style="font-size: 10px; color: #10b981;">● System Status: Secure / Audit Enabled</div>
+        </div>
     </aside>
 
-    <!-- Main Wrapper -->
+    <!-- MAIN APPLICATION WRAPPER -->
     <div class="main-wrapper">
         
-        <!-- Top Header Bar -->
-        <header class="top-header">
-            <div style="display: flex; align-items: center; gap: 14px;">
-                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar Navigation">☰</button>
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="global-search-input" class="search-input" placeholder="Global Search (Person, Phone, Acc, Wallet, Vehicle, Case)...">
+        <!-- 2. GLOBAL CASE CONTEXT BAR -->
+        <header class="context-bar">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
+                <div class="context-meta-group">
+                    <div class="context-item">
+                        <span class="context-label">CASE:</span>
+                        <span id="ctx-case-id" class="context-val">TRX-2026-017</span>
+                    </div>
+                    <div class="context-item">
+                        <span class="context-label">SUBJECT:</span>
+                        <span id="ctx-subject-name" class="context-val" style="color: #38bdf8;">Arjun Sharma</span>
+                    </div>
+                    <div class="context-item">
+                        <span class="context-label">STATUS:</span>
+                        <span id="ctx-status" class="badge badge-verified">Active</span>
+                    </div>
+                    <div class="context-item">
+                        <span class="context-label">PRIORITY:</span>
+                        <span id="ctx-priority" class="badge badge-high">High</span>
+                    </div>
                 </div>
             </div>
-            <div class="header-actions">
-                <!-- GLOBAL SUSPECT & CASE SELECTOR -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 11px; font-weight: 800; color: #2563eb;">CASE & SUSPECT:</span>
-                    <select id="global-person-select" class="person-select-dropdown" onchange="filterAllModulesByPerson(this.value)">
-                        <option value="ALL">ALL SUSPECTS & ENTITIES</option>
-                        <option value="person_rahul_sharma" selected>🔴 Rahul Sharma (Primary Suspect)</option>
-                        <option value="person_vikram_singh">🔵 Vikram Singh (Secondary Suspect / Driver)</option>
-                        <option value="person_amit_patel">🟢 Amit Patel (Secondary Suspect / Hawala Director)</option>
-                        <option value="person_priya_verma">🟡 Priya Verma (Accountant)</option>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 10px; font-weight: 800; color: #64748b;">CHANGE CASE:</span>
+                    <select id="select-change-case" class="select-custom" onchange="changeActiveCase(this.value)">
+                        <option value="TRX-2026-017" selected>TRX-2026-017 (Operation Nexus)</option>
+                        <option value="TRX-2026-014">TRX-2026-014 (Operation Metro)</option>
                     </select>
                 </div>
-                <div class="user-badge">
-                    <div class="avatar">VR</div>
-                    <div>
-                        <div style="font-weight: 600; color: var(--text-main);">Ins. Vikramaditya Rao</div>
-                        <div style="font-size: 10px;">Level 3 Lead Investigator</div>
-                    </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 10px; font-weight: 800; color: #64748b;">CHANGE PERSON:</span>
+                    <select id="select-change-person" class="select-custom" onchange="changeActivePerson(this.value)">
+                        <option value="person_arjun_sharma" selected>🔴 Arjun Sharma (Primary Subject)</option>
+                        <option value="person_rohan_mehta">🔵 Rohan Mehta (Secondary Subject)</option>
+                        <option value="person_priya_joshi">🟢 Priya Joshi (Secondary Subject)</option>
+                        <option value="person_vikram_patil">🟡 Vikram Patil (Secondary Subject)</option>
+                        <option value="person_neha_kulkarni">🟣 Neha Kulkarni (Person of Interest)</option>
+                    </select>
                 </div>
             </div>
         </header>
 
-        <!-- Legal Disclaimer Banner -->
-        <div class="disclaimer-banner">
-            <div><strong>⚖️ LEGAL DISCLAIMER:</strong> TRACE-X provides analytical decision support. Investigative findings represent evidence-supported associations requiring human verification and appropriate legal authorization. The system never automatically declares guilt or criminality.</div>
-            <span class="badge badge-verified">SIH 2026 PROTOTYPE</span>
+        <!-- BREADCRUMB & SYNTHETIC DATA NOTICE -->
+        <div class="breadcrumb-bar">
+            <div>
+                <span id="breadcrumb-text">CASE > TRX-2026-017 > ARJUN SHARMA</span>
+            </div>
+            <span class="synthetic-banner">⚠️ ALL DEMO INFORMATION IS SYNTHETIC & LABELLED AS DEMO DATA</span>
         </div>
 
-        <!-- Main Content Area with 14 Views -->
+        <!-- MAIN CONTENT AREA WITH 14 MODULE VIEWS -->
         <main class="content-area">
 
-            <!-- 1. OVERVIEW VIEW -->
+            <!-- 1. DASHBOARD / OVERVIEW -->
             <section id="view-overview" class="tab-view active">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Investigation Overview</h2>
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Investigative Dashboard</h2>
                 <div class="grid-stats">
                     <div class="stat-card">
-                        <div class="stat-title">Active Cases</div>
-                        <div class="stat-val" id="stat-active-cases">2</div>
-                        <div class="stat-sub">Case TRACE-2026-017 Selected</div>
+                        <div class="stat-title">Primary Subject</div>
+                        <div class="stat-val" style="font-size: 18px; color: #38bdf8;" id="overview-primary-name">Arjun Sharma</div>
+                        <div class="stat-sub">Case TRX-2026-017</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">Evidence Items</div>
-                        <div class="stat-val" id="stat-evidence">6</div>
-                        <div class="stat-sub">100% Hash Verified</div>
+                        <div class="stat-title">Secondary Subjects</div>
+                        <div class="stat-val" id="stat-sec-count">4</div>
+                        <div class="stat-sub">Associates & Contacts</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Entities Extracted</div>
-                        <div class="stat-val" id="stat-entities">29</div>
-                        <div class="stat-sub">Persons, Wallets, Vehicles</div>
+                        <div class="stat-val" id="stat-entities">27</div>
+                        <div class="stat-sub">Phones, Accounts, Wallets</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Evidence Items</div>
+                        <div class="stat-val" id="stat-evidence">82</div>
+                        <div class="stat-sub">100% Hash Verified</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">Relationships</div>
-                        <div class="stat-val" id="stat-relationships">24</div>
+                        <div class="stat-val" id="stat-relationships">46</div>
                         <div class="stat-sub">Multi-Domain Links</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-title">Suspicious Patterns</div>
-                        <div class="stat-val" id="stat-anomalies">3</div>
-                        <div class="stat-sub">Hawala & Burst Flags</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-title">High-Priority Leads</div>
-                        <div class="stat-val" id="stat-leads">1</div>
-                        <div class="stat-sub">Multi-Hop Chain Discovered</div>
+                        <div class="stat-title">Temporal Events</div>
+                        <div class="stat-val" id="stat-events">19</div>
+                        <div class="stat-sub">Timeline Correlated</div>
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <div class="card">
-                        <div class="card-title">Recent Investigative Activity Feed</div>
-                        <div id="activity-feed">Loading recent activity...</div>
+                        <div class="card-title">Recent Activity Feed</div>
+                        <div id="activity-feed">Loading activity...</div>
                     </div>
                     <div class="card">
-                        <div class="card-title">Real-Time Threat Alert Panel</div>
-                        <div id="alert-panel">Loading alerts...</div>
+                        <div class="card-title">🧠 AI Investigative Leads</div>
+                        <div id="ai-leads-panel">Loading AI leads...</div>
                     </div>
                 </div>
             </section>
 
-            <!-- 2. INVESTIGATIONS WORKSPACE -->
+            <!-- 2. CASES SECTION -->
             <section id="view-investigations" class="tab-view">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h2 style="font-size: 20px; font-weight: 800;">Investigation Workspace</h2>
-                    <button class="btn" onclick="openCreateCaseModal()">👤+ Add New Case</button>
+                    <h2 style="font-size: 18px; font-weight: 800;">Case Registry</h2>
+                    <button class="btn" onclick="openAddCaseWizard()">+ ADD NEW CASE</button>
                 </div>
-                <div id="investigations-list">Loading cases...</div>
+                <div id="cases-list-container">Loading cases...</div>
             </section>
 
-            <!-- 3. EVIDENCE CENTER -->
-            <section id="view-evidence" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Evidence Ingestion & Chain of Custody</h2>
+            <!-- 3. EVIDENCE FUSION (PRIMARY WORKSPACE) -->
+            <section id="view-fusion" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Evidence Fusion Workspace</h2>
                 <div class="card">
-                    <div class="card-title">
-                        <span>Authorized Evidence Registry</span>
-                        <span id="evidence-filter-indicator" class="badge badge-verified">Filtered for Selected Suspect</span>
-                    </div>
-                    <table class="table-custom">
-                        <thead>
-                            <tr>
-                                <th>Evidence ID</th>
-                                <th>Type</th>
-                                <th>Title</th>
-                                <th>Source</th>
-                                <th>SHA-256 Hash</th>
-                                <th>Integrity</th>
-                                <th>Provenance / Custody</th>
-                            </tr>
-                        </thead>
-                        <tbody id="evidence-tbody">
-                            <tr><td colspan="7">Loading evidence items...</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="card-title">Concise Multi-Hop Investigation Chain</div>
+                    <div id="fusion-chain-container">Loading fusion engine...</div>
                 </div>
             </section>
 
-            <!-- 4. NETWORK GRAPH WITH COMPACT SHORT-LINK TREE LAYOUT -->
+            <!-- 4. NETWORK GRAPH (TREE VIEW DEFAULT & LAYOUT SWITCHER) -->
             <section id="view-graph" class="tab-view">
                 <div class="card-title" style="margin-bottom: 8px;">
-                    <span>Knowledge Graph Analyzer</span>
-                    <div>
-                        <span class="badge badge-verified">Compact Short-Link Tree View</span>
-                        <span class="badge badge-verified">Indian Suspect Avatars</span>
-                    </div>
+                    <span>Knowledge Network Graph</span>
+                    <button class="btn btn-secondary" onclick="focusSelectedPerson()">🎯 FOCUS PERSON</button>
                 </div>
 
-                <!-- TREE & GRAPH LAYOUT TOOLBAR -->
+                <!-- LAYOUT TOOLBAR (MASTER PROMPT REQUIREMENT 11 & 12) -->
                 <div class="graph-toolbar">
-                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                        <span style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">LAYOUT MODE:</span>
-                        <button id="btn-layout-tree-ud" class="graph-layout-btn active" onclick="changeGraphLayout('tree-ud')">🌲 Tree (Top-Down)</button>
-                        <button id="btn-layout-tree-lr" class="graph-layout-btn" onclick="changeGraphLayout('tree-lr')">🌲 Tree (Left-Right)</button>
-                        <button id="btn-layout-force" class="graph-layout-btn" onclick="changeGraphLayout('force')">🕸️ Compact Force</button>
-                        <button id="btn-layout-circular" class="graph-layout-btn" onclick="changeGraphLayout('circular')">⭕ Circular Cluster</button>
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        <span style="font-size: 10px; font-weight: 800; color: #64748b;">VIEW:</span>
+                        <button id="btn-layout-tree-ud" class="graph-layout-btn active" onclick="changeGraphLayout('tree-ud')">Tree</button>
+                        <button id="btn-layout-radial" class="graph-layout-btn" onclick="changeGraphLayout('radial')">Radial</button>
+                        <button id="btn-layout-hierarchy" class="graph-layout-btn" onclick="changeGraphLayout('hierarchy')">Hierarchy</button>
+                        <button id="btn-layout-timeline" class="graph-layout-btn" onclick="changeGraphLayout('timeline')">Timeline</button>
+                        <button id="btn-layout-compact" class="graph-layout-btn" onclick="changeGraphLayout('compact')">Compact</button>
                     </div>
-                    <div style="font-size: 11px; color: #64748b; font-weight: 600;">💡 Compact links configured for quick visual understanding</div>
+                    <div style="font-size: 11px; color: #64748b; font-weight: 600;">💡 Click node for profile drawer | Click edge for relationship evidence</div>
                 </div>
 
                 <div id="graph-canvas"></div>
+            </section>
 
-                <div id="entity-drawer" class="card" style="display: none; margin-top: 16px; border-left: 4px solid var(--accent-cyan);">
-                    <div style="display: flex; gap: 14px; align-items: center;">
-                        <img id="drawer-entity-avatar" src="" style="width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid #2563eb; display: none;">
-                        <div>
-                            <h3 style="font-size: 16px;">Entity Details: <span id="drawer-entity-name" style="color: var(--accent-cyan);"></span></h3>
-                            <div style="font-size: 12px; margin-top: 4px; display: flex; gap: 16px;">
-                                <div>Type: <strong id="drawer-entity-type"></strong></div>
-                                <div>Threat Score: <strong id="drawer-entity-risk" style="color: var(--status-red);"></strong></div>
-                                <div>Status: <strong id="drawer-entity-status"></strong></div>
-                            </div>
-                        </div>
+            <!-- 5. COMMUNICATIONS -->
+            <section id="view-communications" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Communication Intelligence</h2>
+                <div class="card">
+                    <div class="card-title">
+                        <span>Communication with Selected Person: <strong id="comm-person-name" style="color: #38bdf8;">Arjun Sharma</strong></span>
                     </div>
-                    <p id="drawer-entity-details" style="font-size: 12px; color: var(--text-muted); margin-top: 10px;"></p>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+                        <div class="stat-card"><div class="stat-title">Calls</div><div class="stat-val" id="comm-stat-calls">42</div></div>
+                        <div class="stat-card"><div class="stat-title">Messages</div><div class="stat-val" id="comm-stat-msgs">18</div></div>
+                        <div class="stat-card"><div class="stat-title">Unique Contacts</div><div class="stat-val" id="comm-stat-contacts">9</div></div>
+                        <div class="stat-card"><div class="stat-title">Last Contact</div><div class="stat-val" style="font-size: 14px;" id="comm-stat-last">17 Aug 2026</div></div>
+                    </div>
+                    <div id="comm-contact-tree">Loading contact tree...</div>
                 </div>
             </section>
 
-            <!-- 5. MULTI-DOMAIN TIMELINE -->
-            <section id="view-timeline" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Multi-Domain Chronological Timeline</h2>
+            <!-- 6. FINANCIAL -->
+            <section id="view-financial" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Financial Intelligence</h2>
                 <div class="card">
-                    <div class="card-title">Chronological Event Stream (Correlation Window: ±24 Hours around Incident #1042)</div>
+                    <div class="card-title">Financial Activity: <strong id="fin-person-name" style="color: #38bdf8;">Arjun Sharma</strong></div>
+                    <div id="fin-summary-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                        <div class="stat-card"><div class="stat-title">Total Volume</div><div class="stat-val" style="font-size: 18px;" id="fin-stat-total">₹70,00,000</div></div>
+                        <div class="stat-card"><div class="stat-title">Incoming</div><div class="stat-val" style="font-size: 18px; color: #10b981;" id="fin-stat-in">₹45,00,000</div></div>
+                        <div class="stat-card"><div class="stat-title">Outgoing</div><div class="stat-val" style="font-size: 18px; color: #ef4444;" id="fin-stat-out">₹25,00,000</div></div>
+                    </div>
+                    <div id="fin-transactions-list">Loading financial records...</div>
+                </div>
+            </section>
+
+            <!-- 7. BLOCKCHAIN -->
+            <section id="view-blockchain" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Blockchain Intelligence</h2>
+                <div class="card">
+                    <div class="card-title">Wallet Activity: <strong id="blk-person-name" style="color: #38bdf8;">Arjun Sharma</strong></div>
+                    <div id="blk-list">Loading blockchain records...</div>
+                </div>
+            </section>
+
+            <!-- 8. OSINT WORKSPACE -->
+            <section id="view-osint" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">OSINT Workspace</h2>
+                <div class="card">
+                    <div class="card-title">Public Intelligence Correlated for: <strong id="osint-person-name" style="color: #38bdf8;">Arjun Sharma</strong></div>
+                    <div id="osint-list">Loading OSINT intel...</div>
+                </div>
+            </section>
+
+            <!-- 9. CCTV / DVR / NVR (3 SYNTHETIC DEMO VIDEOS - REQUIREMENT 19) -->
+            <section id="view-dvr" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">CCTV / DVR / NVR Surveillance Workspace</h2>
+                <div class="card">
+                    <div class="card-title">
+                        <span>📹 Synthetic Demo Surveillance Videos</span>
+                        <span class="synthetic-banner">SIMULATED INVESTIGATIVE SCENARIO</span>
+                    </div>
+                    <div id="dvr-video-grid-container" class="dvr-video-grid">Loading surveillance videos...</div>
+                </div>
+            </section>
+
+            <!-- 10. TIMELINE -->
+            <section id="view-timeline" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Global Case Timeline</h2>
+                <div class="card">
+                    <div class="card-title">Chronological Event Stream</div>
                     <div id="timeline-container" class="timeline-list">Loading timeline...</div>
                 </div>
             </section>
 
-            <!-- 6. COMMUNICATIONS WITH SUSPECT CALL REPLAY -->
-            <section id="view-communications" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Communication Intelligence (CDR Analytics)</h2>
-                <div class="card">
-                    <div class="card-title">
-                        <span>Case Communication Log & Flagged Call Pairs</span>
-                        <span id="comm-filter-indicator" class="badge badge-verified">Filtered for Selected Suspect</span>
-                    </div>
-                    <div id="comm-flagged-list">Loading CDR intelligence...</div>
-                </div>
-            </section>
-
-            <!-- 7. FINANCIAL INTELLIGENCE -->
-            <section id="view-financial" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Financial Intelligence & Hawala Risk Indicators</h2>
-                <div class="card">
-                    <div class="card-title">
-                        <span>High-Velocity Transaction Chains & Informal Value Transfer Anomalies</span>
-                        <span id="fin-filter-indicator" class="badge badge-verified">Filtered for Selected Suspect</span>
-                    </div>
-                    <div id="fin-list">Loading financial records...</div>
-                </div>
-            </section>
-
-            <!-- 8. BLOCKCHAIN WORKSPACE -->
-            <section id="view-blockchain" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Blockchain Intelligence & Wallet Analytics</h2>
-                <div class="card">
-                    <div class="card-title">On-Chain Token Flows & Crypto Off-Ramp Alerts</div>
-                    <div id="blk-list">Loading on-chain data...</div>
-                </div>
-            </section>
-
-            <!-- 9. OSINT WORKSPACE WITH INDIAN SUSPECT PROFILES -->
-            <section id="view-osint" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">OSINT Workspace & Suspect Dossiers</h2>
-                <div class="card">
-                    <div class="card-title">Case Suspect Dossiers & Social Media Handles</div>
-                    <div id="osint-suspects-container">Loading suspect dossiers...</div>
-                </div>
-                <div class="card">
-                    <div class="card-title">Correlated Public Threat Intel & Darkweb Pastes</div>
-                    <div id="osint-list">Loading OSINT findings...</div>
-                </div>
-            </section>
-
-            <!-- 10. DVR/NVR FORENSICS WITH REALISTIC CCTV SURVEILLANCE VIDEOS -->
-            <section id="view-dvr" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">DVR/NVR Forensic Video Analysis</h2>
-                
-                <div class="card">
-                    <div class="card-title">
-                        <span>📹 Case CCTV Surveillance Stream Carvings (Real Footage Style)</span>
-                        <span class="badge badge-verified">ANPR & Indian Suspect Matched</span>
-                    </div>
-                    <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Realistic CCTV video event stream carvings cross-referenced with vehicle ANPR and facial recognition logs.</p>
-                    <div id="dvr-video-grid-container" class="dvr-video-grid">Loading DVR videos...</div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">ANPR License Plate Detections & Frame Carving Logs</div>
-                    <div id="dvr-list">Loading DVR logs...</div>
-                </div>
-            </section>
-
-            <!-- 11. ANALYTICS & XAI -->
+            <!-- 11. ANALYTICS -->
             <section id="view-analytics" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Graph Analytics & Influential Entity Ranking</h2>
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Graph Centrality Analytics</h2>
                 <div class="card">
-                    <div class="card-title">Network Centrality Metrics (Degree, Betweenness, PageRank)</div>
+                    <div class="card-title">Entity Ranking Metrics</div>
                     <table class="table-custom">
                         <thead>
                             <tr>
                                 <th>Entity Label</th>
                                 <th>Type</th>
-                                <th>Degree Centrality</th>
+                                <th>Degree</th>
                                 <th>Betweenness</th>
                                 <th>PageRank</th>
-                                <th>Network Assessment</th>
+                                <th>Assessment</th>
                             </tr>
                         </thead>
                         <tbody id="analytics-tbody">
-                            <tr><td colspan="6">Loading graph metrics...</td></tr>
+                            <tr><td colspan="6">Loading analytics...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- 12. EVIDENCE FUSION & LEADS -->
-            <section id="view-fusion" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Evidence Fusion & Explainable AI Lead Generator</h2>
+            <!-- 12. REPORTS -->
+            <section id="view-reports" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Official Investigation Report</h2>
                 <div class="card">
-                    <div class="card-title">Multi-Domain Evidence Chain Synthesis</div>
-                    <div id="fusion-chain-container">Loading Evidence Fusion Engine...</div>
+                    <div class="card-title">
+                        <span>TRACE-X Official Investigation Dossier</span>
+                        <button class="btn" onclick="window.print()">🖨️ Print / Export PDF</button>
+                    </div>
+                    <iframe id="report-preview-frame" style="width: 100%; height: 600px; border: 1px solid var(--border-color); background: #ffffff; border-radius: 6px;"></iframe>
                 </div>
             </section>
 
-            <!-- 13. AUDIT & CHAIN OF CUSTODY -->
+            <!-- 13. AUDIT TRAIL -->
             <section id="view-audit" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Cryptographic Chain of Custody & Tamper Auditor</h2>
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">Cryptographic Audit Trail</h2>
                 <div class="card">
                     <div class="card-title">
-                        <span>SHA-256 Immutable Evidence Block Explorer</span>
-                        <span id="blockchain-status" class="badge badge-verified">Checking Blockchain Integrity...</span>
+                        <span>SHA-256 Immutable Audit Explorer</span>
+                        <span id="blockchain-status" class="badge badge-verified">Verified</span>
                     </div>
                     <table class="table-custom">
                         <thead>
                             <tr>
                                 <th>Block #</th>
                                 <th>Timestamp</th>
-                                <th>Action Type</th>
+                                <th>Action</th>
                                 <th>Actor</th>
                                 <th>SHA-256 Hash</th>
-                                <th>SIH Tamper Test</th>
+                                <th>Tamper Test</th>
                             </tr>
                         </thead>
                         <tbody id="audit-tbody">
-                            <tr><td colspan="6">Loading blockchain ledger...</td></tr>
+                            <tr><td colspan="6">Loading audit blocks...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- 14. REPORTS & SETTINGS -->
-            <section id="view-reports" class="tab-view">
-                <h2 style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">Investigation Reports & Export</h2>
+            <!-- 14. SETTINGS -->
+            <section id="view-settings" class="tab-view">
+                <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 14px;">System Settings</h2>
                 <div class="card">
-                    <div class="card-title">
-                        <span>Official TRACE-X Investigation Report Preview</span>
-                        <button class="btn" onclick="window.print()">🖨️ Print / Export PDF Report</button>
-                    </div>
-                    <iframe id="report-preview-frame" style="width: 100%; height: 600px; border: 1px solid var(--border-color); background: #ffffff; border-radius: 6px;"></iframe>
+                    <div class="card-title">Workstation Configuration</div>
+                    <p style="font-size: 12px; color: var(--text-muted);">Configured for SIH26189 Blockchain & Cybersecurity Theme.</p>
                 </div>
             </section>
 
         </main>
     </div>
 
-    <!-- HIGH-FIDELITY CREATE NEW CASE MODAL WITH SECONDARY SUSPECTS & SOCIAL HANDLES -->
-    <div id="create-case-modal" class="modal-overlay">
+    <!-- 7. RIGHT-SIDE SLIDING PERSON DETAIL DRAWER (MASTER PROMPT REQUIREMENT 7) -->
+    <div id="person-detail-drawer" class="right-drawer-overlay">
+        <div class="drawer-header">
+            <div style="font-size: 14px; font-weight: 800; color: #f8fafc;">PERSON PROFILE DOSSIER</div>
+            <button type="button" style="background: transparent; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;" onclick="closePersonDrawer()">✕</button>
+        </div>
+        
+        <!-- DRAWER TABS -->
+        <div class="drawer-tabs">
+            <button class="drawer-tab-btn active" onclick="switchDrawerTab('overview')">Overview</button>
+            <button class="drawer-tab-btn" onclick="switchDrawerTab('evidence')">Evidence</button>
+            <button class="drawer-tab-btn" onclick="switchDrawerTab('comm')">Communication</button>
+            <button class="drawer-tab-btn" onclick="switchDrawerTab('fin')">Financial</button>
+            <button class="drawer-tab-btn" onclick="switchDrawerTab('osint')">OSINT</button>
+            <button class="drawer-tab-btn" onclick="switchDrawerTab('blk')">Blockchain</button>
+            <button class="drawer-tab-btn" onclick="switchDrawerTab('dvr')">CCTV/DVR</button>
+            <button class="drawer-tab-btn" onclick="switchDrawerTab('net')">Network</button>
+        </div>
+
+        <div class="drawer-body" id="drawer-content-area">
+            Loading person dossier...
+        </div>
+    </div>
+
+    <!-- RELATIONSHIP EVIDENCE DRAWER MODAL (MASTER PROMPT REQUIREMENT 13) -->
+    <div id="rel-evidence-modal" class="modal-overlay">
+        <div class="modal-card" style="width: 580px;">
+            <div class="modal-header">
+                <div style="font-size: 16px; font-weight: 800; color: #38bdf8;">RELATIONSHIP EVIDENCE DETAIL</div>
+                <button type="button" class="modal-close-btn" onclick="closeRelEvidenceModal()">✕</button>
+            </div>
+            <div id="rel-modal-body">Loading relationship details...</div>
+        </div>
+    </div>
+
+    <!-- MULTI-STEP ADD CASE WIZARD MODAL (MASTER PROMPT REQUIREMENTS 4, 5, 6) -->
+    <div id="add-case-wizard-modal" class="modal-overlay">
         <div class="modal-card">
             
             <div class="modal-header">
-                <div class="modal-header-title">
-                    <div class="modal-header-icon">👤+</div>
-                    <span>Add New Investigation Case</span>
-                </div>
-                <button type="button" class="modal-close-btn" onclick="closeCreateCaseModal()">✕</button>
+                <div style="font-size: 16px; font-weight: 800; color: #f8fafc;">+ ADD NEW CASE WORKFLOW</div>
+                <button type="button" class="modal-close-btn" onclick="closeAddCaseWizard()">✕</button>
             </div>
 
-            <form id="create-case-form" onsubmit="submitNewCase(event)">
+            <!-- WIZARD STEP INDICATOR -->
+            <div class="wizard-steps-bar">
+                <span id="wiz-step-1" class="wizard-step-item active">1. Case Information</span>
+                <span id="wiz-step-2" class="wizard-step-item">2. Primary Suspect</span>
+                <span id="wiz-step-3" class="wizard-step-item">3. Secondary Subjects</span>
+            </div>
+
+            <form id="wizard-form" onsubmit="submitWizardForm(event)">
                 
-                <div class="form-group">
-                    <label class="form-label">CASE FULL TITLE <span class="req">*</span></label>
-                    <input type="text" id="case-input-title" required class="form-field-input" placeholder="e.g. Operation Cipher Net / SIM Swapping Inquiry">
-                </div>
-
-                <div class="form-grid-2">
-                    <div>
-                        <label class="form-label">PRIMARY SUSPECT FULL NAME <span class="req">*</span></label>
-                        <input type="text" id="case-input-subject" required class="form-field-input" placeholder="e.g. Rahul Sharma">
+                <!-- STEP 1: CASE INFORMATION -->
+                <div id="wizard-panel-1">
+                    <div class="form-group">
+                        <label class="form-label">Case Name / Title *</label>
+                        <input type="text" id="wiz-case-title" required class="form-field-input" placeholder="e.g. Operation Nexus">
                     </div>
-                    <div>
-                        <label class="form-label">PRIORITY LEVEL <span class="req">*</span></label>
-                        <select id="case-input-priority" class="form-field-input">
-                            <option value="HIGH">HIGH PRIORITY</option>
-                            <option value="MEDIUM">MEDIUM PRIORITY</option>
-                            <option value="LOW">LOW PRIORITY</option>
-                        </select>
+                    <div class="form-grid-2">
+                        <div>
+                            <label class="form-label">Investigation Type</label>
+                            <input type="text" id="wiz-case-type" class="form-field-input" value="Cyber-Financial Crime">
+                        </div>
+                        <div>
+                            <label class="form-label">Priority</label>
+                            <select id="wiz-case-priority" class="form-field-input">
+                                <option value="High" selected>High Priority</option>
+                                <option value="Medium">Medium Priority</option>
+                                <option value="Low">Low Priority</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-
-                <!-- PRIMARY SUSPECT INFO & SOCIAL PROFILES -->
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 16px;">
-                    <div style="font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; margin-bottom: 8px;">👤 Primary Suspect Contact & Social Handles</div>
-                    <div class="form-grid-2" style="margin-bottom: 8px;">
-                        <input type="text" id="case-input-phone" class="form-field-input" placeholder="Phone e.g. +91-98765-10001">
-                        <input type="email" id="case-input-email" class="form-field-input" placeholder="Email e.g. rahul.sharma@protonmail.com">
+                    <div class="form-group">
+                        <label class="form-label">Lead Investigator</label>
+                        <input type="text" id="wiz-case-investigator" class="form-field-input" value="Ins. Vikramaditya Rao (#INV-7092)">
                     </div>
-                    <div class="form-grid-2" style="margin-bottom: 0;">
-                        <input type="text" id="case-input-telegram" class="form-field-input" placeholder="Telegram handle e.g. @cipher_king">
-                        <input type="text" id="case-input-darkweb" class="form-field-input" placeholder="Darkweb Alias e.g. shadow_broker99">
+                    <div class="form-group">
+                        <label class="form-label">Case Description</label>
+                        <textarea id="wiz-case-desc" rows="2" class="form-field-input" placeholder="Describe key investigative facts..."></textarea>
                     </div>
-                </div>
-
-                <!-- SECONDARY SUSPECT INFO -->
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; margin-bottom: 16px;">
-                    <div style="font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin-bottom: 8px;">👥 Secondary Suspect (Co-Conspirator / Driver / Hawala Agent)</div>
-                    <div class="form-grid-2" style="margin-bottom: 8px;">
-                        <input type="text" id="case-input-sec-name" class="form-field-input" placeholder="Secondary Suspect Name e.g. Vikram Singh">
-                        <input type="text" id="case-input-sec-role" class="form-field-input" placeholder="Role e.g. Driver / Hawala Coordinator">
-                    </div>
-                    <div class="form-grid-2" style="margin-bottom: 0;">
-                        <input type="text" id="case-input-sec-phone" class="form-field-input" placeholder="Phone e.g. +91-98765-20002">
-                        <input type="text" id="case-input-sec-social" class="form-field-input" placeholder="Social handle e.g. @v_singh_wheels">
+                    <div class="modal-actions">
+                        <button type="button" class="btn" onclick="goToWizardStep(2)">NEXT ➔</button>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">LEAD INVESTIGATOR <span class="req">*</span></label>
-                    <input type="text" id="case-input-investigator" required class="form-field-input" value="Ins. Vikramaditya Rao (#INV-7092)">
+                <!-- STEP 2: PRIMARY SUSPECT -->
+                <div id="wizard-panel-2" style="display: none;">
+                    <div class="form-grid-2">
+                        <div>
+                            <label class="form-label">Primary Suspect Full Name *</label>
+                            <input type="text" id="wiz-p-name" class="form-field-input" placeholder="e.g. Arjun Sharma">
+                        </div>
+                        <div>
+                            <label class="form-label">Alias</label>
+                            <input type="text" id="wiz-p-alias" class="form-field-input" placeholder="e.g. Cipher King">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div>
+                            <label class="form-label">Age & Gender</label>
+                            <input type="text" id="wiz-p-age" class="form-field-input" placeholder="34, Male">
+                        </div>
+                        <div>
+                            <label class="form-label">Phone</label>
+                            <input type="text" id="wiz-p-phone" class="form-field-input" placeholder="+91-98765-10001">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div>
+                            <label class="form-label">Email</label>
+                            <input type="email" id="wiz-p-email" class="form-field-input" placeholder="arjun.sharma@protonmail.com">
+                        </div>
+                        <div>
+                            <label class="form-label">City / Location</label>
+                            <input type="text" id="wiz-p-city" class="form-field-input" placeholder="Pune, Maharashtra">
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="goToWizardStep(1)">BACK</button>
+                        <button type="button" class="btn" onclick="goToWizardStep(3)">NEXT ➔</button>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">INVESTIGATING AGENCY <span class="req">*</span></label>
-                    <input type="text" id="case-input-agency" required class="form-field-input" value="Special Cyber Crime & Intelligence Cell (SCCIC)">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">CASE SCOPE & DESCRIPTION <span class="req">*</span></label>
-                    <textarea id="case-input-desc" required rows="2" class="form-field-input" placeholder="Enter key crime report facts, FIR identifiers, and preliminary leads..."></textarea>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-pill-cancel" onclick="closeCreateCaseModal()">CANCEL</button>
-                    <button type="submit" class="btn-pill-submit">REGISTER CASE</button>
+                <!-- STEP 3: SECONDARY SUBJECTS -->
+                <div id="wizard-panel-3" style="display: none;">
+                    <div style="background: #1e293b; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                        <div style="font-size: 11px; font-weight: 800; color: #38bdf8; margin-bottom: 8px;">ADD SECONDARY SUBJECT / PERSON OF INTEREST</div>
+                        <div class="form-grid-2">
+                            <input type="text" id="wiz-sec-name" class="form-field-input" placeholder="Name e.g. Rohan Mehta">
+                            <select id="wiz-sec-role" class="form-field-input">
+                                <option value="Associate">Associate</option>
+                                <option value="Business Contact">Business Contact</option>
+                                <option value="Employee">Employee</option>
+                                <option value="Person of Interest">Person of Interest</option>
+                            </select>
+                        </div>
+                        <input type="text" id="wiz-sec-phone" class="form-field-input" placeholder="Phone e.g. +91-98765-20002" style="margin-top: 8px;">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="goToWizardStep(2)">BACK</button>
+                        <button type="submit" class="btn">CREATE CASE & INGEST</button>
+                    </div>
                 </div>
 
             </form>
         </div>
     </div>
 
-    <!-- REALISTIC CCTV SURVEILLANCE VIDEO PLAYER MODAL -->
+    <!-- CCTV SURVEILLANCE VIDEO PLAYER MODAL -->
     <div id="cctv-video-modal" class="modal-overlay">
         <div class="modal-card" style="width: 720px;">
             <div class="modal-header">
-                <div class="modal-header-title">
-                    <div class="modal-header-icon">📹</div>
-                    <span id="cctv-modal-title">CCTV Surveillance Carved Stream</span>
-                </div>
+                <div style="font-size: 16px; font-weight: 800; color: #38bdf8;">CCTV SURVEILLANCE CARVED VIDEO</div>
                 <button type="button" class="modal-close-btn" onclick="closeCCTVVideoModal()">✕</button>
             </div>
-            <div style="background: #000; border-radius: 12px; height: 340px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; border: 2px solid #334155;">
-                <img id="cctv-modal-img" src="" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.88; filter: contrast(1.1) brightness(0.9);">
-                <div style="position: absolute; top: 12px; left: 12px; background: rgba(220, 38, 38, 0.9); color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 800; font-family: monospace; letter-spacing: 0.5px;">
-                    ● LIVE CCTV FORENSIC STREAM | <span id="cctv-modal-cam">Cam C12</span>
-                </div>
-                <div style="position: absolute; bottom: 12px; left: 12px; right: 12px; background: rgba(15, 23, 42, 0.85); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-family: monospace; display: flex; justify-content: space-between; border: 1px solid rgba(255,255,255,0.1);">
-                    <span id="cctv-modal-timestamp">2026-08-28 20:01:15 IST</span>
-                    <span id="cctv-modal-anpr" style="color: #6ee7b7; font-weight: bold;">ANPR: MH12-RS-9988</span>
+            <div style="background: #000; border-radius: 10px; height: 320px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 12px;">
+                <img id="cctv-modal-img" src="" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="position: absolute; top: 10px; left: 10px; background: rgba(220,38,38,0.9); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; font-family: monospace;">
+                    ● REPLAY | <span id="cctv-modal-cam">Cam C12</span>
                 </div>
             </div>
-            <p id="cctv-modal-desc" style="font-size: 13px; color: #475569; margin-bottom: 16px; line-height: 1.5;"></p>
+            <p id="cctv-modal-desc" style="font-size: 12px; color: #94a3b8; margin-bottom: 14px;"></p>
             <div style="display: flex; justify-content: flex-end;">
-                <button class="btn-pill-cancel" onclick="closeCCTVVideoModal()">CLOSE FORENSIC PLAYER</button>
+                <button class="btn btn-secondary" onclick="closeCCTVVideoModal()">CLOSE PLAYER</button>
             </div>
         </div>
     </div>

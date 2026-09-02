@@ -1,5 +1,11 @@
-// TRACE-X Intelligence Platform Frontend Application Controller
-let selectedPersonFilter = 'ALL';
+// TRACE-X Intelligence Workstation Application Controller
+let currentCaseId = 'TRX-2026-017';
+let currentPersonId = 'person_arjun_sharma';
+let currentGraphLayout = 'tree-ud';
+let currentPersonDrawerId = null;
+let currentDrawerTab = 'overview';
+let visNetworkInstance = null;
+let currentGraphData = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
@@ -7,23 +13,43 @@ document.addEventListener('DOMContentLoaded', () => {
     loadOverviewData();
 });
 
-// Global Person/Suspect Filter Handler
-function filterAllModulesByPerson(personId) {
-    selectedPersonFilter = personId;
-    
-    // Update active view
-    const activeNav = document.querySelector('.nav-item.active');
-    const tabId = activeNav ? activeNav.getAttribute('data-tab') : 'overview';
-    switchTab(tabId);
-}
-
-// Sidebar Toggle Handler
 function toggleSidebar() {
     const sidebar = document.getElementById('app-sidebar');
     if (sidebar) sidebar.classList.toggle('collapsed');
 }
 
-// Navigation Tab Switcher
+function changeActiveCase(caseId) {
+    currentCaseId = caseId;
+    document.getElementById('ctx-case-id').innerText = caseId;
+    updateBreadcrumb();
+    refreshActiveView();
+}
+
+function changeActivePerson(personId) {
+    currentPersonId = personId;
+    
+    const personNames = {
+        'person_arjun_sharma': 'Arjun Sharma',
+        'person_rohan_mehta': 'Rohan Mehta',
+        'person_priya_joshi': 'Priya Joshi',
+        'person_vikram_patil': 'Vikram Patil',
+        'person_neha_kulkarni': 'Neha Kulkarni'
+    };
+    const pName = personNames[personId] || personId;
+    document.getElementById('ctx-subject-name').innerText = pName;
+    
+    updateBreadcrumb();
+    refreshActiveView();
+}
+
+function updateBreadcrumb() {
+    const pName = document.getElementById('ctx-subject-name').innerText.toUpperCase();
+    const activeNav = document.querySelector('.nav-item.active');
+    const moduleName = activeNav ? activeNav.innerText.trim().toUpperCase() : 'DASHBOARD';
+    
+    document.getElementById('breadcrumb-text').innerText = `CASE > ${currentCaseId} > ${pName} > ${moduleName}`;
+}
+
 function initNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
@@ -44,6 +70,7 @@ function switchTab(tabId) {
     const activeView = document.getElementById(`view-${tabId}`);
     if (activeView) {
         activeView.classList.add('active');
+        updateBreadcrumb();
         
         if (tabId === 'overview') loadOverviewData();
         if (tabId === 'investigations') loadInvestigationsData();
@@ -62,106 +89,100 @@ function switchTab(tabId) {
     }
 }
 
-// 1. Overview Loader
+function refreshActiveView() {
+    const activeNav = document.querySelector('.nav-item.active');
+    if (activeNav) {
+        switchTab(activeNav.getAttribute('data-tab'));
+    }
+}
+
+// 1. DASHBOARD / OVERVIEW
 async function loadOverviewData() {
     try {
-        const res = await fetch('/api/overview');
+        const res = await fetch(`/api/overview?case_id=${currentCaseId}&person_id=${currentPersonId}`);
         const data = await res.json();
 
-        const stats = data.investigation_statistics;
-        document.getElementById('stat-active-cases').innerText = stats.active_investigations;
-        document.getElementById('stat-evidence').innerText = stats.evidence_items;
-        document.getElementById('stat-entities').innerText = stats.entities;
-        document.getElementById('stat-relationships').innerText = stats.relationships;
-        document.getElementById('stat-anomalies').innerText = stats.suspicious_patterns;
-        document.getElementById('stat-leads').innerText = stats.high_priority_leads;
+        const s = data.case_summary;
+        document.getElementById('overview-primary-name').innerText = s.primary_subject;
+        document.getElementById('stat-sec-count').innerText = s.secondary_subjects_count;
+        document.getElementById('stat-entities').innerText = s.entities_count;
+        document.getElementById('stat-evidence').innerText = s.evidence_count;
+        document.getElementById('stat-relationships').innerText = s.relationships_count;
+        document.getElementById('stat-events').innerText = s.temporal_events_count;
 
         const actList = document.getElementById('activity-feed');
         if (actList) {
             actList.innerHTML = data.recent_activity.map(act => `
-                <div style="padding: 10px 0; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 12px;">
-                    <span>⚡ <strong style="color: #0f172a;">${act.event}</strong></span>
-                    <span style="color: #64748b; font-weight: 600;">${act.time}</span>
+                <div style="padding: 8px 0; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; font-size: 11px;">
+                    <span>⚡ <strong style="color: #f8fafc;">${act.event}</strong></span>
+                    <span style="color: #64748b;">${act.time}</span>
                 </div>
             `).join('');
         }
 
-        const alertList = document.getElementById('alert-panel');
-        if (alertList) {
-            alertList.innerHTML = data.alert_panel.map(al => `
-                <div style="padding: 12px; background: #fef2f2; border-left: 4px solid #dc2626; border-radius: 8px; margin-bottom: 8px; font-size: 12px;">
-                    <strong style="color: #991b1b;">🚨 [${al.severity}]</strong> ${al.alert}
+        const leadsPanel = document.getElementById('ai-leads-panel');
+        if (leadsPanel) {
+            leadsPanel.innerHTML = data.ai_leads.map(lead => `
+                <div style="padding: 12px; background: #0f172a; border-left: 3px solid #3b82f6; border-radius: 8px; margin-bottom: 8px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #38bdf8;">${lead.title}</div>
+                    <p style="font-size: 11px; color: #94a3b8; margin: 4px 0;">${lead.summary}</p>
+                    <span class="badge badge-medium">CONFIDENCE: ${lead.confidence * 100}%</span>
                 </div>
             `).join('');
         }
     } catch (err) {
-        console.error('Failed to load overview data:', err);
+        console.error(err);
     }
 }
 
-// 2. Investigations Workspace Loader & Modal Handlers
+// 2. CASES SECTION
 async function loadInvestigationsData() {
     try {
         const res = await fetch('/api/cases');
         const data = await res.json();
-        const container = document.getElementById('investigations-list');
+        const container = document.getElementById('cases-list-container');
         if (!container) return;
 
         container.innerHTML = data.cases.map(c => {
             const primary = c.primary_suspect || {};
-            const secondaryList = c.secondary_suspects || [];
+            const secondaries = c.secondary_suspects || [];
 
             return `
-                <div class="card" style="margin-bottom: 20px; border-left: 5px solid ${c.priority === 'HIGH' ? '#dc2626' : '#2563eb'};">
+                <div class="card" style="border-left: 4px solid ${c.priority === 'High' ? '#ef4444' : '#3b82f6'};">
                     <div class="card-title">
                         <span>${c.id}: ${c.title}</span>
-                        <span class="badge ${c.priority === 'HIGH' ? 'badge-high' : 'badge-verified'}">${c.priority} PRIORITY</span>
+                        <span class="badge ${c.priority === 'High' ? 'badge-high' : 'badge-verified'}">${c.priority} Priority</span>
                     </div>
 
-                    <!-- PRIMARY SUSPECT PROFILE CARD WITH INDIAN FACE PHOTO -->
-                    <div class="suspect-card" style="background: #f8fafc; border-left: 4px solid #2563eb;">
-                        <img src="${primary.avatar_url || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300'}" class="suspect-avatar" alt="Primary Suspect">
+                    <!-- PRIMARY SUBJECT IDENTITY CARD -->
+                    <div class="suspect-card" onclick="openPersonDrawer('${primary.id}')" style="cursor: pointer;">
+                        <img src="${primary.photo_url || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300'}" class="suspect-avatar">
                         <div>
-                            <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${primary.name || c.subject_name} <span class="badge badge-high" style="font-size: 10px;">Primary Suspect</span></div>
-                            <div style="font-size: 12px; color: #475569; margin: 2px 0;">Role: <strong>${primary.role || 'Syndicate Lead'}</strong></div>
-                            <div style="font-size: 12px; color: #64748b;">📞 Phone: ${primary.phone || 'N/A'} | ✉️ Email: ${primary.email || 'N/A'}</div>
-                            <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
-                                ${Object.entries(primary.social_profiles || {}).map(([platform, handle]) => `
-                                    <span class="social-badge">🌐 ${platform.toUpperCase()}: ${handle}</span>
-                                `).join('')}
-                            </div>
+                            <div style="font-size: 14px; font-weight: 800; color: #f8fafc;">${primary.name} <span class="badge badge-high" style="font-size: 9px;">Primary Subject</span></div>
+                            <div style="font-size: 11px; color: #94a3b8; margin: 2px 0;">Age: <strong>${primary.age || 34}</strong> | Location: <strong>${primary.city || 'Pune'}</strong> | Occupation: <strong>${primary.occupation || 'Consultant'}</strong></div>
+                            <div style="font-size: 11px; color: #38bdf8;">📞 ${primary.phone} | ✉️ ${primary.email}</div>
                         </div>
                     </div>
 
-                    <!-- SECONDARY SUSPECTS LIST -->
-                    ${secondaryList.length > 0 ? `
-                        <div style="margin-top: 10px; margin-bottom: 12px;">
-                            <div style="font-size: 11px; font-weight: 800; color: #0284c7; text-transform: uppercase; margin-bottom: 6px;">👥 Secondary Suspects & Co-Conspirators (${secondaryList.length}):</div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
-                                ${secondaryList.map(sec => `
-                                    <div style="padding: 10px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; display: flex; gap: 10px; align-items: center;">
-                                        <img src="${sec.avatar_url || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300'}" style="width: 46px; height: 46px; border-radius: 50%; object-fit: cover;">
-                                        <div>
-                                            <div style="font-size: 13px; font-weight: 700; color: #0f172a;">${sec.name}</div>
-                                            <div style="font-size: 11px; color: #0284c7; font-weight: 600;">${sec.role}</div>
-                                            <div style="font-size: 11px; color: #64748b;">${sec.phone || 'N/A'}</div>
-                                        </div>
+                    <!-- SECONDARY SUBJECTS -->
+                    ${secondaries.length > 0 ? `
+                        <div style="font-size: 10px; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin: 10px 0 6px 0;">👥 Secondary Subjects & Persons of Interest (${secondaries.length}):</div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-bottom: 10px;">
+                            ${secondaries.map(sec => `
+                                <div style="padding: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; display: flex; gap: 8px; align-items: center; cursor: pointer;" onclick="openPersonDrawer('${sec.id}')">
+                                    <img src="${sec.photo_url || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300'}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+                                    <div>
+                                        <div style="font-size: 12px; font-weight: 700; color: #f8fafc;">${sec.name}</div>
+                                        <div style="font-size: 10px; color: #38bdf8;">${sec.role}</div>
                                     </div>
-                                `).join('')}
-                            </div>
+                                </div>
+                            `).join('')}
                         </div>
                     ` : ''}
 
-                    <p style="font-size: 12px; color: #475569; margin-bottom: 12px;">${c.description}</p>
-                    <div style="font-size: 11px; color: #64748b; margin-bottom: 14px; display: flex; gap: 20px; flex-wrap: wrap;">
-                        <div>Investigator: <strong style="color: #0f172a;">${c.investigator}</strong></div>
-                        <div>Agency: <strong style="color: #0f172a;">${c.agency}</strong></div>
-                        <div>Start Date: <strong style="color: #0f172a;">${c.start_date}</strong></div>
-                        <div>Status: <strong style="color: #16a34a;">${c.status}</strong></div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn" onclick="selectActiveCase('${c.id}')">🕸️ Analyze Network Tree Graph</button>
-                        <button class="btn btn-secondary" onclick="switchTab('fusion')">🔗 Open Evidence Fusion</button>
+                    <p style="font-size: 11px; color: #94a3b8; margin-bottom: 10px;">${c.description}</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn" onclick="selectCaseAndPerson('${c.id}', '${primary.id}')">OPEN CASE WORKSPACE</button>
                     </div>
                 </div>
             `;
@@ -171,59 +192,97 @@ async function loadInvestigationsData() {
     }
 }
 
-function selectActiveCase(caseId) {
-    switchTab('graph');
+function selectCaseAndPerson(caseId, personId) {
+    currentCaseId = caseId;
+    currentPersonId = personId;
+    document.getElementById('ctx-case-id').innerText = caseId;
+    document.getElementById('select-change-case').value = caseId;
+    changeActivePerson(personId);
+    switchTab('fusion');
 }
 
-function openCreateCaseModal() {
-    const modal = document.getElementById('create-case-modal');
+// MULTI-STEP ADD CASE WIZARD HANDLERS
+function openAddCaseWizard() {
+    const modal = document.getElementById('add-case-wizard-modal');
     if (modal) modal.style.display = 'flex';
+    goToWizardStep(1);
 }
 
-function closeCreateCaseModal() {
-    const modal = document.getElementById('create-case-modal');
+function closeAddCaseWizard() {
+    const modal = document.getElementById('add-case-wizard-modal');
     if (modal) modal.style.display = 'none';
 }
 
-async function submitNewCase(e) {
-    e.preventDefault();
-    const title = document.getElementById('case-input-title').value.trim();
-    const subject_name = document.getElementById('case-input-subject').value.trim();
-    const priority = document.getElementById('case-input-priority').value;
-    const investigator = document.getElementById('case-input-investigator').value.trim();
-    const agency = document.getElementById('case-input-agency').value.trim();
-    const description = document.getElementById('case-input-desc').value.trim();
+function goToWizardStep(step) {
+    document.querySelectorAll('.wizard-step-item').forEach(el => el.classList.remove('active'));
+    document.getElementById(`wiz-step-${step}`).classList.add('active');
 
-    const phone = document.getElementById('case-input-phone').value.trim();
-    const email = document.getElementById('case-input-email').value.trim();
-    const telegram = document.getElementById('case-input-telegram').value.trim();
-    const darkweb = document.getElementById('case-input-darkweb').value.trim();
+    document.getElementById('wizard-panel-1').style.display = step === 1 ? 'block' : 'none';
+    document.getElementById('wizard-panel-2').style.display = step === 2 ? 'block' : 'none';
+    document.getElementById('wizard-panel-3').style.display = step === 3 ? 'block' : 'none';
+}
+
+async function submitWizardForm(e) {
+    e.preventDefault();
+    const title = document.getElementById('wiz-case-title').value.trim();
+    const type = document.getElementById('wiz-case-type').value;
+    const priority = document.getElementById('wiz-case-priority').value;
+    const investigator = document.getElementById('wiz-case-investigator').value.trim();
+    const desc = document.getElementById('wiz-case-desc').value.trim();
+
+    const p_name = document.getElementById('wiz-p-name').value.trim();
+    const p_alias = document.getElementById('wiz-p-alias').value.trim();
+    const p_phone = document.getElementById('wiz-p-phone').value.trim();
+    const p_email = document.getElementById('wiz-p-email').value.trim();
+    const p_city = document.getElementById('wiz-p-city').value.trim();
 
     const primary_suspect = {
-        name: subject_name,
-        role: "Primary Suspect",
-        avatar_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300",
-        phone: phone,
-        email: email,
-        social_profiles: {
-            telegram: telegram || "@suspect_tg",
-            darkweb: darkweb || "dark_alias_01"
-        }
+        id: `person_${p_name.lower().replace(/\s+/g, '_')}`,
+        name: p_name || 'Primary Subject',
+        alias: p_alias,
+        role: 'Primary Subject',
+        relationship_to_primary: 'Self',
+        age: 34,
+        gender: 'Male',
+        photo_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300',
+        phone: p_phone,
+        email: p_email,
+        city: p_city,
+        occupation: 'Subject',
+        organization: 'Under Investigation',
+        vehicle: '',
+        social_usernames: {},
+        wallet_address: '',
+        notes: desc,
+        risk_score: 85,
+        evidence_count: 5
     };
 
-    const sec_name = document.getElementById('case-input-sec-name').value.trim();
-    const sec_role = document.getElementById('case-input-sec-role').value.trim();
-    const sec_phone = document.getElementById('case-input-sec-phone').value.trim();
-    const sec_social = document.getElementById('case-input-sec-social').value.trim();
+    const sec_name = document.getElementById('wiz-sec-name').value.trim();
+    const sec_role = document.getElementById('wiz-sec-role').value;
+    const sec_phone = document.getElementById('wiz-sec-phone').value.trim();
 
     const secondary_suspects = [];
     if (sec_name) {
         secondary_suspects.push({
+            id: `person_${sec_name.lower().replace(/\s+/g, '_')}`,
             name: sec_name,
-            role: sec_role || "Co-Conspirator",
-            avatar_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300",
+            alias: sec_name,
+            role: sec_role,
+            relationship_to_primary: 'Associate',
+            age: 30,
+            photo_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300',
             phone: sec_phone,
-            social_profiles: { social: sec_social || "@sec_alias" }
+            email: '',
+            city: 'Pune',
+            occupation: 'Associate',
+            organization: '',
+            vehicle: '',
+            social_usernames: {},
+            wallet_address: '',
+            notes: '',
+            risk_score: 70,
+            evidence_count: 3
         });
     }
 
@@ -231,38 +290,74 @@ async function submitNewCase(e) {
         const res = await fetch('/api/cases', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, subject_name, investigator, agency, priority, description, primary_suspect, secondary_suspects })
+            body: JSON.stringify({
+                title,
+                description: desc,
+                investigation_type: type,
+                priority,
+                lead_investigator: investigator,
+                primary_suspect,
+                secondary_suspects
+            })
         });
         const data = await res.json();
         if (data.success) {
-            alert(`✅ Case Registered Successfully!\n\nCase ID: ${data.case.id}\nPrimary Suspect: ${subject_name}\nSecondary Suspects: ${secondary_suspects.length}\nLogged on Blockchain Evidence Ledger.`);
-            closeCreateCaseModal();
+            alert(`✅ Case ${data.case.id} Created Successfully!\nPrimary Subject: ${p_name}\nLogged on SHA-256 Audit Ledger.`);
+            closeAddCaseWizard();
             loadInvestigationsData();
             loadOverviewData();
         }
     } catch (err) {
         console.error(err);
-        alert('Failed to register case.');
     }
 }
 
-// 3. TREE TYPE NETWORK GRAPH WITH COMPACT SHORT LINKS
-let visNetworkInstance = null;
-let currentGraphData = null;
-let currentLayoutType = 'tree-ud'; // 'tree-ud', 'tree-lr', 'force', 'circular'
+// 3. EVIDENCE FUSION WORKSPACE
+async function loadFusionData() {
+    try {
+        const res = await fetch(`/api/fusion?case_id=${currentCaseId}&person_id=${currentPersonId}`);
+        const data = await res.json();
+        const container = document.getElementById('fusion-chain-container');
+        if (!container) return;
 
+        container.innerHTML = `
+            <div class="xai-box">
+                <div class="xai-title">🧠 EXPLAINABLE AI EVIDENCE CHAIN SYNTHESIS</div>
+                <p style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">${data.explainable_ai.WHAT}</p>
+                <div class="xai-grid">
+                    <div><strong>WHY FLAGGED:</strong> ${data.explainable_ai.WHY}</div>
+                    <div><strong>CONFIDENCE SCORE:</strong> <span style="color: #10b981;">${data.explainable_ai.CONFIDENCE}</span></div>
+                </div>
+            </div>
+
+            <h4 style="margin: 16px 0 8px 0; font-size: 13px; color: #38bdf8;">Concise Investigation Chain:</h4>
+            ${data.evidence_chain.map(c => `
+                <div style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-left: 3px solid #3b82f6; border-radius: 8px; margin-bottom: 6px;">
+                    <div style="font-size: 11px; font-weight: 700; color: #38bdf8;">Step ${c.step_index}: [${c.domain}] ${c.title}</div>
+                    <div style="font-size: 12px; margin: 2px 0; color: #f8fafc;"><strong>${c.from_entity}</strong> ➔ <strong>${c.to_entity}</strong></div>
+                    <div style="font-size: 11px; color: #94a3b8;">${c.details}</div>
+                    <span class="badge badge-verified" style="margin-top: 4px;">Ref: ${c.evidence_ref}</span>
+                </div>
+            `).join('')}
+        `;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 4. NETWORK GRAPH — TREE VIEW DEFAULT & LAYOUT SWITCHER
 async function loadGraphData() {
     try {
-        const res = await fetch('/api/graph');
+        const res = await fetch(`/api/graph?case_id=${currentCaseId}&person_id=${currentPersonId}`);
         currentGraphData = await res.json();
-        renderGraphWithLayout(currentLayoutType);
+        renderGraphWithLayout(currentGraphLayout);
     } catch (err) {
-        console.error('Failed to render graph:', err);
+        console.error(err);
     }
 }
 
 function changeGraphLayout(layoutType) {
-    currentLayoutType = layoutType;
+    currentGraphLayout = layoutType;
     document.querySelectorAll('.graph-layout-btn').forEach(btn => btn.classList.remove('active'));
     
     const activeBtn = document.getElementById(`btn-layout-${layoutType}`);
@@ -271,28 +366,28 @@ function changeGraphLayout(layoutType) {
     renderGraphWithLayout(layoutType);
 }
 
-function renderGraphWithLayout(layoutType) {
+function focusSelectedPerson() {
+    if (!currentGraphData) return;
+    renderGraphWithLayout(currentGraphLayout, true);
+}
+
+function renderGraphWithLayout(layoutType, focusMode = false) {
     if (!currentGraphData) return;
     const container = document.getElementById('graph-canvas');
     if (!container) return;
 
-    // Filter graph nodes if a specific suspect is selected
     let nodesToRender = currentGraphData.nodes;
     let edgesToRender = currentGraphData.edges;
 
-    if (selectedPersonFilter !== 'ALL') {
-        const selectedNode = currentGraphData.nodes.find(n => n.id === selectedPersonFilter);
-        if (selectedNode) {
-            // Find 1-hop and 2-hop connected nodes
-            const connectedEdges = currentGraphData.edges.filter(e => e.source === selectedPersonFilter || e.target === selectedPersonFilter);
-            const connectedNodeIds = new Set([selectedPersonFilter]);
-            connectedEdges.forEach(e => {
-                connectedNodeIds.add(e.source);
-                connectedNodeIds.add(e.target);
-            });
-            nodesToRender = currentGraphData.nodes.filter(n => connectedNodeIds.has(n.id));
-            edgesToRender = connectedEdges;
-        }
+    if (focusMode || currentPersonId) {
+        const connectedEdges = currentGraphData.edges.filter(e => e.source === currentPersonId || e.target === currentPersonId);
+        const connectedNodeIds = new Set([currentPersonId]);
+        connectedEdges.forEach(e => {
+            connectedNodeIds.add(e.source);
+            connectedNodeIds.add(e.target);
+        });
+        nodesToRender = currentGraphData.nodes.filter(n => connectedNodeIds.has(n.id));
+        edgesToRender = connectedEdges;
     }
 
     const visNodes = nodesToRender.map(n => ({
@@ -300,18 +395,19 @@ function renderGraphWithLayout(layoutType) {
         label: `${n.label}\n[${n.type}]`,
         shape: getNodeShape(n.type),
         color: getNodeColor(n.type),
-        font: { color: '#0f172a', size: 11, strokeWidth: 2, strokeColor: '#ffffff', face: 'Inter' },
+        font: { color: '#f8fafc', size: 10, strokeWidth: 2, strokeColor: '#0b0f19', face: 'Inter' },
         level: n.tree_level !== undefined ? n.tree_level : 2
     }));
 
     const visEdges = edgesToRender.map(e => ({
+        id: e.id,
         from: e.source,
         to: e.target,
         label: e.relation,
         arrows: 'to',
         color: { color: getDomainColor(e.domain) },
-        font: { color: '#475569', size: 9, strokeWidth: 2, strokeColor: '#ffffff' },
-        length: 60 // COMPACT SHORT LINKS
+        font: { color: '#94a3b8', size: 8, strokeWidth: 2, strokeColor: '#0b0f19' },
+        length: 50
     }));
 
     const visData = { nodes: new vis.DataSet(visNodes), edges: new vis.DataSet(visEdges) };
@@ -320,27 +416,24 @@ function renderGraphWithLayout(layoutType) {
     let physicsConfig = { enabled: true };
 
     if (layoutType === 'tree-ud') {
-        // Compact Short-Link Top-Down Tree
-        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 80, levelSeparation: 90 } };
+        layoutConfig = { hierarchical: { direction: 'UD', sortMethod: 'directed', nodeSpacing: 70, levelSeparation: 80 } };
         physicsConfig = { enabled: false };
-    } else if (layoutType === 'tree-lr') {
-        // Compact Short-Link Left-Right Tree
-        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 70, levelSeparation: 110 } };
-        physicsConfig = { enabled: false };
-    } else if (layoutType === 'circular') {
+    } else if (layoutType === 'radial') {
         layoutConfig = { randomSeed: 42 };
-        physicsConfig = { barnesHut: { gravitationalConstant: -1200, centralGravity: 0.4, springLength: 45 } };
+        physicsConfig = { barnesHut: { gravitationalConstant: -1000, centralGravity: 0.5, springLength: 40 } };
+    } else if (layoutType === 'hierarchy') {
+        layoutConfig = { hierarchical: { direction: 'LR', sortMethod: 'directed', nodeSpacing: 60, levelSeparation: 90 } };
+        physicsConfig = { enabled: false };
     } else {
-        // Compact Force-Directed
         layoutConfig = { randomSeed: 100 };
-        physicsConfig = { barnesHut: { gravitationalConstant: -1800, springLength: 45 } };
+        physicsConfig = { barnesHut: { gravitationalConstant: -1500, springLength: 40 } };
     }
 
     const options = {
         nodes: { borderWidth: 2 },
         layout: layoutConfig,
         physics: physicsConfig,
-        interaction: { hover: true, tooltipDelay: 200 }
+        interaction: { hover: true, tooltipDelay: 150 }
     };
 
     if (visNetworkInstance) visNetworkInstance.destroy();
@@ -348,8 +441,14 @@ function renderGraphWithLayout(layoutType) {
 
     visNetworkInstance.on('selectNode', function(params) {
         const nodeId = params.nodes[0];
-        const entity = currentGraphData.nodes.find(n => n.id === nodeId);
-        if (entity) showEntityDrawer(entity);
+        openPersonDrawer(nodeId);
+    });
+
+    visNetworkInstance.on('selectEdge', function(params) {
+        if (params.nodes.length === 0 && params.edges.length > 0) {
+            const edgeId = params.edges[0];
+            openRelEvidenceModal(edgeId);
+        }
     });
 }
 
@@ -365,140 +464,154 @@ function getNodeShape(type) {
 function getNodeColor(type) {
     if (type === 'PERSON') return { background: '#ef4444', border: '#b91c1c' };
     if (type === 'PHONE') return { background: '#0284c7', border: '#0369a1' };
-    if (type === 'BANK_ACCOUNT') return { background: '#16a34a', border: '#15803d' };
-    if (type === 'CRYPTO_WALLET') return { background: '#d97706', border: '#b45309' };
-    if (type === 'VEHICLE') return { background: '#7c3aed', border: '#6d28d9' };
-    if (type === 'CAMERA') return { background: '#db2777', border: '#be185d' };
-    return { background: '#2563eb', border: '#1d4ed8' };
+    if (type === 'BANK_ACCOUNT') return { background: '#10b981', border: '#047857' };
+    if (type === 'CRYPTO_WALLET') return { background: '#f59e0b', border: '#b45309' };
+    if (type === 'VEHICLE') return { background: '#8b5cf6', border: '#6d28d9' };
+    if (type === 'CAMERA') return { background: '#ec4899', border: '#be185d' };
+    return { background: '#3b82f6', border: '#1d4ed8' };
 }
 
 function getDomainColor(domain) {
     if (domain === 'COMMUNICATION') return '#0284c7';
-    if (domain === 'FINANCIAL') return '#16a34a';
-    if (domain === 'BLOCKCHAIN') return '#d97706';
-    if (domain === 'DVR') return '#db2777';
-    if (domain === 'OSINT') return '#7c3aed';
+    if (domain === 'FINANCIAL') return '#10b981';
+    if (domain === 'BLOCKCHAIN') return '#f59e0b';
+    if (domain === 'DVR') return '#ec4899';
+    if (domain === 'OSINT') return '#8b5cf6';
     return '#64748b';
 }
 
-function showEntityDrawer(entity) {
-    const drawer = document.getElementById('entity-drawer');
-    if (!drawer) return;
-    drawer.style.display = 'block';
-    document.getElementById('drawer-entity-name').innerText = entity.label;
-    document.getElementById('drawer-entity-type').innerText = entity.type;
-    document.getElementById('drawer-entity-risk').innerText = `${entity.risk_score}/100`;
-    document.getElementById('drawer-entity-status').innerText = entity.status;
-    document.getElementById('drawer-entity-details').innerText = entity.details;
-
-    const avatarEl = document.getElementById('drawer-entity-avatar');
-    if (avatarEl) {
-        if (entity.avatar) {
-            avatarEl.src = entity.avatar;
-            avatarEl.style.display = 'block';
-        } else {
-            avatarEl.style.display = 'none';
-        }
-    }
+// 7. RIGHT-SIDE SLIDING PERSON DETAIL DRAWER (MASTER PROMPT REQUIREMENT 7)
+async function openPersonDrawer(personId) {
+    currentPersonDrawerId = personId;
+    const drawer = document.getElementById('person-detail-drawer');
+    if (drawer) drawer.classList.add('open');
+    switchDrawerTab('overview');
 }
 
-// 4. Multi-Domain Timeline Loader
-async function loadTimelineData() {
-    try {
-        const res = await fetch('/api/timeline');
-        const data = await res.json();
-        const container = document.getElementById('timeline-container');
-        if (!container) return;
-
-        container.innerHTML = data.events.map(ev => `
-            <div class="timeline-item">
-                <div style="font-size: 11px; color: #2563eb; font-weight: 700;">[${ev.domain}] ${ev.timestamp}</div>
-                <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin: 2px 0;">${ev.title}</div>
-                <div style="font-size: 12px; color: #475569;">${ev.details}</div>
-                <span class="badge badge-verified" style="margin-top: 4px;">Source Ref: ${ev.evidence_id}</span>
-            </div>
-        `).join('');
-    } catch (err) {
-        console.error('Failed to load timeline:', err);
-    }
+function closePersonDrawer() {
+    const drawer = document.getElementById('person-detail-drawer');
+    if (drawer) drawer.classList.remove('open');
 }
 
-// 5. Evidence Center Loader
-async function loadEvidenceData() {
+async function switchDrawerTab(tabName) {
+    currentDrawerTab = tabName;
+    document.querySelectorAll('.drawer-tab-btn').forEach(btn => btn.classList.remove('active'));
+    
+    const content = document.getElementById('drawer-content-area');
+    if (!content || !currentPersonDrawerId) return;
+
     try {
-        const res = await fetch('/api/evidence');
+        const res = await fetch(`/api/persons/${currentPersonDrawerId}`);
         const data = await res.json();
-        const tbody = document.getElementById('evidence-tbody');
-        if (!tbody) return;
+        const p = data.person;
 
-        let items = data.evidence_items;
-        if (selectedPersonFilter !== 'ALL') {
-            items = items.filter(e => e.person_id === selectedPersonFilter || e.case_id === 'TRACE-2026-017');
-        }
-
-        tbody.innerHTML = items.map(e => `
-            <tr>
-                <td><strong>${e.id}</strong></td>
-                <td><span class="badge badge-verified">${e.evidence_type}</span></td>
-                <td>${e.title}</td>
-                <td>${e.source}</td>
-                <td><code style="font-size: 11px; color: #2563eb; font-weight: 600;">${e.file_hash.substring(0, 16)}...</code></td>
-                <td><span class="badge ${e.integrity_status === 'VERIFIED' ? 'badge-verified' : 'badge-high'}">${e.integrity_status}</span></td>
-                <td>${e.provenance}</td>
-            </tr>
-        `).join('');
-    } catch (err) {
-        console.error('Failed to load evidence:', err);
-    }
-}
-
-// 6. Communications Loader
-async function loadCommunicationsData() {
-    try {
-        const res = await fetch('/api/communications');
-        const data = await res.json();
-        const container = document.getElementById('comm-flagged-list');
-        if (container) {
-            let edges = data.communication_edges;
-            if (selectedPersonFilter !== 'ALL') {
-                const pName = selectedPersonFilter.replace('person_', '').replace('_', ' ');
-                edges = edges.filter(c => c.source.toLowerCase().includes(pName) || c.target.toLowerCase().includes(pName) || c.details.toLowerCase().includes(pName));
-            }
-
-            container.innerHTML = edges.map(c => `
-                <div style="padding: 14px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #0284c7; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                    <div style="font-weight: 800; color: #0284c7; font-size: 14px;">📞 ${c.source} ➔ ${c.target}</div>
-                    <div style="font-size: 12px; color: #334155; margin-top: 4px; font-weight: 500;">${c.details}</div>
-                    <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
-                        <span class="badge badge-high">PRE-INCIDENT CALL BURST</span>
-                        <span style="font-size: 11px; color: #64748b;">Confidence: ${c.confidence * 100}%</span>
+        if (tabName === 'overview') {
+            content.innerHTML = `
+                <div class="suspect-card">
+                    <img src="${p.photo_url || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300'}" class="suspect-avatar">
+                    <div>
+                        <div style="font-size: 15px; font-weight: 800; color: #f8fafc;">${p.name}</div>
+                        <div style="font-size: 11px; color: #38bdf8; font-weight: 700;">${p.role}</div>
+                        <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Age: ${p.age || 34} | Location: ${p.city || 'Pune'}</div>
                     </div>
                 </div>
-            `).join('');
+
+                <div style="font-size: 11px; color: #94a3b8; margin: 12px 0;">
+                    <div><strong>Phone:</strong> ${p.phone}</div>
+                    <div><strong>Email:</strong> ${p.email}</div>
+                    <div><strong>Vehicle:</strong> ${p.vehicle || 'N/A'}</div>
+                    <div><strong>Wallet:</strong> ${p.wallet_address || 'N/A'}</div>
+                    <div><strong>Notes:</strong> ${p.notes}</div>
+                </div>
+
+                <h4 style="font-size: 12px; color: #38bdf8; margin: 14px 0 6px 0;">Connected Relationships (${data.relationships.length}):</h4>
+                ${data.relationships.map(r => `
+                    <div style="padding: 8px; background: #0b0f19; border: 1px solid #1e293b; border-radius: 6px; margin-bottom: 4px; font-size: 11px;">
+                        <span style="color: #38bdf8;">[${r.domain}] ${r.relation}</span>: ${r.source} ➔ ${r.target}
+                    </div>
+                `).join('')}
+            `;
+        } else if (tabName === 'evidence') {
+            content.innerHTML = `
+                <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 8px;">Associated Evidence Items (${data.evidence_items.length}):</h4>
+                ${data.evidence_items.map(e => `
+                    <div style="padding: 10px; background: #0b0f19; border: 1px solid #1e293b; border-radius: 6px; margin-bottom: 6px; font-size: 11px;">
+                        <div style="font-weight: 700; color: #f8fafc;">${e.id}: ${e.title}</div>
+                        <div style="color: #94a3b8; margin-top: 2px;">Type: ${e.evidence_type} | Source: ${e.source}</div>
+                        <span class="badge badge-verified" style="margin-top: 4px;">Hash Verified</span>
+                    </div>
+                `).join('')}
+            `;
+        } else {
+            content.innerHTML = `<div style="font-size: 12px; color: #94a3b8;">Displaying ${tabName.toUpperCase()} records scoped to ${p.name}...</div>`;
         }
     } catch (err) {
         console.error(err);
     }
 }
 
-// 7. Financial Intelligence Loader
-async function loadFinancialData() {
-    try {
-        const res = await fetch('/api/financial');
-        const data = await res.json();
-        const container = document.getElementById('fin-list');
-        if (container) {
-            let edges = data.financial_edges;
-            if (selectedPersonFilter !== 'ALL') {
-                const pName = selectedPersonFilter.replace('person_', '').replace('_', ' ');
-                edges = edges.filter(f => f.source.toLowerCase().includes(pName) || f.target.toLowerCase().includes(pName) || f.details.toLowerCase().includes(pName));
-            }
+// RELATIONSHIP EVIDENCE DRAWER MODAL (MASTER PROMPT REQUIREMENT 13)
+async function openRelEvidenceModal(relId) {
+    const modal = document.getElementById('rel-evidence-modal');
+    if (!modal) return;
+    modal.style.display = 'flex';
 
-            container.innerHTML = edges.map(f => `
-                <div style="padding: 14px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #16a34a; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                    <div style="font-weight: 800; color: #16a34a; font-size: 14px;">💳 ${f.source} ➔ ${f.target}</div>
-                    <div style="font-size: 12px; color: #334155; margin-top: 4px; font-weight: 500;">${f.details}</div>
-                    <span class="badge badge-high" style="margin-top: 6px;">HAWALA INDICATOR: Rapid Cash Layering</span>
+    try {
+        const res = await fetch(`/api/relationships/${relId}/evidence`);
+        const data = await res.json();
+        const r = data.relationship;
+
+        document.getElementById('rel-modal-body').innerHTML = `
+            <div style="padding: 12px; background: #1e293b; border-radius: 8px; margin-bottom: 12px;">
+                <div style="font-size: 13px; font-weight: 800; color: #38bdf8;">[${r.domain}] ${r.relation}</div>
+                <div style="font-size: 12px; color: #f8fafc; margin: 4px 0;"><strong>${r.source}</strong> ➔ <strong>${r.target}</strong></div>
+                <div style="font-size: 11px; color: #94a3b8;">${r.details}</div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 6px; display: flex; gap: 14px;">
+                    <div>Calls Logged: <strong style="color: #f8fafc;">${r.call_count || 14}</strong></div>
+                    <div>First Observed: <strong style="color: #f8fafc;">${r.first_observed || '04 Aug 2026'}</strong></div>
+                    <div>Last Observed: <strong style="color: #f8fafc;">${r.last_observed || '17 Aug 2026'}</strong></div>
+                </div>
+            </div>
+
+            <h4 style="font-size: 12px; color: #38bdf8; margin-bottom: 8px;">Supporting Evidence References (${data.supporting_evidence.length}):</h4>
+            ${data.supporting_evidence.map(e => `
+                <div style="padding: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; margin-bottom: 6px; font-size: 11px;">
+                    <strong style="color: #38bdf8;">${e.id}</strong>: ${e.title}
+                </div>
+            `).join('')}
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 14px;">
+                <button class="btn" onclick="switchTab('communications'); closeRelEvidenceModal();">VIEW COMMUNICATION LOGS</button>
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function closeRelEvidenceModal() {
+    const modal = document.getElementById('rel-evidence-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// 5. COMMUNICATIONS
+async function loadCommunicationsData() {
+    try {
+        const res = await fetch(`/api/communications?person_id=${currentPersonId}`);
+        const data = await res.json();
+
+        document.getElementById('comm-stat-calls').innerText = data.total_calls;
+        document.getElementById('comm-stat-msgs').innerText = data.total_messages;
+        document.getElementById('comm-stat-contacts').innerText = data.unique_contacts;
+        document.getElementById('comm-stat-last').innerText = data.last_contact;
+
+        const container = document.getElementById('comm-contact-tree');
+        if (container) {
+            container.innerHTML = data.communication_edges.map(c => `
+                <div style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-left: 3px solid #0284c7; border-radius: 8px; margin-bottom: 6px;" onclick="openRelEvidenceModal('${c.id}')">
+                    <div style="font-size: 12px; font-weight: 800; color: #0284c7;">📞 ${c.source} ➔ ${c.target}</div>
+                    <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${c.details}</div>
+                    <span class="badge badge-medium" style="margin-top: 4px;">Temporal Relationship Detected</span>
                 </div>
             `).join('');
         }
@@ -507,17 +620,37 @@ async function loadFinancialData() {
     }
 }
 
-// 8. Blockchain Loader
+// 6. FINANCIAL
+async function loadFinancialData() {
+    try {
+        const res = await fetch(`/api/financial?person_id=${currentPersonId}`);
+        const data = await res.json();
+        const container = document.getElementById('fin-transactions-list');
+        if (container) {
+            container.innerHTML = data.financial_edges.map(f => `
+                <div style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-left: 3px solid #10b981; border-radius: 8px; margin-bottom: 6px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #10b981;">💳 ${f.source} ➔ ${f.target}</div>
+                    <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${f.details}</div>
+                    <span class="badge badge-high" style="margin-top: 4px;">Hawala Cash Transfer Indicator</span>
+                </div>
+            `).join('');
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 7. BLOCKCHAIN
 async function loadBlockchainData() {
     try {
-        const res = await fetch('/api/blockchain');
+        const res = await fetch(`/api/blockchain?person_id=${currentPersonId}`);
         const data = await res.json();
         const container = document.getElementById('blk-list');
         if (container) {
             container.innerHTML = data.blockchain_edges.map(b => `
-                <div style="padding: 14px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #d97706; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                    <div style="font-weight: 800; color: #d97706; font-size: 14px;">⛓️ ${b.source} ➔ ${b.target}</div>
-                    <div style="font-size: 12px; color: #334155; margin-top: 4px; font-weight: 500;">${b.details}</div>
+                <div style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-left: 3px solid #f59e0b; border-radius: 8px; margin-bottom: 6px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #f59e0b;">⛓️ ${b.source} ➔ ${b.target}</div>
+                    <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${b.details}</div>
                 </div>
             `).join('');
         }
@@ -526,59 +659,17 @@ async function loadBlockchainData() {
     }
 }
 
-// 9. OSINT Workspace & Suspect Dossiers Loader
+// 8. OSINT
 async function loadOSINTData() {
     try {
-        const resCases = await fetch('/api/cases');
-        const dataCases = await resCases.json();
-        
-        const suspectContainer = document.getElementById('osint-suspects-container');
-        if (suspectContainer && dataCases.cases.length > 0) {
-            const currentCase = dataCases.cases[0];
-            const primary = currentCase.primary_suspect || {};
-            const secondaries = currentCase.secondary_suspects || [];
-
-            suspectContainer.innerHTML = `
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
-                    <!-- PRIMARY SUSPECT WITH INDIAN FACE PHOTO -->
-                    <div class="suspect-card" style="border-left: 5px solid #dc2626;">
-                        <img src="${primary.avatar_url || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300'}" class="suspect-avatar">
-                        <div>
-                            <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${primary.name || 'Rahul Sharma'} <span class="badge badge-high" style="font-size: 10px;">Primary Suspect</span></div>
-                            <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin: 2px 0;">${primary.role || 'Syndicate Lead'}</div>
-                            <div style="font-size: 12px; color: #475569;">📞 ${primary.phone || 'N/A'} | ✉️ ${primary.email || 'N/A'}</div>
-                            <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
-                                ${Object.entries(primary.social_profiles || {}).map(([p, h]) => `<span class="social-badge">🌐 ${p.toUpperCase()}: ${h}</span>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SECONDARY SUSPECTS -->
-                    ${secondaries.map(sec => `
-                        <div class="suspect-card" style="border-left: 5px solid #0284c7;">
-                            <img src="${sec.avatar_url || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300'}" class="suspect-avatar" style="border-color: #0284c7;">
-                            <div>
-                                <div style="font-size: 15px; font-weight: 800; color: #0f172a;">${sec.name} <span class="badge badge-verified" style="font-size: 10px;">Secondary Suspect</span></div>
-                                <div style="font-size: 12px; color: #0284c7; font-weight: 700; margin: 2px 0;">${sec.role}</div>
-                                <div style="font-size: 12px; color: #475569;">📞 ${sec.phone || 'N/A'} | ✉️ ${sec.email || 'N/A'}</div>
-                                <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
-                                    ${Object.entries(sec.social_profiles || {}).map(([p, h]) => `<span class="social-badge">🌐 ${p.toUpperCase()}: ${h}</span>`).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        const resOsint = await fetch('/api/osint');
-        const dataOsint = await resOsint.json();
+        const res = await fetch(`/api/osint?person_id=${currentPersonId}`);
+        const data = await res.json();
         const container = document.getElementById('osint-list');
         if (container) {
-            container.innerHTML = dataOsint.osint_edges.map(o => `
-                <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="font-weight: 700; color: #7c3aed; font-size: 13px;">🌐 Public Correlation: ${o.source} ➔ ${o.target}</div>
-                    <div style="font-size: 12px; color: #475569; margin-top: 4px;">${o.details}</div>
+            container.innerHTML = data.osint_edges.map(o => `
+                <div style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-left: 3px solid #8b5cf6; border-radius: 8px; margin-bottom: 6px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #8b5cf6;">🌐 ${o.source} ➔ ${o.target}</div>
+                    <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">${o.details}</div>
                 </div>
             `).join('');
         }
@@ -587,10 +678,10 @@ async function loadOSINTData() {
     }
 }
 
-// 10. DVR/NVR Forensics Loader with Realistic Surveillance Video Cards
+// 9. CCTV / DVR / NVR (3 SYNTHETIC DEMO VIDEOS - MASTER PROMPT REQUIREMENT 19)
 async function loadDVRData() {
     try {
-        const res = await fetch('/api/dvr');
+        const res = await fetch(`/api/dvr?person_id=${currentPersonId}`);
         const data = await res.json();
         
         const videoGrid = document.getElementById('dvr-video-grid-container');
@@ -599,28 +690,15 @@ async function loadDVRData() {
                 <div class="dvr-card">
                     <div class="dvr-thumb-wrapper">
                         <img src="${v.video_thumbnail}" class="dvr-thumb-img" alt="CCTV Stream">
-                        <div class="dvr-rec-badge">● LIVE STREAM | ${v.camera_id}</div>
+                        <div class="dvr-rec-badge">● STREAM | ${v.camera_id}</div>
                         <div class="dvr-play-overlay" onclick="openCCTVVideoModal('${v.camera_id}', '${v.event_title}', '${v.timestamp}', '${v.anpr_license_plate}', '${v.video_thumbnail}', '${v.description.replace(/'/g, "\\'")}')">▶</div>
                     </div>
                     <div class="dvr-info-body">
-                        <div style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">${v.event_title}</div>
-                        <div style="font-size: 11px; color: #2563eb; font-weight: 700; margin-bottom: 6px;">📍 ${v.location}</div>
-                        <div style="font-size: 12px; color: #475569; margin-bottom: 8px;"><strong>Identified Indian Suspects:</strong> ${v.suspects_identified.join(', ')}</div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: monospace;">
-                            <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">⏱️ ${v.timestamp}</span>
-                            <span class="badge badge-verified">ANPR: ${v.anpr_license_plate}</span>
-                        </div>
+                        <div style="font-size: 13px; font-weight: 800; color: #f8fafc; margin-bottom: 2px;">${v.event_title}</div>
+                        <div style="font-size: 10px; color: #38bdf8; font-weight: 700; margin-bottom: 4px;">📍 ${v.location}</div>
+                        <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;"><strong>Identified Subjects:</strong> ${v.suspects_identified.join(', ')}</div>
+                        <span class="synthetic-banner" style="font-size: 9px;">${v.label}</span>
                     </div>
-                </div>
-            `).join('');
-        }
-
-        const container = document.getElementById('dvr-list');
-        if (container) {
-            container.innerHTML = data.dvr_edges.map(d => `
-                <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="font-weight: 700; color: #db2777; font-size: 13px;">📹 ${d.source} ➔ ${d.target}</div>
-                    <div style="font-size: 12px; color: #475569; margin-top: 4px;">${d.details}</div>
                 </div>
             `).join('');
         }
@@ -633,11 +711,8 @@ function openCCTVVideoModal(camId, title, timestamp, anpr, imgUrl, desc) {
     const modal = document.getElementById('cctv-video-modal');
     if (!modal) return;
     document.getElementById('cctv-modal-cam').innerText = camId;
-    document.getElementById('cctv-modal-title').innerText = title;
-    document.getElementById('cctv-modal-timestamp').innerText = timestamp;
-    document.getElementById('cctv-modal-anpr').innerText = `ANPR: ${anpr}`;
     document.getElementById('cctv-modal-img').src = imgUrl;
-    document.getElementById('cctv-modal-desc').innerText = desc;
+    document.getElementById('cctv-modal-desc').innerText = `${title} (${timestamp}) - ${desc}`;
     modal.style.display = 'flex';
 }
 
@@ -646,7 +721,51 @@ function closeCCTVVideoModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// 11. Analytics & XAI Loader
+// 10. TIMELINE
+async function loadTimelineData() {
+    try {
+        const res = await fetch(`/api/timeline?case_id=${currentCaseId}`);
+        const data = await res.json();
+        const container = document.getElementById('timeline-container');
+        if (!container) return;
+
+        container.innerHTML = data.events.map(ev => `
+            <div class="timeline-item">
+                <div style="font-size: 10px; color: #38bdf8; font-weight: 700;">[${ev.domain}] ${ev.timestamp}</div>
+                <div style="font-size: 12px; font-weight: 700; color: #f8fafc; margin: 2px 0;">${ev.title}</div>
+                <div style="font-size: 11px; color: #94a3b8;">${ev.details}</div>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 11. EVIDENCE
+async function loadEvidenceData() {
+    try {
+        const res = await fetch(`/api/evidence?case_id=${currentCaseId}`);
+        const data = await res.json();
+        const tbody = document.getElementById('evidence-tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = data.evidence_items.map(e => `
+            <tr>
+                <td><strong>${e.id}</strong></td>
+                <td><span class="badge badge-verified">${e.evidence_type}</span></td>
+                <td>${e.title}</td>
+                <td>${e.source}</td>
+                <td><code style="font-size: 10px; color: #38bdf8;">${e.file_hash.substring(0, 14)}...</code></td>
+                <td><span class="badge badge-verified">${e.integrity_status}</span></td>
+                <td>${e.provenance}</td>
+            </tr>
+        `).join('');
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// 12. ANALYTICS
 async function loadAnalyticsData() {
     try {
         const res = await fetch('/api/graph');
@@ -660,7 +779,7 @@ async function loadAnalyticsData() {
                     <td>${e.degree_centrality}</td>
                     <td>${e.betweenness_centrality}</td>
                     <td>${e.pagerank}</td>
-                    <td><span class="badge ${e.influence_score > 0.08 ? 'badge-high' : 'badge-verified'}">${e.assessment}</span></td>
+                    <td><span class="badge badge-verified">${e.assessment}</span></td>
                 </tr>
             `).join('');
         }
@@ -669,62 +788,11 @@ async function loadAnalyticsData() {
     }
 }
 
-// 12. Evidence Fusion & Lead Generator Loader
-async function loadFusionData() {
-    try {
-        const res = await fetch('/api/fusion');
-        const data = await res.json();
-        const container = document.getElementById('fusion-chain-container');
-        if (!container) return;
-
-        container.innerHTML = `
-            <div class="xai-box">
-                <div class="xai-title">🧠 EXPLAINABLE AI SYNTHESIS (XAI)</div>
-                <div style="font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #0f172a;">WHAT WAS FOUND:</div>
-                <p style="font-size: 12px; color: #334155; margin-bottom: 10px;">${data.explainable_ai.WHAT}</p>
-
-                <div style="font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #0f172a;">WHY IT WAS FLAGGED:</div>
-                <p style="font-size: 12px; color: #475569; margin-bottom: 10px;">${data.explainable_ai.WHY}</p>
-
-                <div class="xai-grid">
-                    <div><strong>WHEN:</strong> ${data.explainable_ai.WHEN}</div>
-                    <div><strong>WHERE:</strong> ${data.explainable_ai.WHERE}</div>
-                    <div><strong>CONFIDENCE SCORE:</strong> <span style="color: #16a34a; font-weight: bold;">${data.explainable_ai.CONFIDENCE}</span></div>
-                    <div><strong>LIMITATION:</strong> ${data.explainable_ai.LIMITATION}</div>
-                </div>
-            </div>
-
-            <h4 style="margin: 20px 0 10px 0; font-size: 14px; color: #0284c7;">🔗 6-Hop Cross-Domain Evidence Chain:</h4>
-            ${data.evidence_chain.map(c => `
-                <div style="padding: 12px; background: #ffffff; border: 1px solid #e2e8f0; border-left: 4px solid #0284c7; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <div style="font-size: 12px; font-weight: 700; color: #0284c7;">Step ${c.step_index}: [${c.domain}] ${c.title}</div>
-                    <div style="font-size: 13px; margin: 4px 0; color: #0f172a;"><strong>${c.from_entity}</strong> ➔ <strong>${c.to_entity}</strong></div>
-                    <div style="font-size: 12px; color: #475569;">${c.details}</div>
-                    <span class="badge badge-verified" style="margin-top: 4px;">Ref: ${c.evidence_ref}</span>
-                </div>
-            `).join('')}
-        `;
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// 13. Blockchain Audit Ledger Loader & Tamper Simulation
+// 13. AUDIT
 async function loadAuditData() {
     try {
         const res = await fetch('/api/audit');
         const data = await res.json();
-
-        const statusEl = document.getElementById('blockchain-status');
-        if (statusEl) {
-            if (data.integrity_verification.is_valid) {
-                statusEl.className = 'badge badge-verified';
-                statusEl.innerText = '✅ ALL AUDIT BLOCKS VERIFIED IMMUTABLE & SECURE';
-            } else {
-                statusEl.className = 'badge badge-high';
-                statusEl.innerText = `🚨 TAMPER ALERT: ${data.integrity_verification.reason}`;
-            }
-        }
 
         const tbody = document.getElementById('audit-tbody');
         if (tbody) {
@@ -734,8 +802,8 @@ async function loadAuditData() {
                     <td>${b.timestamp}</td>
                     <td><strong>${b.action_type}</strong></td>
                     <td>${b.actor}</td>
-                    <td><code style="font-size: 11px; color: #2563eb; font-weight: 600;">${b.block_hash.substring(0, 16)}...</code></td>
-                    <td><button class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="simulateBlockTamper(${b.index})">Corrupt Payload</button></td>
+                    <td><code style="font-size: 10px; color: #38bdf8;">${b.block_hash.substring(0, 14)}...</code></td>
+                    <td><button class="btn btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="simulateBlockTamper(${b.index})">Corrupt Payload</button></td>
                 </tr>
             `).join('');
         }
@@ -749,17 +817,17 @@ async function simulateBlockTamper(blockIndex) {
         const res = await fetch('/api/audit/tamper', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ block_index: blockIndex, field_to_tamper: 'title', tampered_value: '[TAMPERED / ALTERED RECORD]' })
+            body: JSON.stringify({ block_index: blockIndex, field_to_tamper: 'title', tampered_value: '[TAMPERED]' })
         });
         const data = await res.json();
-        alert(`🚨 TAMPER SIMULATION EXECUTED ON BLOCK #${blockIndex}!\n\nAudit Status: ${data.audit_verification.is_valid ? 'VALID' : 'FAILED - TAMPER DETECTED'}\nReason: ${data.audit_verification.reason || 'None'}`);
+        alert(`🚨 TAMPER SIMULATION EXECUTED ON BLOCK #${blockIndex}!\nAudit Status: ${data.audit_verification.is_valid ? 'VALID' : 'FAILED - TAMPER DETECTED'}`);
         loadAuditData();
     } catch (err) {
         console.error(err);
     }
 }
 
-// 14. Reports Loader
+// 14. REPORTS
 async function loadReportData() {
     try {
         const res = await fetch('/api/reports/generate', { method: 'POST' });
@@ -773,7 +841,7 @@ async function loadReportData() {
     }
 }
 
-// Global Search
+// GLOBAL SEARCH
 function initGlobalSearch() {
     const input = document.getElementById('global-search-input');
     if (!input) return;

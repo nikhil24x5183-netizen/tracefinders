@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Add parent directory to sys.path so 'backend' package imports work cleanly
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
@@ -23,9 +22,9 @@ from backend.blockchain_ledger import evidence_ledger
 from backend.report_generator import report_generator
 
 app = FastAPI(
-    title="TRACE-X — AI-Powered Criminal Network Intelligence & Evidence Fusion System",
-    description="SIH 2026 Problem Statement SIH26189 - Blockchain & Cybersecurity",
-    version="2.1.0"
+    title="TRACE-X — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
+    description="Professional Investigation Workstation for SIH26189",
+    version="3.0.0"
 )
 
 DATASTORE = generate_synthetic_dataset()
@@ -34,7 +33,7 @@ for evd in DATASTORE["evidence_items"]:
     evidence_ledger.add_evidence_block(
         case_id=evd["case_id"],
         action_type="EVIDENCE_ACQUIRED",
-        actor="Investigator Deshmukh (#IND-8842)",
+        actor="Ins. Vikramaditya Rao (#INV-7092)",
         data_payload={
             "evidence_id": evd["id"],
             "title": evd["title"],
@@ -43,62 +42,56 @@ for evd in DATASTORE["evidence_items"]:
         }
     )
 
-class NLPExtractRequest(BaseModel):
-    text: str
-    investigator_name: Optional[str] = "Investigator Deshmukh (#IND-8842)"
-    auto_add_to_graph: Optional[bool] = True
-
-class ResolveRequest(BaseModel):
-    primary_entity_id: str
-    candidate_entity_id: str
+class CreateCaseWizardRequest(BaseModel):
+    # Step 1: Case Info
+    id: Optional[str] = None
+    title: str
+    description: str
+    investigation_type: str = "Cyber-Financial Crime"
+    priority: str = "High"
+    date_opened: str = "2026-09-02"
+    lead_investigator: str = "Ins. Vikramaditya Rao (#INV-7092)"
+    location: str = "Pune, Maharashtra"
+    agency: str = "Special Cyber Crime & Intelligence Cell (SCCIC)"
+    tags: List[str] = ["NEW_INVESTIGATION"]
+    
+    # Step 2: Primary Suspect Profile
+    primary_suspect: SuspectProfile
+    
+    # Step 3: Secondary Suspect Profiles
+    secondary_suspects: List[SuspectProfile] = []
 
 class TamperRequest(BaseModel):
     block_index: int
     field_to_tamper: str = "title"
     tampered_value: str = "[EXPUNGED / ILLEGALLY MUTATED EVIDENCE]"
 
-class CreateCaseRequest(BaseModel):
-    title: str
-    subject_name: str
-    description: str
-    investigator: str
-    agency: str
-    priority: Optional[str] = "HIGH"
-    primary_suspect: Optional[SuspectProfile] = None
-    secondary_suspects: List[SuspectProfile] = []
-
 # ----------------- REST API ROUTES -----------------
 
 @app.get("/api/overview")
-def get_overview_statistics():
+def get_overview_statistics(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "person_arjun_sharma"):
+    case_obj = DATASTORE["cases"].get(case_id, DATASTORE["cases"]["TRX-2026-017"])
+    
     return {
-        "investigation_statistics": {
-            "active_investigations": len(DATASTORE["cases"]),
-            "evidence_items": len(DATASTORE["evidence_items"]),
-            "entities": len(DATASTORE["nodes"]),
-            "relationships": len(DATASTORE["edges"]),
-            "suspicious_patterns": len(DATASTORE["anomalies"]),
-            "high_priority_leads": len(DATASTORE["leads"])
-        },
-        "investigation_health": {
-            "evidence_coverage": "94.2%",
-            "unresolved_entities": 1,
-            "high_risk_relationships": 8,
-            "recent_evidence_count": 6,
-            "pending_analyst_review": 3
+        "case_summary": {
+            "case_id": case_obj["id"],
+            "title": case_obj["title"],
+            "primary_subject": case_obj["primary_suspect"]["name"],
+            "secondary_subjects_count": len(case_obj["secondary_suspects"]),
+            "entities_count": len(DATASTORE["nodes"]),
+            "evidence_count": len(DATASTORE["evidence_items"]),
+            "relationships_count": len(DATASTORE["edges"]),
+            "temporal_events_count": 19,
+            "investigative_leads_count": len(DATASTORE["leads"]),
+            "pending_review_count": 3
         },
         "recent_activity": [
-            {"time": "10 mins ago", "event": "New CDR dataset imported for Case TRACE-2026-017", "domain": "CDR"},
+            {"time": "10 mins ago", "event": "New CDR dataset imported for TRX-2026-017", "domain": "CDR"},
             {"time": "25 mins ago", "event": "Financial hawala indicator flagged on HDFC Acc ACC-IND-994101", "domain": "FINANCIAL"},
-            {"time": "45 mins ago", "event": "Blockchain wallet 0x71a...9b4 linked via OSINT crawl", "domain": "BLOCKCHAIN"},
-            {"time": "1 hour ago", "event": "Entity resolution candidate 'R. Sharma' flagged for review", "domain": "RESOLUTION"},
-            {"time": "2 hours ago", "event": "CCTV Cam C12 ANPR frame hash verified on Blockchain Ledger", "domain": "DVR"}
+            {"time": "45 mins ago", "event": "Blockchain wallet 0x82...9b4 linked via OSINT crawl", "domain": "BLOCKCHAIN"},
+            {"time": "1 hour ago", "event": "CCTV Cam C12 ANPR frame hash verified on Blockchain Ledger", "domain": "DVR"}
         ],
-        "alert_panel": [
-            {"severity": "HIGH", "alert": "Unusual communication burst detected (420% spike pre-incident)"},
-            {"severity": "HIGH", "alert": "Rapid multi-hop fund movement detected (₹25L transferred in 18 min)"},
-            {"severity": "MEDIUM", "alert": "Temporal correlation detected around Incident #1042"}
-        ]
+        "ai_leads": DATASTORE["leads"]
     }
 
 @app.get("/api/cases")
@@ -112,165 +105,164 @@ def get_case_details(case_id: str):
     return DATASTORE["cases"][case_id]
 
 @app.post("/api/cases")
-def create_case(req: CreateCaseRequest):
-    case_id = f"TRACE-2026-{len(DATASTORE['cases']) + 18:03d}"
+def create_case_wizard(req: CreateCaseWizardRequest):
+    case_id = req.id or f"TRX-2026-{len(DATASTORE['cases']) + 18:03d}"
     
-    primary_profile = req.primary_suspect.dict() if req.primary_suspect else {
-        "name": req.subject_name,
-        "role": "Primary Suspect",
-        "avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-        "phone": "+91-98765-90001",
-        "email": f"{req.subject_name.lower().replace(' ', '.')}@protonmail.com",
-        "social_profiles": {"telegram": f"@{req.subject_name.lower().replace(' ', '_')}"},
-        "known_vehicles": [],
-        "crypto_wallets": []
-    }
-    
-    sec_profiles = [s.dict() for s in req.secondary_suspects]
+    primary = req.primary_suspect.dict()
+    secondaries = [s.dict() for s in req.secondary_suspects]
     
     new_case = {
         "id": case_id,
         "title": req.title,
-        "subject_name": req.subject_name,
-        "primary_suspect": primary_profile,
-        "secondary_suspects": sec_profiles,
+        "primary_suspect": primary,
+        "secondary_suspects": secondaries,
         "subject_known_identifiers": {
-            "phone": [primary_profile.get("phone", "")] if primary_profile.get("phone") else [],
-            "email": [primary_profile.get("email", "")] if primary_profile.get("email") else [],
-            "aliases": [req.subject_name],
-            "vehicle": primary_profile.get("known_vehicles", []),
-            "wallet": primary_profile.get("crypto_wallets", []),
+            "phone": [primary.get("phone", "")] if primary.get("phone") else [],
+            "email": [primary.get("email", "")] if primary.get("email") else [],
+            "aliases": [primary.get("alias", primary.get("name"))],
+            "vehicle": [primary.get("vehicle", "")] if primary.get("vehicle") else [],
+            "wallet": [primary.get("wallet_address", "")] if primary.get("wallet_address") else [],
             "account": []
         },
         "description": req.description,
-        "investigator": req.investigator,
-        "agency": req.agency,
+        "investigation_type": req.investigation_type,
         "priority": req.priority,
-        "status": "ACTIVE",
-        "start_date": time.strftime("%Y-%m-%d"),
-        "tags": ["NEW_INVESTIGATION"]
+        "status": "Active",
+        "date_opened": req.date_opened,
+        "lead_investigator": req.lead_investigator,
+        "agency": req.agency,
+        "location": req.location,
+        "tags": req.tags,
+        "evidence_count": 0,
+        "last_activity": "Just created"
     }
     
     DATASTORE["cases"][case_id] = new_case
     
-    # Add Primary Suspect Node to Graph
-    p_node_id = f"person_{req.subject_name.lower().replace(' ', '_')}"
-    if not any(n["id"] == p_node_id for n in DATASTORE["nodes"]):
+    # Ingest Primary Node
+    p_id = primary["id"] or f"person_{primary['name'].lower().replace(' ', '_')}"
+    if not any(n["id"] == p_id for n in DATASTORE["nodes"]):
         DATASTORE["nodes"].append({
-            "id": p_node_id,
-            "label": req.subject_name,
+            "id": p_id,
+            "label": primary["name"],
             "type": "PERSON",
-            "risk_score": 85,
+            "risk_score": primary.get("risk_score", 85),
             "confidence": 1.0,
-            "details": f"Primary Suspect in Case {case_id}. Role: {primary_profile['role']}",
+            "details": f"Primary Subject in Case {case_id}. Occupation: {primary.get('occupation')}",
             "status": "Confirmed",
             "source_evidence_ids": ["EVD-DOC-001"],
-            "tree_level": 0
+            "tree_level": 0,
+            "avatar": primary.get("photo_url")
         })
 
-    # Add Secondary Suspect Nodes to Graph
-    for sec in sec_profiles:
-        sec_node_id = f"person_{sec['name'].lower().replace(' ', '_')}"
-        if not any(n["id"] == sec_node_id for n in DATASTORE["nodes"]):
+    # Ingest Secondary Nodes
+    for sec in secondaries:
+        s_id = sec["id"] or f"person_{sec['name'].lower().replace(' ', '_')}"
+        if not any(n["id"] == s_id for n in DATASTORE["nodes"]):
             DATASTORE["nodes"].append({
-                "id": sec_node_id,
+                "id": s_id,
                 "label": sec["name"],
                 "type": "PERSON",
-                "risk_score": 75,
+                "risk_score": sec.get("risk_score", 75),
                 "confidence": 0.9,
-                "details": f"Secondary Suspect in Case {case_id}. Role: {sec['role']}",
+                "details": f"Secondary Subject in Case {case_id}. Role: {sec['role']}",
                 "status": "Confirmed",
                 "source_evidence_ids": ["EVD-DOC-001"],
-                "tree_level": 1
+                "tree_level": 1,
+                "avatar": sec.get("photo_url")
             })
             DATASTORE["edges"].append({
-                "id": f"rel_sec_{hash(sec_node_id)&0xfffffff}",
-                "source": p_node_id,
-                "target": sec_node_id,
+                "id": f"rel_sec_{hash(s_id)&0xfffffff}",
+                "source": p_id,
+                "target": s_id,
                 "relation": "ASSOCIATED_WITH",
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "confidence": 0.9,
                 "source_evidence_ids": ["EVD-DOC-001"],
-                "details": f"Co-conspirator association: {sec['role']}",
-                "domain": "COMMUNICATION"
+                "details": f"Association link: {sec['role']}",
+                "domain": "COMMUNICATION",
+                "call_count": 5
             })
 
     evidence_ledger.add_evidence_block(
         case_id=case_id,
-        action_type="CASE_INITIALIZED",
-        actor=req.investigator,
-        data_payload={"title": req.title, "agency": req.agency, "primary_suspect": req.subject_name}
+        action_type="CASE_CREATED",
+        actor=req.lead_investigator,
+        data_payload={"title": req.title, "agency": req.agency, "primary_subject": primary["name"]}
     )
     
     return {"success": True, "case": new_case}
 
+@app.get("/api/persons/{person_id}")
+def get_person_profile(person_id: str):
+    node = next((n for n in DATASTORE["nodes"] if n["id"] == person_id), None)
+    if not node:
+        raise HTTPException(status_code=404, detail="Person not found")
+        
+    case_obj = DATASTORE["cases"]["TRX-2026-017"]
+    person_data = None
+    if case_obj["primary_suspect"]["id"] == person_id:
+        person_data = case_obj["primary_suspect"]
+    else:
+        person_data = next((s for s in case_obj["secondary_suspects"] if s["id"] == person_id), None)
+        
+    if not person_data:
+        person_data = {
+            "id": node["id"],
+            "name": node["label"],
+            "alias": node["label"],
+            "role": "Person of Interest",
+            "relationship_to_primary": "Associate",
+            "age": 30,
+            "gender": "Unknown",
+            "photo_url": node.get("avatar") or "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300",
+            "phone": "+91-98765-99999",
+            "email": f"{node['label'].lower().replace(' ', '.')}@domain.in",
+            "address": "Pune, Maharashtra",
+            "city": "Pune",
+            "occupation": "Entity",
+            "organization": "Unknown",
+            "vehicle": "",
+            "social_usernames": {"telegram": f"@{node['label'].lower().replace(' ', '_')}"},
+            "wallet_address": "",
+            "notes": node.get("details", ""),
+            "risk_score": node.get("risk_score", 60),
+            "evidence_count": 5
+        }
+        
+    # Get person-specific evidence & relationships
+    person_evidence = [e for e in DATASTORE["evidence_items"] if e.get("person_id") == person_id]
+    person_relationships = [e for e in DATASTORE["edges"] if e["source"] == person_id or e["target"] == person_id]
+    
+    return {
+        "person": person_data,
+        "evidence_items": person_evidence,
+        "relationships": person_relationships
+    }
+
+@app.get("/api/relationships/{rel_id}/evidence")
+def get_relationship_evidence(rel_id: str):
+    rel = next((e for e in DATASTORE["edges"] if e["id"] == rel_id), None)
+    if not rel:
+        raise HTTPException(status_code=404, detail="Relationship not found")
+        
+    evd_items = [e for e in DATASTORE["evidence_items"] if e["id"] in rel.get("source_evidence_ids", [])]
+    return {
+        "relationship": rel,
+        "supporting_evidence": evd_items
+    }
+
 @app.get("/api/evidence")
-def get_evidence_list(case_id: Optional[str] = None):
+def get_evidence_list(case_id: Optional[str] = None, person_id: Optional[str] = None):
     items = DATASTORE["evidence_items"]
     if case_id:
         items = [e for e in items if e["case_id"] == case_id]
+    if person_id and person_id != "ALL":
+        items = [e for e in items if e.get("person_id") == person_id]
     return {"evidence_items": items}
 
-@app.get("/api/evidence/{evidence_id}")
-def get_evidence_item(evidence_id: str):
-    item = next((e for e in DATASTORE["evidence_items"] if e["id"] == evidence_id), None)
-    if not item:
-        raise HTTPException(status_code=404, detail="Evidence item not found")
-    return item
-
-@app.post("/api/evidence")
-def upload_evidence_item(
-    case_id: str = Query(...),
-    title: str = Query(...),
-    evidence_type: str = Query(...),
-    source: str = Query(...),
-    analyst_notes: Optional[str] = Query("")
-):
-    evd_id = f"EVD-{evidence_type[:3].upper()}-{len(DATASTORE['evidence_items']) + 601}"
-    file_hash = f"sha256:{hash(title + str(time.time()))&0xffffffffffffffff:x}"
-    
-    new_evd = {
-        "id": evd_id,
-        "case_id": case_id,
-        "title": title,
-        "evidence_type": evidence_type,
-        "source": source,
-        "acquisition_timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "file_hash": file_hash,
-        "file_size_bytes": 1024500,
-        "integrity_status": "VERIFIED",
-        "processing_status": "PROCESSED",
-        "provenance": f"Investigator Upload via Evidence Center on {time.strftime('%Y-%m-%d')}",
-        "analyst_notes": analyst_notes
-    }
-    
-    DATASTORE["evidence_items"].append(new_evd)
-    
-    evidence_ledger.add_evidence_block(
-        case_id=case_id,
-        action_type="EVIDENCE_MANUALLY_INGESTED",
-        actor="Investigator",
-        data_payload={"evidence_id": evd_id, "title": title, "file_hash": file_hash}
-    )
-    
-    return {"success": True, "evidence": new_evd}
-
-@app.post("/api/entities/extract")
-def extract_entities(req: NLPExtractRequest):
-    res = nlp_engine.extract_from_text(req.text)
-    if req.auto_add_to_graph:
-        for ent in res["entities"]:
-            if not any(n["id"] == ent["id"] for n in DATASTORE["nodes"]):
-                DATASTORE["nodes"].append(ent)
-    return {"success": True, "extracted": res}
-
-@app.post("/api/entities/resolve")
-def resolve_entities(req: ResolveRequest):
-    res = nlp_engine.resolve_entities(req.primary_entity_id, req.candidate_entity_id, DATASTORE["nodes"])
-    return res
-
 @app.get("/api/graph")
-def get_graph():
+def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "person_arjun_sharma"):
     analytics = graph_engine.analyze_graph(DATASTORE["nodes"], DATASTORE["edges"])
     return {
         "nodes": DATASTORE["nodes"],
@@ -278,12 +270,8 @@ def get_graph():
         "analytics": analytics
     }
 
-@app.get("/api/graph/path")
-def get_shortest_path(source_id: str = Query(...), target_id: str = Query(...)):
-    return graph_engine.find_shortest_path(DATASTORE["nodes"], DATASTORE["edges"], source_id, target_id)
-
 @app.get("/api/timeline")
-def get_timeline(period: Optional[str] = "24h"):
+def get_timeline(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = None):
     timeline_events = []
     for e in DATASTORE["edges"]:
         timeline_events.append({
@@ -295,64 +283,60 @@ def get_timeline(period: Optional[str] = "24h"):
             "evidence_id": e.get("source_evidence_ids", ["EVD-DOC-001"])[0]
         })
     timeline_events.sort(key=lambda x: x["timestamp"])
-    return {"period": period, "events": timeline_events}
+    return {"events": timeline_events}
 
 @app.get("/api/communications")
-def get_communications():
+def get_communications(person_id: Optional[str] = "person_arjun_sharma"):
     comm_edges = [e for e in DATASTORE["edges"] if e.get("domain") == "COMMUNICATION"]
+    if person_id and person_id != "ALL":
+        comm_edges = [e for e in comm_edges if e["source"] == person_id or e["target"] == person_id]
     return {
-        "total_calls": 1042,
-        "unique_contacts": 84,
-        "incoming_outgoing_ratio": "1.42",
-        "flagged_bursts": 2,
+        "total_calls": 42,
+        "total_messages": 18,
+        "unique_contacts": 9,
+        "last_contact": "17 Aug 2026",
         "communication_edges": comm_edges
     }
 
 @app.get("/api/financial")
-def get_financial():
+def get_financial(person_id: Optional[str] = "person_arjun_sharma"):
     fin_edges = [e for e in DATASTORE["edges"] if e.get("domain") == "FINANCIAL"]
     return {
-        "total_transactions": 540,
-        "hawala_risk_indicators": 1,
-        "circular_movement_chains": 1,
+        "total_transactions": 54,
+        "incoming": "₹45,00,000",
+        "outgoing": "₹25,00,000",
+        "related_accounts": ["HDFC Acc ****4721", "ICICI Acc ****9901"],
         "financial_edges": fin_edges
     }
 
 @app.get("/api/blockchain")
-def get_blockchain():
+def get_blockchain(person_id: Optional[str] = "person_arjun_sharma"):
     blk_edges = [e for e in DATASTORE["edges"] if e.get("domain") == "BLOCKCHAIN"]
     return {
-        "monitored_wallets": 8,
-        "flagged_offramps": 1,
+        "monitored_wallets": ["0x82a9b4fe82c19a...9b4"],
+        "total_volume": "18.5 ETH",
         "blockchain_edges": blk_edges
     }
 
 @app.get("/api/osint")
-def get_osint():
+def get_osint(person_id: Optional[str] = "person_arjun_sharma"):
     osint_edges = [e for e in DATASTORE["edges"] if e.get("domain") == "OSINT"]
     return {
         "crawled_sources": 52,
-        "correlated_handles": 3,
+        "correlated_handles": ["@cipher_king", "@arjun_s89", "shadow_broker99"],
         "osint_edges": osint_edges
     }
 
 @app.get("/api/dvr")
-def get_dvr():
+def get_dvr(person_id: Optional[str] = "person_arjun_sharma"):
     dvr_edges = [e for e in DATASTORE["edges"] if e.get("domain") == "DVR"]
     return {
-        "monitored_cameras": 20,
-        "anpr_detections": 100,
         "dvr_edges": dvr_edges,
         "dvr_videos": DATASTORE.get("dvr_videos", [])
     }
 
-@app.get("/api/anomalies")
-def get_anomalies():
-    detected = anomaly_engine.detect_anomalies(DATASTORE["nodes"], DATASTORE["edges"], DATASTORE["evidence_items"])
-    return {"anomalies": detected}
-
 @app.get("/api/fusion")
-def get_evidence_fusion(case_id: Optional[str] = "TRACE-2026-017"):
+def get_evidence_fusion(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "person_arjun_sharma"):
     return fusion_engine.generate_fusion_analysis(case_id, DATASTORE["nodes"], DATASTORE["edges"], DATASTORE["evidence_items"])
 
 @app.get("/api/leads")
@@ -377,8 +361,8 @@ def tamper_audit_ledger(req: TamperRequest):
     }
 
 @app.post("/api/reports/generate")
-def generate_report(case_id: Optional[str] = "TRACE-2026-017"):
-    case_data = DATASTORE["cases"].get(case_id, DATASTORE["cases"]["TRACE-2026-017"])
+def generate_report(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = "person_arjun_sharma"):
+    case_data = DATASTORE["cases"].get(case_id, DATASTORE["cases"]["TRX-2026-017"])
     fusion_data = fusion_engine.generate_fusion_analysis(case_id, DATASTORE["nodes"], DATASTORE["edges"], DATASTORE["evidence_items"])
     res = report_generator.generate_report(case_data, DATASTORE["nodes"], DATASTORE["edges"], DATASTORE["evidence_items"], fusion_data)
     return res
