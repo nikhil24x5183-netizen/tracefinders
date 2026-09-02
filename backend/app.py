@@ -24,7 +24,7 @@ from backend.report_generator import report_generator
 app = FastAPI(
     title="TRACE-X — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
     description="SIH 2026 Problem Statement SIH26189 - AI-Powered Criminal Network Analysis System",
-    version="3.5.0"
+    version="4.0.0"
 )
 
 DATASTORE = generate_synthetic_dataset()
@@ -34,7 +34,7 @@ for evd in DATASTORE["evidence_items"]:
     evidence_ledger.add_evidence_block(
         case_id=evd["case_id"],
         action_type="EVIDENCE_ACQUIRED",
-        actor="Ins. Vikramaditya Rao (#INV-7092)",
+        actor="INV-004",
         data_payload={
             "evidence_id": evd["id"],
             "title": evd["title"],
@@ -48,7 +48,7 @@ class CreateCaseWizardRequest(BaseModel):
     title: str
     description: str
     investigation_type: str = "Cyber-Financial Crime"
-    priority: str = "High"
+    priority: str = "HIGH"
     date_opened: str = "2026-09-02"
     lead_investigator: str = "Ins. Vikramaditya Rao (#INV-7092)"
     location: str = "Pune, Maharashtra"
@@ -62,6 +62,11 @@ class TamperRequest(BaseModel):
     field_to_tamper: str = "title"
     tampered_value: str = "[EXPUNGED / ILLEGALLY MUTATED EVIDENCE]"
 
+class EntityResolutionRequest(BaseModel):
+    candidate_id: str
+    action: str  # CONFIRM, REJECT, REVIEW
+    notes: Optional[str] = ""
+
 # ----------------- REST API ROUTES -----------------
 
 @app.get("/api/overview")
@@ -69,18 +74,6 @@ def get_overview_statistics(case_id: Optional[str] = "TRX-2026-017", person_id: 
     case_obj = DATASTORE["cases"].get(case_id, DATASTORE["cases"]["TRX-2026-017"])
     
     return {
-        "investigation_statistics": {
-            "cases": 24,
-            "active_cases": 8,
-            "persons": 137,
-            "evidence_items": 1284,
-            "relationships": 486,
-            "communications": 2941,
-            "financial_transactions": 1827,
-            "osint_records": 624,
-            "blockchain_transactions": 213,
-            "cctv_dvr_evidence": 87
-        },
         "case_summary": {
             "case_id": case_obj["id"],
             "title": case_obj["title"],
@@ -97,12 +90,12 @@ def get_overview_statistics(case_id: Optional[str] = "TRX-2026-017", person_id: 
         },
         "investigation_activity": [
             {"time": "09:42", "event": "New communication cluster detected (+91 98765 1201 ➔ Rohan Mehta)", "domain": "CDR"},
-            {"time": "10:18", "event": "Financial transaction linked to Arjun Sharma (HDFC Acc XXXX 4821 ➔ ₹48,500)", "domain": "FINANCIAL"},
-            {"time": "11:03", "event": "Public OSINT mention discovered (@arjun_s_demo ➔ Nexus Logistics Demo)", "domain": "OSINT"},
+            {"time": "10:18", "event": "Financial transaction linked to Arjun Sharma (XXXX4821 ➔ ₹48,500)", "domain": "FINANCIAL"},
+            {"time": "11:03", "event": "Public-Source mention discovered (@arjun_s_demo ➔ Nexus Logistics)", "domain": "OSINT"},
             {"time": "12:27", "event": "Potential relationship detected between Arjun Sharma and Rohan Mehta", "domain": "GRAPH"},
             {"time": "13:41", "event": "CCTV event linked to vehicle MH12 AB 4821 (CAM-04 ANPR match)", "domain": "DVR"},
-            {"time": "15:08", "event": "Blockchain wallet activity correlated (0xDEMO...A721 ➔ 0.84 ETH)", "domain": "BLOCKCHAIN"},
-            {"time": "16:22", "event": "Evidence integrity verification completed (100% SHA-256 Verified)", "domain": "AUDIT"}
+            {"time": "15:08", "event": "Blockchain wallet activity correlated (0xDEMO...A721 ➔ 1.20 ETH)", "domain": "BLOCKCHAIN"},
+            {"time": "16:22", "event": "Evidence integrity verification completed (Verified)", "domain": "AUDIT"}
         ],
         "ai_leads": DATASTORE["leads"]
     }
@@ -130,7 +123,7 @@ def create_case_wizard(req: CreateCaseWizardRequest):
     
     new_case = {
         "id": case_id,
-        "title": req.title,
+        "title": req.title.upper(),
         "primary_suspect": primary,
         "secondary_suspects": secondaries,
         "subject_known_identifiers": {
@@ -143,7 +136,7 @@ def create_case_wizard(req: CreateCaseWizardRequest):
         "description": req.description,
         "investigation_type": req.investigation_type,
         "priority": req.priority,
-        "status": "Active Investigation",
+        "status": "ACTIVE",
         "date_opened": req.date_opened,
         "lead_investigator": req.lead_investigator,
         "agency": req.agency,
@@ -156,7 +149,7 @@ def create_case_wizard(req: CreateCaseWizardRequest):
         "osint_count": 3,
         "blockchain_count": 1,
         "cctv_count": 1,
-        "last_activity": "Just created"
+        "last_activity": "18 Aug 2026 21:17"
     }
     
     DATASTORE["cases"][case_id] = new_case
@@ -189,9 +182,9 @@ def get_person_profile(person_id: str):
             "phone": "+91 98765 9999",
             "email": "contact.demo@example.test",
             "address": "Pune, Maharashtra",
-            "city": "Pune",
+            "city": "Pune, Maharashtra",
             "occupation": "Associate",
-            "organization": "Nexus Logistics Demo",
+            "organization": "Nexus Logistics",
             "vehicle": "MH12 XY 9988",
             "social_usernames": {"telegram": "@associate_demo"},
             "wallet_address": "0x3910...199",
@@ -199,7 +192,8 @@ def get_person_profile(person_id: str):
             "risk_score": 65,
             "evidence_count": 12,
             "relationship_count": 4,
-            "status": "Person of Interest"
+            "status": "Person of Interest",
+            "last_updated": "18 Aug 2026 21:17"
         }
         
     person_evidence = [e for e in DATASTORE["evidence_items"] if e.get("person_id") == person_id or person_id == "person_arjun_sharma"]
@@ -233,16 +227,22 @@ def get_evidence_detail(evidence_id: str):
             "case_id": "TRX-2026-017",
             "person_id": "person_arjun_sharma",
             "title": f"Evidence Record {evidence_id}",
-            "evidence_type": "CDR",
-            "source": "Telecom Provider",
-            "acquisition_timestamp": "2026-08-18 20:02:00",
-            "file_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-            "integrity_status": "VERIFIED",
+            "evidence_type": "Communication Analysis",
+            "source": "Communication Dataset",
+            "acquisition_timestamp": "18 Aug 2026 20:02:14",
+            "acquisition_date": "18 Aug 2026",
+            "acquisition_time": "20:02:14",
+            "file_hash": "8f31c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852c91a",
+            "file_size_bytes": 1840000,
+            "integrity_status": "Verified",
             "processing_status": "PROCESSED",
-            "provenance": "Cryptographically signed export under Sec 65B.",
+            "provenance": "Communication Dataset",
             "analyst_notes": "Log record associated with primary subject Arjun Sharma.",
             "confidence": 0.95,
-            "extracted_entities": ["Arjun Sharma", "Rohan Mehta"]
+            "extracted_entities": ["Arjun Sharma", "Rohan Mehta", "Pune"],
+            "related_events": ["EV-CCTV-031", "EV-FIN-014", "EV-REL-074"],
+            "duration": "04:21",
+            "direction": "Outgoing"
         }
     return evd
 
@@ -280,35 +280,37 @@ def get_graph(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] 
 @app.get("/api/timeline")
 def get_timeline(case_id: Optional[str] = "TRX-2026-017", person_id: Optional[str] = None):
     timeline_events = [
-        {"id": "EV-057", "timestamp": "18 Aug 2026 20:01", "title": "Person meeting at Synthetic Pune Location A", "domain": "DVR", "details": "CCTV Cam-04 capture of Arjun Sharma and Rohan Mehta.", "evidence_id": "EV-057"},
-        {"id": "EV-001", "timestamp": "18 Aug 2026 20:02", "title": "Arjun ➔ Rohan phone call (Duration: 04:21)", "domain": "CDR", "details": "Outgoing encrypted call post-meeting.", "evidence_id": "EV-001"},
-        {"id": "EV-014", "timestamp": "18 Aug 2026 20:17", "title": "Simulated financial exchange scene", "domain": "DVR", "details": "SIMULATED INVESTIGATIVE SCENARIO: Envelope/bag exchange at Location B.", "evidence_id": "EV-014"},
-        {"id": "EV-001-B", "timestamp": "18 Aug 2026 20:19", "title": "Communication event (Duration: 06:12)", "domain": "CDR", "details": "Follow-up phone conversation.", "evidence_id": "EV-001"},
-        {"id": "EV-031", "timestamp": "18 Aug 2026 20:26", "title": "Vehicle departure (MH12 AB 4821)", "domain": "DVR", "details": "ANPR sighting of SUV driven by Vikram Patil.", "evidence_id": "EV-031"},
-        {"id": "EV-001-C", "timestamp": "18 Aug 2026 20:42", "title": "Phone activity burst", "domain": "CDR", "details": "SIM-box tower handoff recorded.", "evidence_id": "EV-001"},
-        {"id": "EV-014-B", "timestamp": "18 Aug 2026 21:03", "title": "Financial transaction (₹48,500 Outgoing)", "domain": "FINANCIAL", "details": "HDFC Acc XXXX 4821 wire transfer.", "evidence_id": "EV-014"},
-        {"id": "EV-042", "timestamp": "18 Aug 2026 21:17", "title": "Blockchain transaction (0.84 ETH)", "domain": "BLOCKCHAIN", "details": "Wallet 0xDEMO...A721 receipt.", "evidence_id": "EV-042"}
+        {"id": "EV-CCTV-031", "timestamp": "18 Aug 2026 20:01:14", "title": "PERSON MEETING", "domain": "DVR", "details": "CCTV CAM-04 capture of Arjun Sharma and Rohan Mehta.", "evidence_id": "EV-CCTV-031", "person": "Arjun Sharma", "location": "Pune"},
+        {"id": "EV-COM-023", "timestamp": "18 Aug 2026 20:02:07", "title": "COMMUNICATION EVENT (Outgoing 04:21)", "domain": "CDR", "details": "Cell tower connection initiated to Rohan Mehta.", "evidence_id": "EV-COM-023", "person": "Arjun Sharma", "location": "Pune"},
+        {"id": "EV-COM-024", "timestamp": "18 Aug 2026 20:11:23", "title": "COMMUNICATION EVENT (Incoming 02:44)", "domain": "CDR", "details": "Incoming call from Rohan Mehta.", "evidence_id": "EV-COM-023", "person": "Rohan Mehta", "location": "Pune"},
+        {"id": "EV-CCTV-032", "timestamp": "18 Aug 2026 20:17:38", "title": "PHYSICAL EVENT (FINANCIAL EXCHANGE)", "domain": "DVR", "details": "Surveillance CAM-04 capture of envelope exchange.", "evidence_id": "EV-CCTV-032", "person": "Arjun Sharma", "location": "Pune"},
+        {"id": "EV-COM-025", "timestamp": "18 Aug 2026 20:19:04", "title": "COMMUNICATION EVENT (Outgoing 06:12)", "domain": "CDR", "details": "Follow-up communication recorded.", "evidence_id": "EV-COM-023", "person": "Arjun Sharma", "location": "Pune"},
+        {"id": "EV-CCTV-033", "timestamp": "18 Aug 2026 20:26:11", "title": "VEHICLE DEPARTURE (MH12 AB 4821)", "domain": "DVR", "details": "ANPR sighting of SUV driven by Vikram Patil.", "evidence_id": "EV-CCTV-033", "person": "Vikram Patil", "location": "Pune"},
+        {"id": "EV-COM-026", "timestamp": "18 Aug 2026 20:42:51", "title": "PHONE EVENT (Burst)", "domain": "CDR", "details": "SIM-box tower handoff recorded.", "evidence_id": "EV-COM-001", "person": "Arjun Sharma", "location": "Pune"},
+        {"id": "EV-FIN-014", "timestamp": "18 Aug 2026 21:03:18", "title": "FINANCIAL EVENT (₹48,500 Wire)", "domain": "FINANCIAL", "details": "Account XXXX4821 wire transfer to Rohan Mehta.", "evidence_id": "EV-FIN-014", "person": "Rohan Mehta", "location": "Pune"},
+        {"id": "EV-BC-042", "timestamp": "18 Aug 2026 21:17:04", "title": "BLOCKCHAIN EVENT (1.20 ETH)", "domain": "BLOCKCHAIN", "details": "Wallet 0xDEMO...A721 transaction.", "evidence_id": "EV-BC-042", "person": "Arjun Sharma", "location": "Blockchain"}
     ]
     return {
-        "temporal_assessment": "TEMPORAL RELATIONSHIP DETECTED: Multiple events occur within a short temporal window and may warrant investigator review.",
+        "temporal_assessment": "TEMPORAL RELATIONSHIP DETECTED: Multiple communication, physical, and financial events occur within a short temporal window and may warrant investigator review.",
         "events": timeline_events
     }
 
 @app.get("/api/communications")
 def get_communications(person_id: Optional[str] = "person_arjun_sharma"):
     rohan_call_timeline = [
-        {"timestamp": "18 Aug 2026 20:02", "direction": "Outgoing", "duration": "04:21", "evidence_id": "EV-001"},
-        {"timestamp": "18 Aug 2026 20:11", "direction": "Incoming", "duration": "02:44", "evidence_id": "EV-001"},
-        {"timestamp": "18 Aug 2026 20:19", "direction": "Outgoing", "duration": "06:12", "evidence_id": "EV-001"},
-        {"timestamp": "18 Aug 2026 20:31", "direction": "Incoming", "duration": "01:18", "evidence_id": "EV-001"},
-        {"timestamp": "17 Aug 2026 19:42", "direction": "Outgoing", "duration": "03:09", "evidence_id": "EV-001"}
+        {"date": "18 Aug 2026", "time": "20:02:14", "direction": "Outgoing", "duration": "04:21", "evidence_id": "EV-COM-023"},
+        {"date": "18 Aug 2026", "time": "20:11:23", "direction": "Incoming", "duration": "02:44", "evidence_id": "EV-COM-023"},
+        {"date": "18 Aug 2026", "time": "20:19:04", "direction": "Outgoing", "duration": "06:12", "evidence_id": "EV-COM-023"},
+        {"date": "18 Aug 2026", "time": "20:31:18", "direction": "Incoming", "duration": "01:18", "evidence_id": "EV-COM-023"},
+        {"date": "17 Aug 2026", "time": "19:42:05", "direction": "Outgoing", "duration": "03:09", "evidence_id": "EV-COM-001"}
     ]
     
     return {
-        "total_calls": 187,
-        "total_messages": 234,
+        "total_events": 421,
+        "calls": 187,
+        "messages": 234,
         "unique_contacts": 11,
-        "last_contact": "18 Aug 2026",
+        "active_period": "03 Aug – 18 Aug 2026",
         "contacts": [
             {"id": "person_rohan_mehta", "name": "Rohan Mehta", "role": "Business Contact", "calls": 27, "phone": "+91 98765 2002"},
             {"id": "person_priya_joshi", "name": "Priya Joshi", "role": "Associate", "calls": 14, "phone": "+91 98765 3003"},
@@ -323,54 +325,55 @@ def get_communications(person_id: Optional[str] = "person_arjun_sharma"):
 @app.get("/api/financial")
 def get_financial(person_id: Optional[str] = "person_arjun_sharma"):
     accounts = [
-        {"bank": "HDFC Demo Account", "account_number": "XXXX 4821", "type": "Current Account", "balance": "₹14,50,000"},
-        {"bank": "Axis Demo Account", "account_number": "XXXX 7194", "type": "Corporate Account", "balance": "₹8,20,000"}
+        {"bank": "HDFC Account", "account_number": "XXXX4821", "type": "Current Account", "balance": "₹14,50,000"},
+        {"bank": "Axis Account", "account_number": "XXXX7194", "type": "Corporate Account", "balance": "₹8,20,000"}
     ]
     
     transactions = [
-        {"id": "TXN-8801", "date": "18 Aug 2026", "time": "21:03", "amount": "₹48,500", "type": "Outgoing", "related_person": "Rohan Mehta", "account": "HDFC XXXX 4821", "evidence_id": "EV-014", "location": "Pune", "confidence": "95%", "notes": "IMPS Wire to Rohan Mehta"},
-        {"id": "TXN-8802", "date": "18 Aug 2026", "time": "15:20", "amount": "₹72,000", "type": "Incoming", "related_person": "Priya Joshi", "account": "Axis XXXX 7194", "evidence_id": "EV-074", "location": "Pune", "confidence": "93%", "notes": "Corporate credit deposit"},
-        {"id": "TXN-8803", "date": "17 Aug 2026", "time": "18:45", "amount": "₹19,800", "type": "Outgoing", "related_person": "Vikram Patil", "account": "HDFC XXXX 4821", "evidence_id": "EV-014", "location": "Pune", "confidence": "90%", "notes": "Logistics expense payment"},
-        {"id": "TXN-8804", "date": "16 Aug 2026", "time": "11:10", "amount": "₹1,25,000", "type": "Incoming", "related_person": "Nexus Logistics Demo", "account": "Axis XXXX 7194", "evidence_id": "EV-074", "location": "Pune", "confidence": "94%", "notes": "Client retainer transfer"},
-        {"id": "TXN-8805", "date": "15 Aug 2026", "time": "14:30", "amount": "₹38,200", "type": "Outgoing", "related_person": "Priya Joshi", "account": "HDFC XXXX 4821", "evidence_id": "EV-014", "location": "Pune", "confidence": "91%", "notes": "Consulting disbursement"}
+        {"date": "18 Aug 2026", "time": "20:58", "amount": "₹48,500", "direction": "OUT", "account": "XXXX4821", "counterparty": "Rohan Mehta", "reference": "TXN-88421", "evidence_id": "EV-FIN-014", "dest_account": "XXXX7312", "correlation": "EV-COM-031", "location": "Pune", "confidence": "71%", "indicator": "Temporal proximity between communication and financial activity."},
+        {"date": "18 Aug 2026", "time": "15:20", "amount": "₹72,000", "direction": "IN", "account": "XXXX7194", "counterparty": "Priya Joshi", "reference": "TXN-88422", "evidence_id": "EV-REL-074", "dest_account": "XXXX7194", "correlation": "EV-DOC-057", "location": "Pune", "confidence": "93%", "indicator": "Corporate wire deposit."},
+        {"date": "17 Aug 2026", "time": "18:45", "amount": "₹19,800", "direction": "OUT", "account": "XXXX4821", "counterparty": "Vikram Patil", "reference": "TXN-88423", "evidence_id": "EV-FIN-014", "dest_account": "XXXX9901", "correlation": "EV-CCTV-033", "location": "Pune", "confidence": "90%", "indicator": "Logistics expense payment."},
+        {"date": "16 Aug 2026", "time": "11:10", "amount": "₹1,25,000", "direction": "IN", "account": "XXXX7194", "counterparty": "Nexus Logistics", "reference": "TXN-88424", "evidence_id": "EV-REL-074", "dest_account": "XXXX7194", "correlation": "EV-DOC-057", "location": "Pune", "confidence": "94%", "indicator": "Retainer credit transfer."},
+        {"date": "15 Aug 2026", "time": "14:30", "amount": "₹38,200", "direction": "OUT", "account": "XXXX4821", "counterparty": "Priya Joshi", "reference": "TXN-88425", "evidence_id": "EV-FIN-014", "dest_account": "XXXX5544", "correlation": "EV-FIN-014", "location": "Pune", "confidence": "91%", "indicator": "Consulting disbursement."}
     ]
     
-    hawala_analysis = {
-        "title": "Potential Informal Value Transfer Pattern",
-        "confidence": "71%",
-        "status": "Requires Human Review",
-        "explanation": "Observed transaction structure matches selected red-flag indicators.",
-        "indicators": [
-            "Indicator 1: Repeated third-party transfers without commercial documentation",
-            "Indicator 2: Rapid movement between multiple accounts within short timeframe",
-            "Indicator 3: Transaction timing correlated with communication activity",
-            "Indicator 4: Geographically separated counterparties",
-            "Indicator 5: Repeated settlement-like balance clearing patterns"
-        ]
-    }
+    hawala_indicators = [
+        {"name": "Repeated third-party transfers", "status": "OBSERVED", "details": "Transfers without commercial documentation observed across counterparty accounts."},
+        {"name": "Rapid account movement", "status": "OBSERVED", "details": "Movement between multiple accounts within short interval."},
+        {"name": "Multiple counterparties", "status": "OBSERVED", "details": "Multiple counterparty accounts linked within 48-hour window."},
+        {"name": "Transaction timing correlated with communication", "status": "OBSERVED", "details": "Financial activity initiated within minutes of CDR call burst."},
+        {"name": "Geographical separation", "status": "NOT OBSERVED", "details": "Counterparties located within Western Maharashtra corridor."},
+        {"name": "Unusual settlement pattern", "status": "INCONCLUSIVE", "details": "Requires ongoing ledger observation."}
+    ]
     
     return {
         "accounts": accounts,
         "transactions": transactions,
-        "hawala_analysis": hawala_analysis
+        "hawala_analysis": {
+            "title": "INFORMAL VALUE TRANSFER INDICATORS",
+            "assessment": "Potential informal value transfer pattern",
+            "status": "Requires investigative verification",
+            "indicators": hawala_indicators
+        }
     }
 
 @app.get("/api/blockchain")
 def get_blockchain(person_id: Optional[str] = "person_arjun_sharma"):
     wallet_info = {
         "address": "0xDEMO...A721",
+        "associated_evidence": "EV-BC-042",
         "balance": "8.42 ETH",
-        "total_transactions": 47,
         "incoming": 23,
         "outgoing": 24,
+        "total_observed": 47,
         "disclaimer": "Wallet association based on available evidence."
     }
     
     transactions = [
-        {"id": "TX-DEMO-001", "amount": "0.84 ETH", "type": "Incoming", "sender": "0x3910...199", "recipient": "0xDEMO...A721", "hash": "0x7a89b...c12", "timestamp": "18 Aug 2026 21:17"},
-        {"id": "TX-DEMO-002", "amount": "1.20 ETH", "type": "Outgoing", "sender": "0xDEMO...A721", "recipient": "0x88f1a...d94", "hash": "0x12c4e...f56", "timestamp": "18 Aug 2026 21:40"},
-        {"id": "TX-DEMO-003", "amount": "0.42 ETH", "type": "Outgoing", "sender": "0xDEMO...A721", "recipient": "0x9910a...e22", "hash": "0x55d1a...a88", "timestamp": "17 Aug 2026 14:10"},
-        {"id": "TX-DEMO-004", "amount": "2.10 ETH", "type": "Incoming", "sender": "0x44a19...b01", "recipient": "0xDEMO...A721", "hash": "0x8892b...c33", "timestamp": "16 Aug 2026 09:25"}
+        {"id": "TX-DEMO-001", "hash": "TX-DEMO-001", "from_addr": "0x3910...199", "to_addr": "0xDEMO...A721", "value": "0.84 ETH", "time": "18 Aug 2026 21:17:04", "evidence_id": "EV-BC-042"},
+        {"id": "TX-DEMO-002", "hash": "TX-DEMO-002", "from_addr": "0xDEMO...A721", "to_addr": "0xDEMO...F921", "value": "1.20 ETH", "time": "18 Aug 2026 21:40:12", "evidence_id": "EV-BC-042"},
+        {"id": "TX-DEMO-003", "hash": "TX-DEMO-003", "from_addr": "0xDEMO...A721", "to_addr": "0x9910...E22", "value": "0.42 ETH", "time": "17 Aug 2026 14:10:00", "evidence_id": "EV-BC-042"},
+        {"id": "TX-DEMO-004", "hash": "TX-DEMO-004", "from_addr": "0x44a1...B01", "to_addr": "0xDEMO...A721", "value": "2.10 ETH", "time": "16 Aug 2026 09:25:30", "evidence_id": "EV-BC-042"}
     ]
     
     return {
@@ -382,54 +385,48 @@ def get_blockchain(person_id: Optional[str] = "person_arjun_sharma"):
 def get_osint(person_id: Optional[str] = "person_arjun_sharma"):
     records = [
         {
-            "id": "OSINT-001",
-            "type": "Public Profile",
-            "value": "@arjun_s_demo",
-            "source": "Public social platform",
+            "id": "PSI-023",
+            "subject": "Arjun Sharma",
+            "source": "Public Web",
             "last_observed": "18 Aug 2026",
-            "evidence_id": "EV-023",
-            "confidence": "88%",
-            "entities": ["Arjun Sharma", "@arjun_s_demo"]
+            "entity": "Rohan Mehta",
+            "location": "Pune",
+            "evidence_id": "EV-OSINT-023",
+            "confidence": "76%",
+            "value": "@arjun_s_demo profile & forum post"
         },
         {
-            "id": "OSINT-002",
-            "type": "Public Mention",
-            "value": "Public forum post linking Arjun Sharma & Rohan Mehta",
-            "source": "Public web page",
+            "id": "PSI-024",
+            "subject": "Arjun Sharma",
+            "source": "Public Web Directory",
             "last_observed": "18 Aug 2026",
-            "evidence_id": "EV-023",
-            "confidence": "85%",
-            "entities": ["Arjun Sharma", "Rohan Mehta"]
-        },
-        {
-            "id": "OSINT-003",
-            "type": "Public Organization",
-            "value": "Nexus Logistics Demo",
-            "source": "Business reference portal",
-            "last_observed": "18 Aug 2026",
-            "evidence_id": "EV-061",
+            "entity": "Nexus Logistics",
+            "location": "Pune",
+            "evidence_id": "EV-DOC-057",
             "confidence": "91%",
-            "entities": ["Nexus Logistics Demo", "Priya Joshi"]
+            "value": "Nexus Logistics MCA Registration reference"
         },
         {
-            "id": "OSINT-004",
-            "type": "Public Location Mention",
-            "value": "Pune Junction Logistics Hub",
-            "source": "Public mapping directory",
+            "id": "PSI-025",
+            "subject": "Arjun Sharma",
+            "source": "Public Mapping Directory",
             "last_observed": "18 Aug 2026",
-            "evidence_id": "EV-061",
+            "entity": "Pune Junction Hub",
+            "location": "Pune",
+            "evidence_id": "EV-LOC-061",
             "confidence": "90%",
-            "entities": ["Pune", "Nexus Logistics Demo"]
+            "value": "Public Location Mention"
         },
         {
-            "id": "OSINT-005",
-            "type": "Public Wallet Reference",
-            "value": "0xDEMO...A721",
-            "source": "Public blockchain explorer record",
+            "id": "PSI-026",
+            "subject": "Arjun Sharma",
+            "source": "Public Blockchain Explorer",
             "last_observed": "18 Aug 2026",
-            "evidence_id": "EV-042",
+            "entity": "0xDEMO...A721",
+            "location": "Blockchain",
+            "evidence_id": "EV-BC-042",
             "confidence": "94%",
-            "entities": ["0xDEMO...A721", "Cipher King"]
+            "value": "Public Wallet Reference"
         }
     ]
     return {"records": records}
@@ -476,6 +473,12 @@ def get_audit_trail():
         "blockchain_audit": [b.to_dict() for b in evidence_ledger.chain]
     }
 
+@app.post("/api/entity-resolution/action")
+def handle_entity_resolution(req: EntityResolutionRequest):
+    cand = DATASTORE["ambiguous_candidate"]
+    cand["status"] = f"Actioned: {req.action}"
+    return {"success": True, "candidate": cand, "message": f"Candidate match {req.candidate_id} actioned as {req.action}."}
+
 @app.post("/api/audit/tamper")
 def tamper_audit_ledger(req: TamperRequest):
     tamper_res = evidence_ledger.simulate_tamper(req.block_index, req.field_to_tamper, req.tampered_value)
@@ -516,6 +519,6 @@ def serve_index():
     index_path = os.path.join(static_dir, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return HTMLResponse("<h1>TRACE-X Platform Loading...</h1>")
+    return HTMLResponse("<h1>TRACE-X Workstation Loading...</h1>")
 
 app.mount("/static", StaticFiles(directory=static_dir), name="static")

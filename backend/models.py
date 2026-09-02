@@ -4,8 +4,8 @@ from typing import List, Dict, Any, Optional
 class SuspectProfile(BaseModel):
     id: str = "person_arjun_sharma"
     name: str = "Arjun Sharma"
-    alias: Optional[str] = "Cipher King"
-    role: str = "Primary Subject"  # Primary Subject, Secondary Subject, Person of Interest, Associate, Business Contact, Employee
+    alias: Optional[str] = "Arjun S."
+    role: str = "Primary Subject"  # Primary Subject, Associate, Business Contact, Employee, Person of Interest, Unknown
     relationship_to_primary: Optional[str] = "Self"
     age: Optional[int] = 34
     gender: Optional[str] = "Male"
@@ -13,28 +13,29 @@ class SuspectProfile(BaseModel):
     phone: Optional[str] = "+91 98765 1201"
     email: Optional[str] = "arjun.sharma.demo@example.test"
     address: Optional[str] = "Flat 402, Shivajinagar"
-    city: Optional[str] = "Pune"
+    city: Optional[str] = "Pune, Maharashtra"
     occupation: Optional[str] = "Logistics Consultant"
-    organization: Optional[str] = "Nexus Logistics Demo"
+    organization: Optional[str] = "Nexus Logistics"
     vehicle: Optional[str] = "MH12 AB 4821"
-    social_usernames: Dict[str, str] = {"telegram": "@cipher_king", "twitter": "@arjun_s_demo", "instagram": "@arjun_cyber"}
+    social_usernames: Dict[str, str] = {"twitter": "@arjun_s_demo", "telegram": "@cipher_king", "instagram": "@arjun_cyber"}
     wallet_address: Optional[str] = "0xDEMO...A721"
     notes: Optional[str] = "Primary subject under investigation for Operation Nexus."
     risk_score: int = 92
     evidence_count: int = 24
     relationship_count: int = 7
     status: str = "Under Investigation"
+    last_updated: str = "18 Aug 2026 21:17"
 
 class Case(BaseModel):
     id: str = "TRX-2026-017"
-    title: str = "Operation Nexus"
+    title: str = "OPERATION NEXUS"
     primary_suspect: SuspectProfile
     secondary_suspects: List[SuspectProfile] = []
     subject_known_identifiers: Dict[str, List[str]] = {}
     description: str = "Cross-domain intelligence fusion investigating an illicit financial transfer syndicate coordinating extortion, money laundering through informal channels, and crypto off-ramping connected to cyber incident #1042."
     investigation_type: str = "Cyber-Financial Crime"
-    priority: str = "High"
-    status: str = "Active Investigation"
+    priority: str = "HIGH"
+    status: str = "ACTIVE"
     date_opened: str = "2026-08-15"
     lead_investigator: str = "Ins. Vikramaditya Rao (#INV-7092)"
     location: str = "Pune, Maharashtra"
@@ -47,7 +48,7 @@ class Case(BaseModel):
     osint_count: int = 42
     blockchain_count: int = 18
     cctv_count: int = 9
-    last_activity: str = "10 mins ago"
+    last_activity: str = "18 Aug 2026 21:17"
 
 class Entity(BaseModel):
     id: str
@@ -73,28 +74,36 @@ class Relationship(BaseModel):
     details: Optional[str] = ""
     domain: str = "GENERAL"
     call_count: Optional[int] = 0
-    first_observed: Optional[str] = ""
-    last_observed: Optional[str] = ""
+    first_observed: Optional[str] = "03 Aug 2026"
+    last_observed: Optional[str] = "18 Aug 2026"
+    supporting_evidence_count: int = 7
+    shared_locations_count: int = 3
+    shared_organizations_count: int = 1
     explanation: Optional[str] = ""
     alt_explanation: Optional[str] = ""
     temporal_correlation: Optional[str] = ""
 
 class EvidenceItem(BaseModel):
-    id: str
+    id: str  # e.g., EV-COM-001, EV-FIN-014, EV-OSINT-023, EV-CCTV-031, EV-BC-042
     case_id: str = "TRX-2026-017"
     person_id: Optional[str] = "person_arjun_sharma"
     title: str
     evidence_type: str
     source: str
     acquisition_timestamp: str
+    acquisition_date: str = "18 Aug 2026"
+    acquisition_time: str = "20:02:14"
     file_hash: str
     file_size_bytes: int = 1024500
-    integrity_status: str = "VERIFIED"
+    integrity_status: str = "Verified"
     processing_status: str = "PROCESSED"
-    provenance: str
+    provenance: str = "Communication Dataset"
     analyst_notes: str = ""
     confidence: float = 0.95
     extracted_entities: List[str] = []
+    related_events: List[str] = []
+    duration: Optional[str] = None
+    direction: Optional[str] = None
 
 class Anomaly(BaseModel):
     id: str
@@ -111,11 +120,12 @@ class Anomaly(BaseModel):
 class InvestigativeLead(BaseModel):
     id: str
     title: str
-    summary: str
+    lead: str
     confidence: float
     evidence_chain: List[Dict[str, Any]]
     recommended_actions: List[str]
     supporting_evidence: List[str] = []
+    observed_pattern: str = ""
     alternative_explanation: Optional[str] = ""
     status: str = "Needs Review"
     human_review_required: bool = True
