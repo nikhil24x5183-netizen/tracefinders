@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TRACE FINDERS — USER_MANUAL.md (Printable A4 PDF)</title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            background: #ffffff;
+            line-height: 1.6;
+            font-size: 13px;
+            padding: 24px;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 24px; color: #1e3a8a; border-bottom: 2px solid #2563eb; padding-bottom: 8px; margin-top: 20px; }
+        h2 { font-size: 18px; color: #1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 18px; }
+        h3 { font-size: 15px; color: #2563eb; margin-top: 14px; }
+        code, pre { font-family: 'Fira Code', monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        pre { padding: 12px; overflow-x: auto; background: #0f172a; color: #38bdf8; border-radius: 8px; }
+        hr { border: 0; border-top: 1px solid #cbd5e1; margin: 20px 0; }
+        li { margin-left: 20px; }
+        .no-print {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2563eb;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: none;
+            z-index: 1000;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()">🖨️ Save as A4 PDF</button>
+    <div style="font-size: 11px; color: #64748b; font-weight: 800; font-family: monospace; text-transform: uppercase; margin-bottom: 12px;">
+        OFFICIAL DOCUMENTATION EXPORT // TRACE FINDERS (SIH26189) // USER_MANUAL.md
+    </div>
+    <h1>📖 INVESTIGATOR & ANALYST OPERATING MANUAL — TRACE FINDERS</h1>
+<br>
+<p>**Manual Version:** `1.0.0`  </p>
+<p>**Target Audience:** Law Enforcement Officers, Cyber Crime Analysts, Forensic Investigators  </p>
+<br>
+<hr>
+<br>
+<h2>📑 Operating Manual Table of Contents</h2>
+<br>
+<p>1. [Workstation Navigation Overview](#1-workstation-navigation-overview)</p>
+<p>2. [Managing Suspect Contexts & Profiles](#2-managing-suspect-contexts--profiles)</p>
+<p>3. [Link Analysis Graph Masterclass](#3-link-analysis-graph-masterclass)</p>
+<p>4. [CCTV & DVR Surveillance Forensics Operations](#4-cctv--dvr-surveillance-forensics-operations)</p>
+<p>5. [Generating & Exporting Official Investigation Dossiers](#5-generating--exporting-official-investigation-dossiers)</p>
+<br>
+<hr>
+<br>
+<h2>1. Workstation Navigation Overview</h2>
+<br>
+<p>The workstation interface is partitioned into three functional areas:</p>
+<li>**Left Navigation Sidebar**: Access to all 15 operational modules (Overview, Cases, Person Profiles, Fusion, Link Analysis Graph, Communications, Financial, Blockchain, OSINT, DVR, Timeline, Analytics, Entity Resolution, Dossier, Audit).</li>
+<li>**Top Context Header**: Displays current active Case ID (`TRX-2026-017`), Subject Name (`Arjun Sharma`), Target Role (`Primary Subject`), Global Search Bar, and Subject Context Switcher Dropdown.</li>
+<li>**Main Content Area**: Active analytical view with responsive dark workstation theme (`#000000` / `#090a0f`).</li>
+<br>
+<hr>
+<br>
+<h2>2. Managing Suspect Contexts & Profiles</h2>
+<br>
+<h3>How to Switch Target Subjects:</h3>
+<p>1. Locate the **Person Dropdown** in the top header.</p>
+<p>2. Select any target profile:</p>
+<p>   - `🔴 Arjun Sharma (Primary Subject)`</p>
+<p>   - `🔵 Rohan Mehta (Business Contact)`</p>
+<p>   - `🟢 Priya Joshi (Associate)`</p>
+<p>   - `🟡 Vikram Patil (Person of Interest)`</p>
+<p>   - `🟣 Neha Kulkarni (Employee)`</p>
+<p>   - `⚠️ Arjun S. (Ambiguous Match Candidate)`</p>
+<p>3. All panels, financial transactions, DVR streams, and graph networks will immediately transform to reflect the newly selected subject.</p>
+<br>
+<hr>
+<br>
+<h2>3. Link Analysis Graph Masterclass</h2>
+<br>
+<h3>Canvas Interactivity & Controls:</h3>
+<li>**Pan Canvas**: Click and drag any empty area of the graph canvas to move 360°.</li>
+<li>**Zoom**: Scroll mouse wheel or use floating toolbar buttons `[ + ]` and `[ − ]`.</li>
+<li>**Drag Nodes**: Click and drag any entity node to reposition branches or clear visual overlaps.</li>
+<li>**Re-Center Root**: Click `[ 🎯 ]` on the floating toolbar to instantly center and zoom into the root target node.</li>
+<li>**Layout Engines**: Use top buttons to toggle between `Tree (Root Top)`, `Radial`, `Hierarchy`, and `Compact`.</li>
+<br>
+<hr>
+<br>
+<h2>4. CCTV & DVR Surveillance Forensics Operations</h2>
+<br>
+<p>1. Navigate to **📹 CCTV / DVR Forensics**.</p>
+<p>2. **Filter Cameras**: Use the top filter bar to filter by status (`Active Recording` / `Archived`), location (`Pune` / `Mumbai`), or type (`Fixed` / `PTZ` / `ANPR`).</p>
+<p>3. **Open Camera Inspection**: Click `🔍 OPEN CAMERA` on any camera card (e.g. `CAM-04`) to view full resolution stream preview, metadata, and 24-hour timestamp markers.</p>
+<p>4. **Play Video Clips**: Use player controls (`▶`, `⏮ 10s`, `⏭ 10s`) to inspect suspect sightings and ANPR detections.</p>
+<br>
+<hr>
+<br>
+<h2>5. Generating & Exporting Official Investigation Dossiers</h2>
+<br>
+<p>1. Navigate to **📄 Investigation Dossier**.</p>
+<p>2. Review the automatically generated person-scoped summary report.</p>
+<p>3. Click **`🖨️ Print / Export PDF Dossier`** at the top right of the dossier card.</p>
+<p>4. Set print destination to **Save as PDF**, paper size to **A4**, and save the official document.</p>
+<br>
+</body>
+</html>

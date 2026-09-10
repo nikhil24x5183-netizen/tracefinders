@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TRACE FINDERS — README.md (Printable A4 PDF)</title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            background: #ffffff;
+            line-height: 1.6;
+            font-size: 13px;
+            padding: 24px;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 24px; color: #1e3a8a; border-bottom: 2px solid #2563eb; padding-bottom: 8px; margin-top: 20px; }
+        h2 { font-size: 18px; color: #1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 18px; }
+        h3 { font-size: 15px; color: #2563eb; margin-top: 14px; }
+        code, pre { font-family: 'Fira Code', monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        pre { padding: 12px; overflow-x: auto; background: #0f172a; color: #38bdf8; border-radius: 8px; }
+        hr { border: 0; border-top: 1px solid #cbd5e1; margin: 20px 0; }
+        li { margin-left: 20px; }
+        .no-print {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2563eb;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: none;
+            z-index: 1000;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()">🖨️ Save as A4 PDF</button>
+    <div style="font-size: 11px; color: #64748b; font-weight: 800; font-family: monospace; text-transform: uppercase; margin-bottom: 12px;">
+        OFFICIAL DOCUMENTATION EXPORT // TRACE FINDERS (SIH26189) // README.md
+    </div>
+    <p><div align="center"></p>
+<br>
+<p>  <img src="static/logo.png" alt="TRACE FINDERS Logo" width="120" style="border-radius: 12px; margin-bottom: 10px;"></p>
+<br>
+<p>  # 🔍 TRACE FINDERS</p>
+<p>  ### AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation</p>
+<br>
+<p>  [![SIH 2026](https://img.shields.io/badge/SIH%202026-Problem%20SIH26189-blue?style=for-the-badge&logo=shield)](https://sih.gov.in)</p>
+<p>  [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)</p>
+<p>  [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)</p>
+<p>  [![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)</p>
+<p>  [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)</p>
+<p>  [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)</p>
+<br>
+<p>  <p align="center"></p>
+<p>    <b>Next-Generation Enterprise Intelligence Platform for Law Enforcement, Forensic Analysts, and Cyber Crime Investigation Units.</b></p>
+<p>  </p></p>
+<br>
+<p>  <p align="center"></p>
+<p>    <a href="https://criminalnetworkanalysis.vercel.app"><b>🌐 Live Cloud Workstation</b></a> •</p>
+<p>    <a href="https://github.com/nikhil24x5183-netizen/tracefinders"><b>📦 GitHub Repository</b></a> •</p>
+<p>    <a href="ARCHITECTURE.md"><b>🏗️ System Architecture</b></a></p>
+<p>  </p></p>
+<br>
+<p></div></p>
+<br>
+<hr>
+<br>
+<h2>📑 Table of Contents</h2>
+<br>
+<li>[🌟 System Overview](#-system-overview)</li>
+<li>[⚡ Key Intelligence Capabilities](#-key-intelligence-capabilities)</li>
+<li>[🏗️ High-Level Architecture](#️-high-level-architecture)</li>
+<li>[📱 Responsive UI & Workstation Themes](#-responsive-ui--workstation-themes)</li>
+<li>[📊 Data Model & Person-Scoped Isolation](#-data-model--person-scoped-isolation)</li>
+<li>[🛠️ Tech Stack](#️-tech-stack)</li>
+<li>[🚀 Quick Start & Installation](#-quick-start--installation)</li>
+<li>[🔧 Firebase Cloud Database Setup](#-firebase-cloud-database-setup)</li>
+<li>[🌐 Live Deployment Links](#-live-deployment-links)</li>
+<li>[📜 License & Acknowledgments](#-license--acknowledgments)</li>
+<br>
+<hr>
+<br>
+<h2>🌟 System Overview</h2>
+<br>
+<p>**TRACE FINDERS** is a state-of-the-art criminal network analysis workstation engineered for law enforcement agencies, cybercrime investigation cells, and forensic intelligence teams under **Smart India Hackathon (SIH 2026 - Problem Statement SIH26189)**.</p>
+<br>
+<p>Traditional investigative tools suffer from context bleeding, static visualizations, and fragmented evidence data across isolated silos (CDR logs, bank wire ledgers, CCTV DVR streams, blockchain wallets, and social media OSINT). **TRACE FINDERS** resolves this by establishing a **100% Person-Scoped Investigation Data Engine**, correlated through **Multi-Hop Cross-Domain Evidence Fusion** and **Explainable AI (XAI)** decision support.</p>
+<br>
+<hr>
+<br>
+<h2>⚡ Key Intelligence Capabilities</h2>
+<br>
+<h3>👤 1. 100% Person-Scoped Data Model & Dynamic Switching</h3>
+<li>**Zero Context Bleeding**: Every primary suspect, associate, and person of interest maintains a strictly isolated investigative record tree.</li>
+<li>**Dynamic Context Controller**: Switching the active target subject instantly transforms all workstation panels, financial ledgers, communication trees, DVR video clips, timeline chronology, and graph networks.</li>
+<li>**6 Distinct Target Profiles Built-In**:</li>
+<p>  - `P-001` **Arjun Sharma** — Primary Subject *(Logistics & Financial Controller)*</p>
+<p>  - `P-002` **Rohan Mehta** — Business Contact *(Cross-Border Importer)*</p>
+<p>  - `P-003` **Priya Joshi** — Associate *(Corporate Accounts Executive)*</p>
+<p>  - `P-004` **Vikram Patil** — Person of Interest *(Hawala Transactor)*</p>
+<p>  - `P-005` **Neha Kulkarni** — Employee *(Internal Transport Dispatcher)*</p>
+<p>  - `P-006` **Arjun S.** — Ambiguous Match Candidate *(Entity Resolution Pipeline)*</p>
+<br>
+<h3>🕸️ 2. Interactive Vis.js Link Analysis Knowledge Graph</h3>
+<li>**360° Drag & Pan Control**: Fully interactive graph canvas supporting pinch zoom, unconstrained dragging, free node repositioning, and double-click target focus.</li>
+<li>**4 Algorithmic Layout Engines**:</li>
+<p>  - `Tree (Root Top)` — Directed hierarchical top-down flow centered on the active target subject.</p>
+<p>  - `Radial` — Concentric multi-hop degree rings.</p>
+<p>  - `Hierarchy` — Left-to-right temporal/role dependency layout.</p>
+<p>  - `Compact` — High-density force-directed cluster layout.</p>
+<li>**Floating Controls Overlay**: Quick-action floating toolbar (`[ + ]` Zoom In, `[ − ]` Zoom Out, `[ ⛶ ]` Fit to Screen, `[ ⟳ ]` Reset Layout, `[ 🎯 ]` Re-Center Root Node).</li>
+<br>
+<h3>📹 3. CCTV / DVR Forensics Workspace</h3>
+<li>**All-Camera Responsive Inventory Grid**: Displays all 12 monitored camera locations (`CAM-01` through `CAM-12`) simultaneously with zero clipped cards or hidden carousels.</li>
+<li>**24-Hour Recording Event Timeline**: Visual marker timeline (00:00 to 23:59 IST) displaying exact timestamps of suspect sightings, vehicle ANPR triggers, and meeting events.</li>
+<li>**3-Column Split Analytics Layout**:</li>
+<p>  - **Left Column**: Chronological Evidence Timeline.</p>
+<p>  - **Center Column**: Multi-Camera Video Clip Player with playback controls (`▶`, `⏮ 10s`, `⏭ 10s`) & SHA-256 evidence reference tags.</p>
+<p>  - **Right Column**: Cross-domain Related Entities & Camera Registry.</p>
+<br>
+<h3>🔗 4. Multi-Hop Evidence Fusion & Explainable AI (XAI)</h3>
+<li>**Cross-Domain Correlation Pipeline**: Automatically links entity nodes across 5 analytical domains:</li>
+<p>  $$\text{Person Profile} \xrightarrow{\text{CDR}} \text{Telecom Node} \xrightarrow{\text{ANPR}} \text{CCTV Event} \xrightarrow{\text{Wire}} \text{Financial Ledger} \xrightarrow{\text{Wallet}} \text{Blockchain}$$</p>
+<li>**XAI Assessment Engine**: Generates human-understandable correlation rationale, confidence scores, flagging triggers, and alternative hypotheses to support judicial review.</li>
+<br>
+<h3>📄 5. Official Investigation Dossier & A4 PDF Generator</h3>
+<li>**Embedded Profile Photo**: Profile card displaying target portrait, aliases, identifier grid, and legal risk classification.</li>
+<li>**Native Print & PDF Export**: Instant A4-formatted PDF generation using `@page { size: A4; margin: 15mm; }` via browser print engine integration.</li>
+<br>
+<hr>
+<br>
+<h2>🏗️ High-Level Architecture</h2>
+<br>
+<pre><code>
+graph TD
+    A[Investigator Browser / Mobile Client] --&gt;|HTTPS / REST API| B[Vercel Serverless Gateway / FastAPI]
+    B --&gt;|Fail-Safe Cloud Sync| C[(Firebase Realtime Database)]
+    B --&gt;|Graph Engine| D[Vis.js Link Analysis Network]
+    B --&gt;|XAI Correlation| E[Multi-Hop Fusion Engine]
+    B --&gt;|Report Service| F[A4 PDF Dossier Generator]
+
+    subgraph Firebase Cloud Datastore
+        C --&gt; C1[profiles: P-001 ... P-006]
+        C --&gt; C2[cases: TRX-2026-017]
+        C --&gt; C3[cctv_inventory: CAM-01 ... CAM-12]
+        C --&gt; C4[multi_hop_fusion & XAI]
+        C --&gt; C5[audit_logs & timeline]
+    end
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>📱 Responsive UI & Workstation Themes</h2>
+<br>
+<li>**Pure OLED Pitch Black & Obsidian Theme**: Engineered with `#000000` pitch black background, `#090a0f` matte charcoal cards, `#040406` obsidian headers, and `#38bdf8` electric cyan accents for low eye strain during overnight operations.</li>
+<li>**Mobile & Tablet Drawer Navigation**: On screens $\le 768\text{px}$, the sidebar smoothly transforms into a slide-out drawer (`z-index: 2000`) with touch-optimized scroll wrappers for all data tables.</li>
+<br>
+<hr>
+<br>
+<h2>📊 Data Model & Person-Scoped Isolation</h2>
+<br>
+<pre><code>
+{
+  "datastore": {
+    "profiles": {
+      "P-001": {
+        "id": "P-001",
+        "name": "Arjun Sharma",
+        "role": "Primary Subject",
+        "phone": "+91 98765 1201",
+        "email": "arjun.sharma.demo@example.test",
+        "vehicle": "MH12 AB 4821",
+        "account_number": "XXXX4821",
+        "wallet_address": "0xDEMO...A721"
+      },
+      "P-002": {
+        "id": "P-002",
+        "name": "Rohan Mehta",
+        "role": "Business Contact",
+        "phone": "+91 97765 4876",
+        "email": "rohan.mehta.demo@example.test",
+        "vehicle": "MH01 CR 7814",
+        "account_number": "XXXX7312",
+        "wallet_address": "0xDEMO...D492"
+      }
+    }
+  }
+}
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>🛠️ Tech Stack</h2>
+<br>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| Layer | Technology / Library |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| :--- | :--- |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Frontend UI** | HTML5, CSS3 Variables, ES6 JavaScript, Vis.js Network Engine |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Backend REST API** | Python 3.12, FastAPI, Uvicorn |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Cloud Database** | Firebase Realtime Database & Firestore REST Service |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Serverless Deployment** | Vercel Serverless Functions (`@vercel/python`) |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Source Control** | Git, GitHub Actions / CI |</div>
+<br>
+<hr>
+<br>
+<h2>🚀 Quick Start & Installation</h2>
+<br>
+<h3>1. Clone the Repository</h3>
+<pre><code>
+git clone https://github.com/nikhil24x5183-netizen/tracefinders.git
+cd tracefinders
+</code></pre>
+<br>
+<h3>2. Install Dependencies</h3>
+<pre><code>
+pip install -r requirements.txt
+</code></pre>
+<br>
+<h3>3. Run Local Development Server</h3>
+<pre><code>
+python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
+</code></pre>
+<p>Open **`http://localhost:8000`** in your browser.</p>
+<br>
+<hr>
+<br>
+<h2>🔧 Firebase Cloud Database Setup</h2>
+<br>
+<p>To link your personal Firebase Console project:</p>
+<p>1. Open **[https://console.firebase.google.com](https://console.firebase.google.com)**.</p>
+<p>2. Select your project (e.g. `tracefinders-daa12`).</p>
+<p>3. Click **Build ➔ Realtime Database ➔ Create Database** (Start in **Test Mode**).</p>
+<p>4. Set environment variable on Vercel or locally:</p>
+<p>   ```bash</p>
+<p>   export FIREBASE_DATABASE_URL="https://your-project-id-default-rtdb.firebaseio.com"</p>
+<p>   ```</p>
+<br>
+<hr>
+<br>
+<h2>🌐 Live Deployment Links</h2>
+<br>
+<li>**🌐 Vercel Live Production App**: **[https://criminalnetworkanalysis.vercel.app](https://criminalnetworkanalysis.vercel.app)**</li>
+<li>**📦 GitHub Repository**: **[https://github.com/nikhil24x5183-netizen/tracefinders](https://github.com/nikhil24x5183-netizen/tracefinders)**</li>
+<li>**🔥 Firebase JSON Feed**: **[https://tracefinders-daa12-default-rtdb.firebaseio.com/datastore.json](https://tracefinders-daa12-default-rtdb.firebaseio.com/datastore.json)**</li>
+<li>**🏗️ Architecture Documentation**: **[ARCHITECTURE.md](ARCHITECTURE.md)**</li>
+<br>
+<hr>
+<br>
+<h2>📜 License & Acknowledgments</h2>
+<br>
+<p>Distributed under the **MIT License**. Developed for **Smart India Hackathon 2026 (Problem SIH26189)**.</p>
+<br>
+</body>
+</html>

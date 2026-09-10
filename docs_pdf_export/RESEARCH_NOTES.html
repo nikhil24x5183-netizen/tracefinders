@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TRACE FINDERS — RESEARCH_NOTES.md (Printable A4 PDF)</title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            background: #ffffff;
+            line-height: 1.6;
+            font-size: 13px;
+            padding: 24px;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 24px; color: #1e3a8a; border-bottom: 2px solid #2563eb; padding-bottom: 8px; margin-top: 20px; }
+        h2 { font-size: 18px; color: #1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 18px; }
+        h3 { font-size: 15px; color: #2563eb; margin-top: 14px; }
+        code, pre { font-family: 'Fira Code', monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        pre { padding: 12px; overflow-x: auto; background: #0f172a; color: #38bdf8; border-radius: 8px; }
+        hr { border: 0; border-top: 1px solid #cbd5e1; margin: 20px 0; }
+        li { margin-left: 20px; }
+        .no-print {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2563eb;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: none;
+            z-index: 1000;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()">🖨️ Save as A4 PDF</button>
+    <div style="font-size: 11px; color: #64748b; font-weight: 800; font-family: monospace; text-transform: uppercase; margin-bottom: 12px;">
+        OFFICIAL DOCUMENTATION EXPORT // TRACE FINDERS (SIH26189) // RESEARCH_NOTES.md
+    </div>
+    <h1>🔬 RESEARCH & TECHNICAL NOTES — TRACE FINDERS</h1>
+<br>
+<p>**Document Version:** `2.0.0`  </p>
+<p>**SIH 2026 Problem Statement:** `SIH26189` — AI-Powered Criminal Network Analysis System  </p>
+<p>**Subject Area:** Graph Theory, Multi-Hop Evidence Fusion, Computer Vision ANPR Analytics, Explainable AI (XAI)  </p>
+<br>
+<hr>
+<br>
+<h2>📑 Table of Contents</h2>
+<p>1. [Theoretical Graph Analytics & Centrality Models](#1-theoretical-graph-analytics--centrality-models)</p>
+<p>2. [Multi-Hop Cross-Domain Correlation Mechanics](#2-multi-hop-cross-domain-correlation-mechanics)</p>
+<p>3. [CCTV / DVR ANPR & Facial Recognition Analytics](#3-cctv--dvr-anpr--facial-recognition-analytics)</p>
+<p>4. [Explainable AI (XAI) & Legal Admissibility Framework](#4-explainable-ai-xai--legal-admissibility-framework)</p>
+<p>5. [Entity Resolution & Deduplication Algorithms](#5-entity-resolution--deduplication-algorithms)</p>
+<p>6. [References & Academic Literature](#6-references--academic-literature)</p>
+<br>
+<hr>
+<br>
+<h2>1. Theoretical Graph Analytics & Centrality Models</h2>
+<br>
+<p>Criminal network analysis relies on mathematical graph representations where entities are vertices $V$ and evidentiary associations are directed or undirected weighted edges $E$.</p>
+<br>
+<p>$$G = (V, E, W)$$</p>
+<br>
+<h3>1.1 Degree Centrality</h3>
+<p>Measures immediate connectivity and operational interaction volume:</p>
+<br>
+<p>$$C_D(v) = \frac{\deg(v)}{|V| - 1}$$</p>
+<br>
+<p>Where $\deg(v)$ represents the total number of distinct evidentiary links associated with node $v$.</p>
+<br>
+<h3>1.2 Betweenness Centrality (Brokerage Detection)</h3>
+<p>Identifies critical "broker" nodes controlling communication or financial flow between disparate criminal syndicates:</p>
+<br>
+<p>$$C_B(v) = \sum_{s \neq v \neq t \in V} \frac{\sigma_{st}(v)}{\sigma_{st}}$$</p>
+<br>
+<p>Where $\sigma_{st}$ is the total number of shortest paths from node $s$ to node $t$ and $\sigma_{st}(v)$ is the number of those paths that pass through node $v$. Nodes with high betweenness centrality are flagged as key logistical hubs or Hawala intermediaries.</p>
+<br>
+<h3>1.3 PageRank Centrality (Syndicate Leader Identification)</h3>
+<p>Evaluates directional influence by propagating link weight recursively:</p>
+<br>
+<p>$$PR(p) = \frac{1-d}{N} + d \sum_{i \in M(p)} \frac{PR(i)}{L(i)}$$</p>
+<br>
+<p>Where $d = 0.85$ is the damping factor, $M(p)$ is the set of nodes linking to $p$, and $L(i)$ is the out-degree of node $i$.</p>
+<br>
+<hr>
+<br>
+<h2>2. Multi-Hop Cross-Domain Correlation Mechanics</h2>
+<br>
+<p>Evidence in modern criminal investigations spans disparate data silos:</p>
+<br>
+<p>$$\text{Domain}_1 (\text{Telecom}) \longleftrightarrow \text{Domain}_2 (\text{ANPR CCTV}) \longleftrightarrow \text{Domain}_3 (\text{Banking}) \longleftrightarrow \text{Domain}_4 (\text{Blockchain})$$</p>
+<br>
+<h3>2.1 Spatio-Temporal Correlation Matrix</h3>
+<p>The correlation score $S_{\text{corr}}(A, B)$ between two events $A$ and $B$ is computed as:</p>
+<br>
+<p>$$S_{\text{corr}}(A, B) = w_t \cdot e^{-\lambda_t |t_A - t_B|} + w_s \cdot e^{-\lambda_s d(L_A, L_B)} + w_e \cdot \text{Sim}(E_A, E_B)$$</p>
+<br>
+<p>Where:</p>
+<li>$t_A, t_B$ are event timestamps.</li>
+<li>$d(L_A, L_B)$ is the Haversine distance between geographical coordinates.</li>
+<li>$\text{Sim}(E_A, E_B)$ is entity attribute similarity (Jaro-Winkler distance on names/aliases).</li>
+<li>$w_t, w_s, w_e$ are domain weighting constants ($0.4, 0.35, 0.25$).</li>
+<br>
+<hr>
+<br>
+<h2>3. CCTV / DVR ANPR & Facial Recognition Analytics</h2>
+<br>
+<h3>3.1 Automatic Number Plate Recognition (ANPR) Pipeline</h3>
+<p>1. **Frame Extraction & Preprocessing**: Dual-pass contrast enhancement and CLAHE adaptive histogram equalization.</p>
+<p>2. **Bounding Box Detection**: YOLOv8-Nano vehicle license plate detector.</p>
+<p>3. **OCR Feature Extraction**: Tesseract-v5 & EasyOCR ensemble parser trained on Indian HSRP (High Security Registration Plate) font geometry.</p>
+<br>
+<h3>3.2 24-Hour Timeline Marker Aggregation</h3>
+<p>Events from 12 active surveillance cameras (`CAM-01` through `CAM-12`) are indexed into a temporal B-tree index, rendering real-time sighting markers across 24-hour windows (00:00 to 23:59 IST).</p>
+<br>
+<hr>
+<br>
+<h2>4. Explainable AI (XAI) & Legal Admissibility Framework</h2>
+<br>
+<p>To satisfy judicial requirements under Section 65B of the Indian Evidence Act / Bharatiya Sakshya Adhiniyam, 2023, automated outputs must be fully transparent.</p>
+<br>
+<pre><code>
+┌─────────────────────────────────────────────────────────────────┐
+│                    XAI ASSESSMENT STRUCTURE                     │
+├─────────────────────────────────────────────────────────────────┤
+│  1. CORRELATION RATIONALE   ➔ Why these entities were linked   │
+│  2. FLAGGING REASONING     ➔ Suspicious pattern criteria        │
+│  3. CONFIDENCE METRIC      ➔ Calculated probability (e.g. 88%)  │
+│  4. ALTERNATIVE HYPOTHESIS ➔ Defense counter-argument scenario │
+│  5. EVIDENTIARY HASH REF   ➔ SHA-256 Chain of Custody Ref     │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>5. Entity Resolution & Deduplication Algorithms</h2>
+<br>
+<p>When ambiguous candidates (e.g., `Arjun S.` vs `Arjun Sharma`) enter the system, the entity resolution engine evaluates identity likelihood using a multi-attribute similarity vector:</p>
+<br>
+<p>$$\mathbf{V}_{\text{match}} = \begin{bmatrix} \text{JaroWinkler}(\text{Name}_1, \text{Name}_2) \\ \text{GeographicOverlap}(\text{City}_1, \text{City}_2) \\ \text{CommonCoContacts}(\text{CDR}_1, \text{CDR}_2) \end{bmatrix}$$</p>
+<br>
+<p>Match Confidence Score $\mathcal{M} = \mathbf{w}^T \mathbf{V}_{\text{match}}$. Candidates scoring $0.40 \le \mathcal{M} < 0.75$ are placed in the **Entity Resolution Review Queue** for analyst verification.</p>
+<br>
+<hr>
+<br>
+<h2>6. References & Academic Literature</h2>
+<br>
+<p>1. Freeman, L. C. (1977). *A set of measures of centrality based on betweenness*. Sociometry, 40(1), 35-41.</p>
+<p>2. Page, L., Brin, S., Motwani, R., & Winograd, T. (1999). *The PageRank citation ranking: Bringing order to the web*. Stanford InfoLab Technical Report.</p>
+<p>3. Krebs, V. E. (2002). *Uncloaking terrorist networks*. First Monday, 7(4).</p>
+<p>4. Indian Evidence Act / Section 65B Admissibility of Electronic Records / Bharatiya Sakshya Adhiniyam, 2023.</p>
+<p>5. Smart India Hackathon (SIH 2026) Problem Statement `SIH26189`.</p>
+<br>
+</body>
+</html>

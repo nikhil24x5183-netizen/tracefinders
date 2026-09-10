@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TRACE FINDERS — SECURITY_AND_COMPLIANCE.md (Printable A4 PDF)</title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            background: #ffffff;
+            line-height: 1.6;
+            font-size: 13px;
+            padding: 24px;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 24px; color: #1e3a8a; border-bottom: 2px solid #2563eb; padding-bottom: 8px; margin-top: 20px; }
+        h2 { font-size: 18px; color: #1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 18px; }
+        h3 { font-size: 15px; color: #2563eb; margin-top: 14px; }
+        code, pre { font-family: 'Fira Code', monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        pre { padding: 12px; overflow-x: auto; background: #0f172a; color: #38bdf8; border-radius: 8px; }
+        hr { border: 0; border-top: 1px solid #cbd5e1; margin: 20px 0; }
+        li { margin-left: 20px; }
+        .no-print {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2563eb;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: none;
+            z-index: 1000;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()">🖨️ Save as A4 PDF</button>
+    <div style="font-size: 11px; color: #64748b; font-weight: 800; font-family: monospace; text-transform: uppercase; margin-bottom: 12px;">
+        OFFICIAL DOCUMENTATION EXPORT // TRACE FINDERS (SIH26189) // SECURITY_AND_COMPLIANCE.md
+    </div>
+    <h1>🛡️ SECURITY, AUDIT & LEGAL COMPLIANCE — TRACE FINDERS</h1>
+<br>
+<p>**Document Version:** `1.5.0`  </p>
+<p>**Compliance Target:** Indian Evidence Act / Section 65B, IT Act 2000, Bharatiya Sakshya Adhiniyam 2023  </p>
+<p>**Security Classification:** Law Enforcement Forensic Operating Standard  </p>
+<br>
+<hr>
+<br>
+<h2>📑 Security Architecture Summary</h2>
+<br>
+<p>1. **SHA-256 Chain of Custody Verification**: Every evidence item ingested (audio recordings, CCTV video streams, bank statements, CDR CSVs) is assigned a SHA-256 cryptographic hash upon acquisition.</p>
+<p>2. **Immutable Audit Trail**: All workstation actions (viewing profile, context switching, graph exports, dossier generation) generate immutable audit log entries.</p>
+<p>3. **Role-Based Access Control (RBAC)**: Enforces Analyst, Lead Investigator, and Judicial Reviewer permission levels.</p>
+<p>4. **Data Isolation Policy**: Person-scoped memory models prevent cross-case or cross-subject data contamination.</p>
+<br>
+<hr>
+<br>
+<h2>🔒 Cryptographic Hashing Protocol</h2>
+<br>
+<pre><code>
+interface AuditRecord {
+  timestamp: string;      // e.g. "18 Aug 2026 09:43 IST"
+  user_id: string;        // e.g. "INV-7092"
+  action: string;         // e.g. "Switched Person Context"
+  object_id: string;      // e.g. "P-002 (Rohan Mehta)"
+  sha256_hash: string;    // e.g. "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  result: "SUCCESS" | "DENIED";
+}
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>⚖️ Legal Admissibility Compliance Matrix</h2>
+<br>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| Judicial Requirement | Technical Implementation in TRACE FINDERS | Status |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| :--- | :--- | :---: |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Section 65B Certificate Support** | Electronic record metadata, device node ID (`#INV-7092`), timestamp, SHA-256 hash | ✅ Compliant |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Non-Tampering Proof** | Read-only evidence drawer with hash verification status badge | ✅ Compliant |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Audit Trail Immutable Logging** | Operational Audit Explorer module tracking all analyst interactions | ✅ Compliant |</div>
+<div style='font-family: monospace; font-size: 11px; padding: 4px 0;'>| **Explainable AI Transparency** | Human-understandable XAI rationale & alternative hypothesis generator | ✅ Compliant |</div>
+<br>
+</body>
+</html>

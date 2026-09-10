@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TRACE FINDERS — ARCHITECTURE.md (Printable A4 PDF)</title>
+    <style>
+        @page { size: A4; margin: 15mm; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            background: #ffffff;
+            line-height: 1.6;
+            font-size: 13px;
+            padding: 24px;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 24px; color: #1e3a8a; border-bottom: 2px solid #2563eb; padding-bottom: 8px; margin-top: 20px; }
+        h2 { font-size: 18px; color: #1e3a8a; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-top: 18px; }
+        h3 { font-size: 15px; color: #2563eb; margin-top: 14px; }
+        code, pre { font-family: 'Fira Code', monospace; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        pre { padding: 12px; overflow-x: auto; background: #0f172a; color: #38bdf8; border-radius: 8px; }
+        hr { border: 0; border-top: 1px solid #cbd5e1; margin: 20px 0; }
+        li { margin-left: 20px; }
+        .no-print {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: #2563eb;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border: none;
+            z-index: 1000;
+        }
+        @media print {
+            .no-print { display: none; }
+            body { padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()">🖨️ Save as A4 PDF</button>
+    <div style="font-size: 11px; color: #64748b; font-weight: 800; font-family: monospace; text-transform: uppercase; margin-bottom: 12px;">
+        OFFICIAL DOCUMENTATION EXPORT // TRACE FINDERS (SIH26189) // ARCHITECTURE.md
+    </div>
+    <h1>🏗️ TRACE FINDERS — SYSTEM ARCHITECTURE DOCUMENT</h1>
+<br>
+<p>**System Version:** `10.0.0`  </p>
+<p>**Target Specification:** SIH 2026 — Problem Statement `SIH26189` (AI-Powered Criminal Network Analysis System)  </p>
+<p>**Security Level:** Law Enforcement & Forensic Analyst Operational Specification  </p>
+<br>
+<hr>
+<br>
+<h2>📑 System Architecture Table of Contents</h2>
+<br>
+<p>1. [Executive Summary & Architectural Philosophy](#1-executive-summary--architectural-philosophy)</p>
+<p>2. [End-to-End System Topology](#2-end-to-end-system-topology)</p>
+<p>3. [Person-Scoped Data Isolation Architecture](#3-person-scoped-data-isolation-architecture)</p>
+<p>4. [Link Analysis Knowledge Graph Engine](#4-link-analysis-knowledge-graph-engine)</p>
+<p>5. [CCTV / DVR Forensics & Timeline Pipeline](#5-cctv--dvr-forensics--timeline-pipeline)</p>
+<p>6. [Multi-Hop Cross-Domain Evidence Fusion & XAI Engine](#6-multi-hop-cross-domain-evidence-fusion--xai-engine)</p>
+<p>7. [Cloud Infrastructure & Deployment Topology](#7-cloud-infrastructure--deployment-topology)</p>
+<p>8. [Security, Integrity & SHA-256 Chain of Custody](#8-security-integrity--sha-256-chain-of-custody)</p>
+<br>
+<hr>
+<br>
+<h2>1. Executive Summary & Architectural Philosophy</h2>
+<br>
+<p>**TRACE FINDERS** is designed around three architectural pillars:</p>
+<br>
+<pre><code>
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          TRACE FINDERS PILLARS                          │
+├──────────────────────────┬──────────────────────┬───────────────────────┤
+│   STRICT PERSON SCOPING  │  MULTI-HOP FUSION    │   EXPLAINABLE AI      │
+│  Zero context bleeding   │  Cross-domain links  │  Human-understandable │
+│  across target profiles  │  CDR ➔ ANPR ➔ Wallet │  correlation rationale│
+└──────────────────────────┴──────────────────────┴───────────────────────┘
+</code></pre>
+<br>
+<p>1. **Strict Context Separation**: The data layer enforces complete isolation between subject profiles (`P-001` through `P-006`). No shared global references bleed across active target workstations.</p>
+<p>2. **Multi-Hop Evidence Fusion**: Evidence records across telecom CDRs, banking ledgers, ANPR CCTV captures, and blockchain transactions are joined via graph walks.</p>
+<p>3. **Explainable AI (XAI)**: Machine-generated recommendations provide transparent reasoning, confidence metrics, and alternative hypothesis flags to satisfy court evidentiary standards.</p>
+<br>
+<hr>
+<br>
+<h2>2. End-to-End System Topology</h2>
+<br>
+<pre><code>
+flowchart TB
+    subgraph Client Layer
+        A[Workstation Client / Mobile Web UI]
+        A1[Theme Controller: Pure OLED Pitch Black]
+        A2[Context Controller: Person Switcher]
+        A3[Vis.js Canvas Interactivity]
+    end
+
+    subgraph Gateway & Execution Layer
+        B[Vercel Serverless Function Edge]
+        B1[FastAPI REST API Gateway]
+        B2[FastAPI Middleware & Route Handlers]
+    end
+
+    subgraph Storage & Persistence Layer
+        C[(Firebase Realtime Database)]
+        C1[Fail-Safe Local Datastore Buffer]
+    end
+
+    subgraph Analytical Processing Modules
+        D1[Person-Scoped Graph Generator]
+        D2[CCTV / DVR Forensics Engine]
+        D3[Multi-Hop Fusion & XAI Engine]
+        D4[A4 Dossier Report Generator]
+    end
+
+    A --&gt;|HTTPS Requests| B
+    B --&gt; B1
+    B1 --&gt; B2
+    B2 --&gt;|Read / Write| C
+    C &lt;--&gt; C1
+    B2 --&gt; D1
+    B2 --&gt; D2
+    B2 --&gt; D3
+    B2 --&gt; D4
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>3. Person-Scoped Data Isolation Architecture</h2>
+<br>
+<p>To prevent context leakage, every entity is stored under a primary key index tied to a specific `person_id`.</p>
+<br>
+<pre><code>
+datastore/
+  ├── profiles/
+  │     ├── P-001/  (Arjun Sharma - Primary Subject)
+  │     ├── P-002/  (Rohan Mehta - Business Contact)
+  │     ├── P-003/  (Priya Joshi - Associate)
+  │     ├── P-004/  (Vikram Patil - Person of Interest)
+  │     ├── P-005/  (Neha Kulkarni - Employee)
+  │     └── P-006/  (Arjun S. - Ambiguous Match Candidate)
+  ├── cases/
+  │     └── TRX-2026-017/ (Operation Nexus)
+  ├── cctv_inventory/ (CAM-01 through CAM-12)
+  ├── multi_hop_chains/
+  └── audit_logs/
+</code></pre>
+<br>
+<h3>Profile Data Model Schema</h3>
+<pre><code>
+interface PersonProfile {
+  id: string;                // e.g. 'P-001'
+  name: string;              // e.g. 'Arjun Sharma'
+  alias: string;             // e.g. 'Arjun S.'
+  role: string;              // e.g. 'Primary Subject'
+  age: number;
+  gender: string;
+  phone: string;             // Isolated 10-digit primary MSISDN
+  email: string;             // Isolated primary email
+  vehicle: string;           // Isolated registration number (ANPR tag)
+  account_number: string;    // Isolated bank ledger identifier
+  wallet_address: string;    // Isolated EVM/UTXO blockchain wallet
+  photo_url: string;         // Embedded portrait URI
+  status: string;            // 'Under Investigation' | 'Verified'
+  counts: {
+    calls: number;
+    messages: number;
+    financial: number;
+    blockchain: number;
+    cctv: number;
+    osint: number;
+  };
+}
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>4. Link Analysis Knowledge Graph Engine</h2>
+<br>
+<p>The Link Analysis engine uses the **Vis.js Network Library** embedded into an unconstrained canvas container.</p>
+<br>
+<pre><code>
+┌─────────────────────────────────────────────────────────────────┐
+│               VIS.JS LINK ANALYSIS GRAPH ENGINE                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│                 [ PHONE: +91 98765 1201 ]                       │
+│                           │ (Used By)                           │
+│                           ▼                                     │
+│   [ ROHAN MEHTA ] ◄─── (TARGET: ARJUN SHARMA) ───► [ VEHICLE ] │
+│   (Business)                  │ (Transacts)       (MH12 AB 4821)│
+│                               ▼                                 │
+│                     [ BANK: XXXX4821 ]                          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<br>
+<h3>Layout Algorithms</h3>
+<p>1. **Tree (Root Top)**: Enforces directed hierarchical level separation (`UD`). The currently selected target subject (`person_id`) is positioned dynamically as Level 0 root node.</p>
+<p>2. **Radial**: Generates concentric topological distance rings radiating outward from the root subject node.</p>
+<p>3. **Hierarchy**: Left-to-right (`LR`) chronological dependency tree.</p>
+<p>4. **Compact**: Barnes-Hut gravitational force-directed clustering model ($\text{gravity} = -1000$, $\text{spring} = 50$).</p>
+<br>
+<hr>
+<br>
+<h2>5. CCTV / DVR Forensics & Timeline Pipeline</h2>
+<br>
+<p>The CCTV module manages **12 active camera feeds** (`CAM-01` to `CAM-12`) without carousel truncation.</p>
+<br>
+<pre><code>
+┌─────────────────────────────────────────────────────────────────┐
+│                  CCTV / DVR FORENSICS PIPELINE                  │
+├─────────────────────────────────────────────────────────────────┤
+│  CAMERA REGISTRY ──► EVENT MARKER INDEX ──► CLIP SELECTION      │
+│  (12 Cams Grid)      (00:00 - 23:59 IST)    (ANPR & Face Rec)   │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<br>
+<h3>Camera Metadata Model</h3>
+<pre><code>
+{
+  "id": "CAM-04",
+  "name": "Pune Central Zone",
+  "location": "Shivajinagar, Pune",
+  "camera_type": "Fixed CCTV",
+  "status": "Active Recording",
+  "resolution": "1920 x 1080",
+  "recording_window": "00:00 - 23:59",
+  "events_count": 12,
+  "evidence_links": 8,
+  "associated_persons_count": 3
+}
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>6. Multi-Hop Cross-Domain Evidence Fusion & XAI Engine</h2>
+<br>
+<p>The Fusion engine computes multi-hop evidence correlation paths across disparate data domains:</p>
+<br>
+<p>$$\text{Hop}_1 (\text{Profile}) \longrightarrow \text{Hop}_2 (\text{Telecom CDR}) \longrightarrow \text{Hop}_3 (\text{DVR ANPR}) \longrightarrow \text{Hop}_4 (\text{Wire Ledger}) \longrightarrow \text{Hop}_5 (\text{Blockchain})$$</p>
+<br>
+<pre><code>
+interface FusionChainStep {
+  step: number;
+  domain: 'PROFILE' | 'TELECOM' | 'CCTV' | 'FINANCIAL' | 'BLOCKCHAIN';
+  label: string;
+  detail: string;
+  badge: string;
+}
+
+interface XAIEssessment {
+  title: string;
+  confidence_score: string;  // e.g. "88%"
+  action_status: string;     // e.g. "VERIFIED CORRELATION"
+  what: string;              // Correlation rationale
+  why: string;               // Flagging rationale
+  alternative_explanation: string; // Counter-hypothesis for legal review
+  supporting_evidence: string[];   // SHA-256 evidence record refs
+}
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>7. Cloud Infrastructure & Deployment Topology</h2>
+<br>
+<p>The application is deployed across a serverless hybrid cloud topology:</p>
+<br>
+<pre><code>
+                       ┌────────────────────────┐
+                       │   GitHub Repository    │
+                       │ (tracefinders/main)    │
+                       └───────────┬────────────┘
+                                   │ Git Push / Webhook
+                                   ▼
+                       ┌────────────────────────┐
+                       │ Vercel Serverless Edge │
+                       │ (Python 3.12 Engine)   │
+                       └───────────┬────────────┘
+                                   │ HTTPS REST Sync
+                                   ▼
+                       ┌────────────────────────┐
+                       │ Firebase Realtime DB   │
+                       │ (tracefinders-daa12)   │
+                       └────────────────────────┘
+</code></pre>
+<br>
+<hr>
+<br>
+<h2>8. Security, Integrity & SHA-256 Chain of Custody</h2>
+<br>
+<p>All evidence assets and investigative actions undergo SHA-256 cryptographic hashing prior to rendering.</p>
+<br>
+<pre><code>
+{
+  "evidence_id": "EV-COM-001",
+  "case_id": "TRX-2026-017",
+  "personId": "P-001",
+  "acquisition_date": "18 Aug 2026 10:18 IST",
+  "sha256_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "custody_status": "Verified - Legal Admissible"
+}
+</code></pre>
+<br>
+<hr>
+<p>*TRACE FINDERS Architectural Specification Document. Smart India Hackathon (SIH 2026).*</p>
+<br>
+</body>
+</html>
