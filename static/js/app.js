@@ -73,11 +73,80 @@ function changeActivePerson(personId) {
         riskBadge.style.color = rData.color;
         riskBadge.style.borderColor = rData.color;
         riskBadge.style.background = rData.bg;
-        riskBadge.innerHTML = `⚡ ${rData.score} / 100 (${rData.level})`;
+        riskBadge.style.cursor = 'pointer';
+        riskBadge.onclick = () => openRiskScoreModal(personId);
+        riskBadge.innerHTML = `⚡ ${rData.score} / 100 (${rData.level}) 🔍`;
     }
 
     updateBreadcrumb();
     refreshActiveView();
+}
+
+async function openRiskScoreModal(personId = currentPersonId) {
+    const modal = document.getElementById('modal-risk-detail');
+    const body = document.getElementById('risk-modal-body');
+    if (!modal || !body) return;
+
+    modal.classList.add('active');
+    body.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">Fetching SAMPARK AI Risk Score Evaluation...</div>`;
+
+    try {
+        const res = await fetch(`/api/risk/${personId}`);
+        const data = await res.json();
+
+        body.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.6); border: 1.5px solid ${data.risk_color}; padding: 18px; border-radius: 12px; margin-bottom: 20px;">
+                <div style="display: flex; gap: 14px; align-items: center;">
+                    <img src="${data.photo_url}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid ${data.risk_color};">
+                    <div>
+                        <div style="font-size: 18px; font-weight: 800; color: var(--text-main);">${data.name} (${data.alias})</div>
+                        <div style="font-size: 12px; color: var(--accent-orange); font-weight: 700;">${data.role} | ID: ${data.person_id}</div>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 32px; font-weight: 900; color: ${data.risk_color};">${data.risk_score} / 100</div>
+                    <span class="badge" style="background: ${data.risk_color}; color: #ffffff; font-weight: 800; font-size: 11px;">${data.risk_level}</span>
+                </div>
+            </div>
+
+            <div style="width: 100%; height: 12px; background: #1e293b; border-radius: 6px; overflow: hidden; margin-bottom: 20px;">
+                <div style="width: ${data.risk_score}%; height: 100%; background: ${data.risk_color}; transition: width 0.8s ease-in-out;"></div>
+            </div>
+
+            <div style="font-size: 13px; font-weight: 800; color: var(--accent-orange); margin-bottom: 10px; text-transform: uppercase;">1. Key Risk Contribution Factors (${data.factors.length}):</div>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                ${data.factors.map(f => `
+                    <div style="padding: 12px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px; display: flex; justify-content: space-between; gap: 12px; align-items: flex-start;">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 700; color: var(--text-main);">${f.category}: ${f.factor}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">${f.detail}</div>
+                        </div>
+                        <span style="font-size: 12px; font-weight: 800; color: ${data.risk_color}; flex-shrink: 0; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">+${f.points} PTS</span>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div style="font-size: 13px; font-weight: 800; color: var(--accent-orange); margin-bottom: 10px; text-transform: uppercase;">2. Recommended Investigative Actions:</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                ${data.recommended_actions.map(act => `
+                    <div style="padding: 10px; background: rgba(249, 115, 22, 0.08); border-left: 3px solid var(--accent-orange); border-radius: 4px; font-size: 12px; color: var(--text-main); font-weight: 600;">
+                        ● ${act}
+                    </div>
+                `).join('')}
+            </div>
+
+            <div style="font-size: 11px; color: var(--text-muted); text-align: right; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                Last Evaluated: <strong>${data.last_updated}</strong> | Engine Node #INV-7092
+            </div>
+        `;
+    } catch (err) {
+        body.innerHTML = `<div style="color: var(--status-red); padding: 20px;">Error loading Risk Score evaluation.</div>`;
+    }
+}
+
+function closeRiskScoreModal() {
+    const modal = document.getElementById('modal-risk-detail');
+    if (modal) modal.classList.remove('active');
 }
 
 function updateBreadcrumb() {

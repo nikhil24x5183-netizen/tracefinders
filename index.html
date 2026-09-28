@@ -630,8 +630,29 @@
                         <button type="button" class="btn btn-secondary" onclick="goToWizardStep(2)">BACK</button>
                         <button type="submit" class="btn">CREATE CASE & INGEST</button>
                     </div>
+    <!-- SAMPARK DETAILED RISK SCORE EVALUATION MODAL (REQUIREMENT 3) -->
+    <div id="modal-risk-detail" class="modal-overlay">
+        <div class="modal-card" style="max-width: 680px; border: 1.5px solid var(--accent-orange);">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">⚡</span>
+                    <div>
+                        <div class="modal-title" style="color: var(--accent-orange);">SAMPARK AI RISK SCORE BREAKDOWN</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">Comprehensive Threat Analysis & Recommended Next Steps</div>
+                    </div>
                 </div>
-            </form>
+                <button class="modal-close-btn" onclick="closeRiskScoreModal()">✕</button>
+            </div>
+            
+            <div id="risk-modal-body" style="margin-top: 14px;">
+                <!-- Populated dynamically via openRiskScoreModal(personId) -->
+                Loading Risk Score evaluation...
+            </div>
+            
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeRiskScoreModal()">CLOSE</button>
+                <button type="button" class="btn" onclick="closeRiskScoreModal(); switchTab('fusion');">EXPLORE FUSION LEADS ➔</button>
+            </div>
         </div>
     </div>
 

@@ -244,6 +244,49 @@ def get_overview_statistics(case_id: Optional[str] = "TRX-2026-017", person_id: 
 def get_all_cases():
     return {"cases": list(DATASTORE["cases"].values())}
 
+@app.get("/api/risk/{person_id}")
+def get_person_risk_score(person_id: str):
+    pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
+    prof = DATASTORE["profiles"][pid]
+    
+    score = prof.get("risk_score", 75)
+    level = prof.get("risk_level", "HIGH RISK")
+    color = prof.get("risk_color", "#f97316")
+    factors = prof.get("risk_factors", [])
+    
+    if score >= 85:
+        actions = [
+            "Initiate 24/7 Physical & Electronic Surveillance",
+            "Issue Section 91 Notice for Complete IP & Banking Logs",
+            "Place Primary MSISDN on Active Intercept Queue",
+            "Flag Vehicle ANPR Tags Across State Highway Corridors"
+        ]
+    elif score >= 70:
+        actions = [
+            "Audit Secondary Financial Wire Transactions",
+            "Cross-verify Social Media Handles with Darkweb Forums",
+            "Issue Formal Summons for Account Reconciliation"
+        ]
+    else:
+        actions = [
+            "Monitor Communication Pattern Anomalies",
+            "Log Routine Gateway Traffic Logs"
+        ]
+        
+    return {
+        "person_id": pid,
+        "name": prof["name"],
+        "alias": prof["alias"],
+        "role": prof["role"],
+        "photo_url": prof["photo_url"],
+        "risk_score": score,
+        "risk_level": level,
+        "risk_color": color,
+        "factors": factors,
+        "recommended_actions": actions,
+        "last_updated": prof.get("last_updated", "18 Aug 2026 21:17")
+    }
+
 @app.get("/api/persons/{person_id}")
 def get_person_profile(person_id: str):
     pid = person_id if person_id in DATASTORE["profiles"] else "P-001"
