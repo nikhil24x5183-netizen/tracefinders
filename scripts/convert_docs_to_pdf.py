@@ -1,5 +1,5 @@
 """
-TRACE FINDERS — Offline Documentation to HTML/PDF Converter Script
+SAMPARK — Offline Documentation to HTML/PDF Converter Script
 Converts all project markdown documentation files into printable A4 HTML/PDF files
 ready to upload directly to Google Drive.
 """
@@ -67,7 +67,7 @@ for doc in DOC_FILES:
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TRACE FINDERS — {doc} (Printable A4 PDF)</title>
+    <title>SAMPARK — {doc} (Printable A4 PDF)</title>
     <style>
         @page {{ size: A4; margin: 15mm; }}
         body {{
@@ -111,7 +111,7 @@ for doc in DOC_FILES:
 <body>
     <button class="no-print" onclick="window.print()">🖨️ Save as A4 PDF</button>
     <div style="font-size: 11px; color: #64748b; font-weight: 800; font-family: monospace; text-transform: uppercase; margin-bottom: 12px;">
-        OFFICIAL DOCUMENTATION EXPORT // TRACE FINDERS (SIH26189) // {doc}
+        OFFICIAL DOCUMENTATION EXPORT // SAMPARK (SIH26189) // {doc}
     </div>
     {rendered_body}
 </body>

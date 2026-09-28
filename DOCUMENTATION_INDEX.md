@@ -1,7 +1,7 @@
-# 📚 MASTER DOCUMENTATION & PDF DOWNLOAD INDEX — TRACE FINDERS
+# 📚 MASTER DOCUMENTATION & PDF DOWNLOAD INDEX — SAMPARK
 
 **System Version:** `10.0.0`  
-**Project Name:** TRACE FINDERS — AI-Powered Criminal Network Analysis System  
+**Project Name:** SAMPARK — AI-Powered Criminal Network Analysis System  
 **SIH 2026 Problem Statement:** `SIH26189`  
 **GitHub Repository:** [https://github.com/nikhil24x5183-netizen/tracefinders](https://github.com/nikhil24x5183-netizen/tracefinders)  
 **Live Production App:** [https://criminalnetworkanalysis.vercel.app](https://criminalnetworkanalysis.vercel.app)  

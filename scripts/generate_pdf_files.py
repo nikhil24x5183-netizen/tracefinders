@@ -1,5 +1,5 @@
 """
-TRACE FINDERS — Automated ReportLab PDF Document Generator
+SAMPARK — Automated ReportLab PDF Document Generator
 Compiles all Markdown documentation files into true A4 PDF binary files (.pdf)
 stored in 'pdf_documents/' directory.
 """
@@ -108,7 +108,7 @@ for doc in DOC_FILES:
     story = []
     
     # Header Banner
-    story.append(Paragraph(f"TRACE FINDERS (SIH26189) — OFFICIAL DOCUMENTATION PDF: {doc}", ParagraphStyle('HeadBanner', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#64748b'))))
+    story.append(Paragraph(f"SAMPARK (SIH26189) — OFFICIAL DOCUMENTATION PDF: {doc}", ParagraphStyle('HeadBanner', fontName='Helvetica-Bold', fontSize=8, textColor=colors.HexColor('#64748b'))))
     story.append(Spacer(1, 10))
 
     with open(filepath, "r", encoding="utf-8") as f:

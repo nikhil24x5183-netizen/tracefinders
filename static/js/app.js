@@ -1,4 +1,4 @@
-// TRACE FINDERS Intelligence Workstation Application Controller
+// SAMPARK Intelligence Workstation Application Controller
 let currentCaseId = 'TRX-2026-017';
 let currentPersonId = 'P-001';
 let currentGraphLayout = 'tree-ud';

@@ -1,4 +1,4 @@
-# 🔬 RESEARCH & TECHNICAL NOTES — TRACE FINDERS
+# 🔬 RESEARCH & TECHNICAL NOTES — SAMPARK
 
 **Document Version:** `2.0.0`  
 **SIH 2026 Problem Statement:** `SIH26189` — AI-Powered Criminal Network Analysis System  

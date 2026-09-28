@@ -1,4 +1,4 @@
-/* TRACE FINDERS — CRISP LIGHT / DARK INTELLIGENCE WORKSTATION THEME */
+/* SAMPARK — CRISP LIGHT / DARK INTELLIGENCE WORKSTATION THEME */
 
 :root {
   /* LIGHT MODE DEFAULT */
@@ -79,11 +79,23 @@ body {
 }
 
 .brand {
-  padding: 18px;
-  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  padding: 10px 14px;
+  background: #040406 !important;
+  border: 1px solid #222538 !important;
+  border-radius: 8px;
+  margin: 12px 14px 16px 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.brand img {
+  height: 38px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(249, 115, 22, 0.4));
 }
 
 .brand-text {

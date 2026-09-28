@@ -1,4 +1,4 @@
-# 📖 INVESTIGATOR & ANALYST OPERATING MANUAL — TRACE FINDERS
+# 📖 INVESTIGATOR & ANALYST OPERATING MANUAL — SAMPARK
 
 **Manual Version:** `1.0.0`  
 **Target Audience:** Law Enforcement Officers, Cyber Crime Analysts, Forensic Investigators  

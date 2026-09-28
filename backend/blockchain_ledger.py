@@ -49,8 +49,8 @@ class BlockchainEvidenceLedger:
             timestamp="2026-08-15 00:00:00",
             case_id="SYSTEM",
             action_type="GENESIS_BLOCK_INITIALIZED",
-            actor="TRACE-X Cryptographic Kernel",
-            data_payload={"system": "TRACE-X Evidence Ledger Engine", "hash_algo": "SHA-256"},
+            actor="SAMPARK Cryptographic Kernel",
+            data_payload={"system": "SAMPARK Evidence Ledger Engine", "hash_algo": "SHA-256"},
             previous_hash="0" * 64
         )
         self.chain.append(genesis)

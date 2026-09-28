@@ -1,5 +1,5 @@
 """
-TRACE FINDERS — Firebase Cloud Backend & Database Adapter
+SAMPARK — Firebase Cloud Backend & Database Adapter
 Connects the application to Firebase Cloud Database (Realtime DB / Firestore REST API)
 so all person profiles, cases, evidence, and audit logs are stored in the cloud.
 """
@@ -40,7 +40,7 @@ def fetch_from_firebase(path):
     if FIREBASE_DB_URL:
         try:
             url = f"{FIREBASE_DB_URL.rstrip('/')}/{path}.json"
-            req = urllib.request.Request(url, headers={'User-Agent': 'TRACE-FINDERS-Cloud/1.0'})
+            req = urllib.request.Request(url, headers={'User-Agent': 'SAMPARK-Cloud/1.0'})
             with urllib.request.urlopen(req, timeout=2) as resp:
                 val = resp.read()
                 if val:

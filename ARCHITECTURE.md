@@ -1,4 +1,4 @@
-# 🏗️ TRACE FINDERS — SYSTEM ARCHITECTURE DOCUMENT
+# 🏗️ SAMPARK — SYSTEM ARCHITECTURE DOCUMENT
 
 **System Version:** `10.0.0`  
 **Target Specification:** SIH 2026 — Problem Statement `SIH26189` (AI-Powered Criminal Network Analysis System)  
@@ -21,11 +21,11 @@
 
 ## 1. Executive Summary & Architectural Philosophy
 
-**TRACE FINDERS** is designed around three architectural pillars:
+**SAMPARK** is designed around three architectural pillars:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                          TRACE FINDERS PILLARS                          │
+│                          SAMPARK PILLARS                          │
 ├──────────────────────────┬──────────────────────┬───────────────────────┤
 │   STRICT PERSON SCOPING  │  MULTI-HOP FUSION    │   EXPLAINABLE AI      │
 │  Zero context bleeding   │  Cross-domain links  │  Human-understandable │
@@ -258,4 +258,4 @@ All evidence assets and investigative actions undergo SHA-256 cryptographic hash
 ```
 
 ---
-*TRACE FINDERS Architectural Specification Document. Smart India Hackathon (SIH 2026).*
+*SAMPARK Architectural Specification Document. Smart India Hackathon (SIH 2026).*

@@ -1,4 +1,4 @@
-# 🛡️ SECURITY, AUDIT & LEGAL COMPLIANCE — TRACE FINDERS
+# 🛡️ SECURITY, AUDIT & LEGAL COMPLIANCE — SAMPARK
 
 **Document Version:** `1.5.0`  
 **Compliance Target:** Indian Evidence Act / Section 65B, IT Act 2000, Bharatiya Sakshya Adhiniyam 2023  
@@ -32,7 +32,7 @@ interface AuditRecord {
 
 ## ⚖️ Legal Admissibility Compliance Matrix
 
-| Judicial Requirement | Technical Implementation in TRACE FINDERS | Status |
+| Judicial Requirement | Technical Implementation in SAMPARK | Status |
 | :--- | :--- | :---: |
 | **Section 65B Certificate Support** | Electronic record metadata, device node ID (`#INV-7092`), timestamp, SHA-256 hash | ✅ Compliant |
 | **Non-Tampering Proof** | Read-only evidence drawer with hash verification status badge | ✅ Compliant |

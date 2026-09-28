@@ -1,4 +1,4 @@
-# 📡 REST API SPECIFICATION — TRACE FINDERS
+# 📡 REST API SPECIFICATION — SAMPARK
 
 **API Version:** `v1.0.0`  
 **Base URL (Vercel Cloud):** `https://criminalnetworkanalysis.vercel.app/api`  

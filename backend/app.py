@@ -15,7 +15,7 @@ from backend.report_generator import report_generator
 from backend.firebase_service import sync_to_firebase, fetch_from_firebase
 
 app = FastAPI(
-    title="TRACE FINDERS — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
+    title="SAMPARK — AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation",
     description="SIH 2026 Problem Statement SIH26189 - AI-Powered Criminal Network Analysis System",
     version="10.0.0"
 )
@@ -547,7 +547,7 @@ def print_documentation_pdf(doc_name: str):
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TRACE FINDERS — {filename} (A4 PDF Export)</title>
+    <title>SAMPARK — {filename} (A4 PDF Export)</title>
     <style>
         @page {{ size: A4; margin: 15mm; }}
         body {{
@@ -591,7 +591,7 @@ def print_documentation_pdf(doc_name: str):
 <body>
     <button class="no-print" onclick="window.print()">🖨️ Save as A4 PDF</button>
     <div style="font-size: 11px; color: #64748b; font-weight: 800; font-family: monospace; text-transform: uppercase; margin-bottom: 12px;">
-        OFFICIAL DOCUMENTATION EXPORT // TRACE FINDERS (SIH26189) // {filename}
+        OFFICIAL DOCUMENTATION EXPORT // SAMPARK (SIH26189) // {filename}
     </div>
     {rendered_body}
 </body>
@@ -606,6 +606,6 @@ def serve_index():
     index_path = os.path.join(static_dir, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return HTMLResponse("<h1>TRACE FINDERS Workstation Loading...</h1>")
+    return HTMLResponse("<h1>SAMPARK Workstation Loading...</h1>")
 
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
