@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRACE FINDERS — Criminal Network Intelligence & Evidence Fusion Workstation</title>
+    <title>SAMPARK — AI Driven Criminal Network Analysis System</title>
     <!-- CSS & Fonts -->
     <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,16 +17,16 @@
     <!-- 1. GLOBAL LEFT SIDEBAR -->
     <aside class="sidebar" id="app-sidebar">
         <div class="brand">
-            <img src="/static/logo.png" style="height: 42px; width: auto; border-radius: 6px;" alt="TRACE FINDERS Logo">
-            <div>
-                <div class="brand-text">TRACE FINDERS</div>
-                <div class="sih-badge">INTELLIGENCE WORKSTATION</div>
+            <img src="/static/logo.png" style="height: 44px; width: auto; max-width: 170px; object-fit: contain;" alt="SAMPARK Logo">
+            <div style="display: none;">
+                <div class="brand-text">SAMPARK</div>
+                <div class="sih-badge">AI DRIVEN NETWORK ANALYSIS</div>
             </div>
         </div>
         <ul class="nav-list">
             <li class="nav-item active" data-tab="overview"><span class="nav-icon">📊</span> Operational Overview</li>
             <li class="nav-item" data-tab="cases"><span class="nav-icon">📁</span> Case Management</li>
-            <li class="nav-item" data-tab="persons"><span class="nav-icon">👤</span> Person Profile</li>
+            <li class="nav-item" data-tab="persons"><span class="nav-icon">👤</span> Person Profile & Risk Score</li>
             <li class="nav-item" data-tab="fusion"><span class="nav-icon">🔗</span> Evidence Associations & Leads</li>
             <li class="nav-item" data-tab="graph"><span class="nav-icon">🕸️</span> Link Analysis Graph</li>
             <li class="nav-item" data-tab="communications"><span class="nav-icon">📞</span> Communication Analysis</li>
@@ -63,15 +63,19 @@
                 <div class="context-meta-group">
                     <div class="context-item">
                         <span class="context-label">CASE:</span>
-                        <span id="ctx-case-id" class="context-val" style="color: var(--accent-blue);">TRX-2026-017</span>
+                        <span id="ctx-case-id" class="context-val" style="color: var(--accent-orange);">TRX-2026-017</span>
                     </div>
                     <div class="context-item">
                         <span class="context-label">PERSON:</span>
-                        <span id="ctx-subject-name" class="context-val" style="color: var(--accent-blue);">ARJUN SHARMA</span>
+                        <span id="ctx-subject-name" class="context-val" style="color: var(--accent-orange);">ARJUN SHARMA</span>
                     </div>
                     <div class="context-item">
                         <span class="context-label">ROLE:</span>
                         <span id="ctx-subject-role" class="badge badge-high">PRIMARY SUBJECT</span>
+                    </div>
+                    <div class="context-item" style="border-left: 1px solid var(--border-color); padding-left: 10px;">
+                        <span class="context-label">RISK THREAT:</span>
+                        <div id="ctx-subject-risk-badge" class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; font-weight: 800; font-size: 12px;">⚡ 92 / 100 (CRITICAL RISK)</div>
                     </div>
                 </div>
 

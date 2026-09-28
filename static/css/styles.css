@@ -7,8 +7,9 @@
   --bg-card-hover: #f1f5f9;
   --bg-sidebar: #ffffff;
   --bg-header: #ffffff;
-  --accent-blue: #2563eb;
-  --accent-cyan: #0284c7;
+  --accent-orange: #f97316;
+  --accent-blue: #f97316;
+  --accent-cyan: #ff5722;
   --accent-purple: #7c3aed;
   --status-red: #dc2626;
   --status-amber: #d97706;
@@ -27,8 +28,9 @@ body.dark-mode {
   --bg-card-hover: #12141d;
   --bg-sidebar: #040406;
   --bg-header: #040406;
-  --accent-blue: #38bdf8;
-  --accent-cyan: #22d3ee;
+  --accent-orange: #ff6b00;
+  --accent-blue: #f97316;
+  --accent-cyan: #ff5722;
   --accent-purple: #c084fc;
   --status-red: #f87171;
   --status-amber: #fbbf24;

@@ -41,6 +41,9 @@ class ReportGenerator:
         paccount = person_data.get("account_number", "XXXX4821")
         pwallet = person_data.get("wallet_address", "0xDEMO...A721")
         prisk = person_data.get("risk_score", 92)
+        prisk_level = person_data.get("risk_level", "CRITICAL RISK")
+        prisk_color = person_data.get("risk_color", "#ef4444")
+        prisk_factors = person_data.get("risk_factors", [])
         pcounts = person_data.get("counts", {})
 
         evd_rows = ""
@@ -60,11 +63,15 @@ class ReportGenerator:
         if not cctv_rows:
             cctv_rows = f"<tr><td colspan='5'>No direct surveillance sightings logged for {pname} on selected filters.</td></tr>"
 
+        rf_rows = ""
+        for rf in prisk_factors:
+            rf_rows += f"<tr><td><strong>{rf.get('category','')}</strong></td><td>{rf.get('factor','')}</td><td>{rf.get('detail','')}</td><td><span style='color: {prisk_color}; font-weight: 800;'>+{rf.get('points',0)} PTS</span></td></tr>"
+
         html_content = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>TRACE FINDERS Official Investigation Dossier - {case_id} ({pname})</title>
+    <title>SAMPARK Official Investigation Dossier - {case_id} ({pname})</title>
     <style>
         @page {{
             size: A4;

@@ -1,11 +1,11 @@
 <div align="center">
 
-  <img src="static/logo.png" alt="TRACE FINDERS Logo" width="120" style="border-radius: 12px; margin-bottom: 10px;">
+  <img src="static/logo.png" alt="SAMPARK Logo" width="220" style="border-radius: 8px; margin-bottom: 12px;">
 
-  # 🔍 TRACE FINDERS
-  ### AI-Powered Criminal Network Intelligence & Evidence Fusion Workstation
+  # 🔍 SAMPARK
+  ### AI Driven Criminal Network Analysis System
 
-  [![SIH 2026](https://img.shields.io/badge/SIH%202026-Problem%20SIH26189-blue?style=for-the-badge&logo=shield)](https://sih.gov.in)
+  [![SIH 2026](https://img.shields.io/badge/SIH%202026-Problem%20SIH26189-orange?style=for-the-badge&logo=shield)](https://sih.gov.in)
   [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
   [![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
   [![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
@@ -13,7 +13,7 @@
   [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
   <p align="center">
-    <b>Next-Generation Enterprise Intelligence Platform for Law Enforcement, Forensic Analysts, and Cyber Crime Investigation Units.</b>
+    <b>Next-Generation AI-Driven Enterprise Intelligence Platform for Law Enforcement, Forensic Analysts, and Cyber Crime Investigation Units.</b>
   </p>
 
   <p align="center">

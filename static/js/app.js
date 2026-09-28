@@ -42,6 +42,15 @@ function toggleSidebar() {
     if (sidebar) sidebar.classList.toggle('collapsed');
 }
 
+const PERSON_RISK_SCORES = {
+    'P-001': { score: 92, level: 'CRITICAL RISK', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)' },
+    'P-002': { score: 85, level: 'HIGH RISK', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)' },
+    'P-003': { score: 68, level: 'MEDIUM RISK', color: '#eab308', bg: 'rgba(234, 179, 8, 0.15)' },
+    'P-004': { score: 74, level: 'HIGH RISK', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)' },
+    'P-005': { score: 45, level: 'MEDIUM RISK', color: '#eab308', bg: 'rgba(234, 179, 8, 0.15)' },
+    'P-006': { score: 88, level: 'CRITICAL RISK', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)' }
+};
+
 function changeActivePerson(personId) {
     currentPersonId = personId;
     
@@ -57,6 +66,16 @@ function changeActivePerson(personId) {
         roleElem.className = `badge ${personId === 'P-001' ? 'badge-high' : 'badge-verified'}`;
     }
     
+    // Update SAMPARK Risk Score Badge in Header
+    const riskBadge = document.getElementById('ctx-subject-risk-badge');
+    if (riskBadge) {
+        const rData = PERSON_RISK_SCORES[personId] || { score: 75, level: 'HIGH RISK', color: '#f97316', bg: 'rgba(249, 115, 22, 0.15)' };
+        riskBadge.style.color = rData.color;
+        riskBadge.style.borderColor = rData.color;
+        riskBadge.style.background = rData.bg;
+        riskBadge.innerHTML = `⚡ ${rData.score} / 100 (${rData.level})`;
+    }
+
     updateBreadcrumb();
     refreshActiveView();
 }
@@ -216,15 +235,51 @@ async function loadPersonsViewData() {
         container.innerHTML = `
             <div class="card">
                 <div style="display: flex; gap: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px;">
-                    <img src="${p.photo_url}" style="width: 100px; height: 100px; border-radius: 14px; object-fit: cover; border: 3px solid var(--accent-blue);">
+                    <img src="${p.photo_url}" style="width: 100px; height: 100px; border-radius: 14px; object-fit: cover; border: 3px solid var(--accent-orange);">
                     <div>
                         <div style="font-size: 24px; font-weight: 800; color: var(--text-main);">${p.name}</div>
-                        <div style="font-size: 15px; font-weight: 700; color: var(--accent-blue); margin: 4px 0;">Role: ${p.role} (ID: ${p.id})</div>
+                        <div style="font-size: 15px; font-weight: 700; color: var(--accent-orange); margin: 4px 0;">Role: ${p.role} (ID: ${p.id})</div>
                         <div style="font-size: 13px; color: var(--text-muted); display: flex; gap: 20px; margin-top: 8px;">
                             <div>Case: <strong style="color: var(--text-main);">${currentCaseId}</strong></div>
                             <div>Status: <span class="badge badge-high">${p.status}</span></div>
                             <div>Last Updated: <strong style="color: var(--text-main);">${p.last_updated}</strong></div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- SAMPARK AI THREAT & RISK SCORE PANEL -->
+                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid ${p.risk_color || '#ef4444'}; border-radius: 12px; padding: 18px; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 22px;">⚡</span>
+                            <div>
+                                <div style="font-size: 16px; font-weight: 800; color: var(--text-main);">SAMPARK AI RISK SCORE EVALUATION</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Real-time multi-source threat indicator calculated across CDR, Banking, DVR ANPR & Blockchain</div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 28px; font-weight: 900; color: ${p.risk_color || '#ef4444'};">${p.risk_score || 75} / 100</div>
+                            <span class="badge" style="background: ${p.risk_color || '#ef4444'}; color: #ffffff; font-weight: 800; font-size: 11px;">${p.risk_level || 'HIGH RISK'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Risk Bar Gauge -->
+                    <div style="width: 100%; height: 10px; background: #1e293b; border-radius: 5px; overflow: hidden; margin-bottom: 16px;">
+                        <div style="width: ${p.risk_score || 75}%; height: 100%; background: ${p.risk_color || '#ef4444'}; transition: width 0.8s ease-in-out;"></div>
+                    </div>
+
+                    <!-- Risk Factor Breakdown Grid -->
+                    <div style="font-size: 12px; font-weight: 800; color: var(--accent-orange); margin-bottom: 8px;">KEY RISK CONTRIBUTION FACTORS:</div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
+                        ${(p.risk_factors || []).map(f => `
+                            <div style="padding: 10px; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 12px; color: var(--text-main);">
+                                    <span>${f.category}: ${f.factor}</span>
+                                    <span style="color: ${p.risk_color || '#ef4444'};">+${f.points} PTS</span>
+                                </div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">${f.detail}</div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
 
