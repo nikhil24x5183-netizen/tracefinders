@@ -52,15 +52,15 @@
         
         <!-- 2. GLOBAL CONTEXT BAR HEADER -->
         <header class="context-bar">
-            <div style="display: flex; align-items: center; gap: 14px;">
-                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar" style="background: transparent; border: none; font-size: 20px; color: var(--text-main); cursor: pointer;">☰</button>
+            <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar" style="background: transparent; border: none; font-size: 18px; color: var(--text-main); cursor: pointer; padding: 4px;">☰</button>
                 <div class="search-box">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="global-search-input" class="search-input" placeholder="Search Person, Phone, Vehicle, Wallet, EV-COM-001...">
+                    <input type="text" id="global-search-input" class="search-input" placeholder="Search person, phone, vehicle...">
                 </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
                 <div class="context-meta-group">
                     <div class="context-item">
                         <span class="context-label">CASE:</span>
@@ -72,25 +72,25 @@
                     </div>
                     <div class="context-item">
                         <span class="context-label">ROLE:</span>
-                        <span id="ctx-subject-role" class="badge badge-high">PRIMARY SUBJECT</span>
+                        <span id="ctx-subject-role" class="badge badge-high" style="font-size: 11px; padding: 3px 8px; white-space: nowrap;">PRIMARY SUBJECT</span>
                     </div>
-                    <div class="context-item" style="border-left: 1px solid var(--border-color); padding-left: 10px;">
+                    <div class="context-item" style="border-left: 1px solid var(--border-color); padding-left: 8px;">
                         <span class="context-label">RISK THREAT:</span>
-                        <div id="ctx-subject-risk-badge" class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; font-weight: 800; font-size: 12px;">⚡ 92 / 100 (CRITICAL RISK)</div>
+                        <div id="ctx-subject-risk-badge" class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; font-weight: 800; font-size: 11px; cursor: pointer; white-space: nowrap; padding: 3px 8px;" onclick="openRiskScoreModal('P-001')" title="Click for SAMPARK Risk Breakdown">⚡ 92/100 · CRITICAL RISK 🔍</div>
                     </div>
                 </div>
 
                 <!-- PERSON SELECTOR DROPDOWN & THEME TOGGLE -->
-                <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                     <select id="select-change-person" class="select-custom" onchange="changeActivePerson(this.value)">
-                        <option value="P-001" selected>🔴 Arjun Sharma (Primary Subject)</option>
-                        <option value="P-002">🔵 Rohan Mehta (Business Contact)</option>
-                        <option value="P-003">🟢 Priya Joshi (Associate)</option>
-                        <option value="P-004">🟡 Vikram Patil (Person of Interest)</option>
-                        <option value="P-005">🟣 Neha Kulkarni (Employee)</option>
-                        <option value="P-006">⚠️ Arjun S. (Ambiguous Match Candidate)</option>
+                        <option value="P-001" selected>Target: Arjun Sharma (Primary)</option>
+                        <option value="P-002">Target: Rohan Mehta (Contact)</option>
+                        <option value="P-003">Target: Priya Joshi (Associate)</option>
+                        <option value="P-004">Target: Vikram Patil (POI)</option>
+                        <option value="P-005">Target: Neha Kulkarni (Employee)</option>
+                        <option value="P-006">Target: Arjun S. (Candidate)</option>
                     </select>
-                    <button class="btn btn-secondary" id="theme-toggle-btn" onclick="toggleTheme()" style="padding: 6px 12px; font-size: 12px;">🌙 Dark</button>
+                    <button class="btn btn-secondary" id="theme-toggle-btn" onclick="toggleTheme()" style="padding: 6px 10px; font-size: 11px; white-space: nowrap;">🌙 Dark</button>
                 </div>
             </div>
         </header>

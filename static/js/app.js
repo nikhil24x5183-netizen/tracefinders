@@ -51,11 +51,19 @@ const PERSON_RISK_SCORES = {
     'P-006': { score: 88, level: 'CRITICAL RISK', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)' }
 };
 
+const PERSON_NAMES = {
+    'P-001': 'ARJUN SHARMA',
+    'P-002': 'ROHAN MEHTA',
+    'P-003': 'PRIYA JOSHI',
+    'P-004': 'VIKRAM PATIL',
+    'P-005': 'NEHA KULKARNI',
+    'P-006': 'ARJUN S.'
+};
+
 function changeActivePerson(personId) {
     currentPersonId = personId;
     
-    const selectP = document.getElementById('select-change-person');
-    const pName = selectP ? selectP.options[selectP.selectedIndex].text.split('(')[0].replace(/^[🔴🔵🟢🟡🟣⚠️]\s*/, '').trim().toUpperCase() : 'ARJUN SHARMA';
+    const pName = PERSON_NAMES[personId] || 'ARJUN SHARMA';
     
     const nameElem = document.getElementById('ctx-subject-name');
     if (nameElem) nameElem.innerText = pName;
@@ -75,7 +83,7 @@ function changeActivePerson(personId) {
         riskBadge.style.background = rData.bg;
         riskBadge.style.cursor = 'pointer';
         riskBadge.onclick = () => openRiskScoreModal(personId);
-        riskBadge.innerHTML = `⚡ ${rData.score} / 100 (${rData.level}) 🔍`;
+        riskBadge.innerHTML = `⚡ ${rData.score}/100 · ${rData.level} 🔍`;
     }
 
     updateBreadcrumb();
@@ -152,8 +160,7 @@ function closeRiskScoreModal() {
 function updateBreadcrumb() {
     const activeNav = document.querySelector('.nav-item.active');
     const moduleName = activeNav ? activeNav.innerText.trim().toUpperCase() : 'OPERATIONAL OVERVIEW';
-    const selectP = document.getElementById('select-change-person');
-    const pName = selectP ? selectP.options[selectP.selectedIndex].text.split('(')[0].replace(/^[🔴🔵🟢🟡🟣⚠️]\s*/, '').trim().toUpperCase() : 'ARJUN SHARMA';
+    const pName = PERSON_NAMES[currentPersonId] || 'ARJUN SHARMA';
     
     document.getElementById('breadcrumb-text').innerText = `CASE MANAGEMENT > ${currentCaseId} > ${pName} > ${moduleName}`;
 }
