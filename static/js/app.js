@@ -186,6 +186,7 @@ function switchTab(tabId) {
         updateBreadcrumb();
         
         if (tabId === 'overview') loadOverviewData();
+        if (tabId === 'risk') loadRiskViewData();
         if (tabId === 'cases') loadInvestigationsData();
         if (tabId === 'persons') loadPersonsViewData();
         if (tabId === 'graph') loadGraphData();
@@ -238,6 +239,143 @@ async function loadOverviewData() {
         }
     } catch (err) {
         console.error(err);
+    }
+// DEDICATED SAMPARK AI RISK THREAT INTELLIGENCE VIEW
+async function loadRiskViewData(personId = currentPersonId) {
+    const container = document.getElementById('risk-view-container');
+    if (!container) return;
+
+    container.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">Calculating SAMPARK AI Risk Threat Evaluation...</div>`;
+
+    try {
+        const res = await fetch(`/api/risk/${personId}`);
+        const data = await res.json();
+
+        // Calculate domain point contributions
+        let finPts = 0, telPts = 0, cctvPts = 0, blkPts = 0, otherPts = 0;
+        data.factors.forEach(f => {
+            const cat = (f.category || '').toUpperCase();
+            if (cat.includes('FIN')) finPts += f.points;
+            else if (cat.includes('TEL')) telPts += f.points;
+            else if (cat.includes('CCTV')) cctvPts += f.points;
+            else if (cat.includes('BLOCK')) blkPts += f.points;
+            else otherPts += f.points;
+        });
+
+        const allSubjects = [
+            { id: 'P-001', name: 'Arjun Sharma', role: 'Primary Subject', score: 92, color: '#ef4444' },
+            { id: 'P-002', name: 'Rohan Mehta', role: 'Business Contact', score: 85, color: '#f97316' },
+            { id: 'P-003', name: 'Priya Joshi', role: 'Associate', score: 68, color: '#eab308' },
+            { id: 'P-004', name: 'Vikram Patil', role: 'Person of Interest', score: 74, color: '#f97316' },
+            { id: 'P-005', name: 'Neha Kulkarni', role: 'Employee', score: 45, color: '#eab308' },
+            { id: 'P-006', name: 'Arjun S.', role: 'Candidate Match', score: 88, color: '#ef4444' }
+        ];
+
+        container.innerHTML = `
+            <!-- Subject Switcher Quick Bar -->
+            <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 20px;">
+                ${allSubjects.map(s => `
+                    <div onclick="changeActivePerson('${s.id}'); loadRiskViewData('${s.id}');" style="padding: 10px 14px; background: ${s.id === personId ? 'rgba(249, 115, 22, 0.15)' : 'var(--bg-card)'}; border: 1.5px solid ${s.id === personId ? 'var(--accent-orange)' : 'var(--border-color)'}; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                        <span style="font-weight: 800; color: ${s.id === personId ? 'var(--accent-orange)' : 'var(--text-main)'}; font-size: 13px;">${s.name}</span>
+                        <span class="badge" style="background: ${s.color}; color: #ffffff; font-size: 10px; font-weight: 800;">${s.score}</span>
+                    </div>
+                `).join('')}
+            </div>
+
+            <!-- Main Risk Metric & Target Subject Showcase -->
+            <div style="display: grid; grid-template-columns: 320px 1fr; gap: 20px; margin-bottom: 24px;">
+                <!-- Circular Risk Gauge Card -->
+                <div class="card" style="border: 2px solid ${data.risk_color}; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px 20px;">
+                    <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;">SAMPARK COMPOSITE RISK INDEX</div>
+                    <div style="font-size: 64px; font-weight: 900; color: ${data.risk_color}; line-height: 1; margin: 14px 0 6px 0;">${data.risk_score}</div>
+                    <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 12px;">OUT OF 100 MAXIMUM THREAT</div>
+                    <span class="badge" style="background: ${data.risk_color}; color: #ffffff; font-size: 13px; font-weight: 800; padding: 6px 16px; border-radius: 6px;">${data.risk_level}</span>
+                    
+                    <div style="width: 100%; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin-top: 20px;">
+                        <div style="width: ${data.risk_score}%; height: 100%; background: ${data.risk_color};"></div>
+                    </div>
+                </div>
+
+                <!-- Subject Profile & Domain Threat Weights Card -->
+                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; gap: 16px; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 16px;">
+                            <img src="${data.photo_url}" style="width: 64px; height: 64px; border-radius: 12px; object-fit: cover; border: 2px solid ${data.risk_color};">
+                            <div>
+                                <div style="font-size: 20px; font-weight: 800; color: var(--text-main);">${data.name}</div>
+                                <div style="font-size: 13px; color: var(--accent-orange); font-weight: 700;">${data.role} (Alias: ${data.alias})</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Subject ID: <strong>${data.person_id}</strong> | Case: <strong>${currentCaseId}</strong></div>
+                            </div>
+                        </div>
+
+                        <div style="font-size: 12px; font-weight: 800; color: var(--accent-orange); margin-bottom: 10px; text-transform: uppercase;">MULTI-DOMAIN RISK POINT ALLOCATION:</div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                            <div style="padding: 10px; background: var(--bg-card-hover); border-radius: 6px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">FINANCIAL</div>
+                                <div style="font-size: 18px; font-weight: 800; color: ${finPts > 0 ? 'var(--accent-orange)' : 'var(--text-main)'};">+${finPts} PTS</div>
+                            </div>
+                            <div style="padding: 10px; background: var(--bg-card-hover); border-radius: 6px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">TELECOM CDR</div>
+                                <div style="font-size: 18px; font-weight: 800; color: ${telPts > 0 ? 'var(--accent-orange)' : 'var(--text-main)'};">+${telPts} PTS</div>
+                            </div>
+                            <div style="padding: 10px; background: var(--bg-card-hover); border-radius: 6px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">CCTV ANPR</div>
+                                <div style="font-size: 18px; font-weight: 800; color: ${cctvPts > 0 ? 'var(--accent-orange)' : 'var(--text-main)'};">+${cctvPts} PTS</div>
+                            </div>
+                            <div style="padding: 10px; background: var(--bg-card-hover); border-radius: 6px; text-align: center;">
+                                <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">BLOCKCHAIN</div>
+                                <div style="font-size: 18px; font-weight: 800; color: ${blkPts > 0 ? 'var(--accent-orange)' : 'var(--text-main)'};">+${blkPts} PTS</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 14px;">
+                        Last Evaluated: <strong>${data.last_updated}</strong> | Algorithmic Model: <code>SAMPARK-XAI-v10</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contributing Risk Factors Table -->
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-title">🔍 Evidentiary Risk Factors Contributing to Score (${data.factors.length})</div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Risk Indicator Factor</th>
+                                <th>Evidentiary Pattern / Intelligence Summary</th>
+                                <th style="text-align: right;">Threat Points</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.factors.map(f => `
+                                <tr>
+                                    <td><span class="badge" style="background: rgba(249, 115, 22, 0.15); color: var(--accent-orange); font-weight: 800;">${f.category}</span></td>
+                                    <td><strong>${f.factor}</strong></td>
+                                    <td style="color: var(--text-muted);">${f.detail}</td>
+                                    <td style="text-align: right; font-weight: 800; color: ${data.risk_color};">+${f.points} PTS</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recommended Law Enforcement Actions -->
+            <div class="card">
+                <div class="card-title">🚨 Recommended Investigative Protocol & Next Steps</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+                    ${data.recommended_actions.map(act => `
+                        <div style="padding: 14px; background: var(--bg-card-hover); border-left: 4px solid var(--accent-orange); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-main);">
+                            ● ${act}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        container.innerHTML = `<div style="color: var(--status-red); padding: 20px;">Error loading SAMPARK AI Risk Analysis.</div>`;
     }
 }
 
