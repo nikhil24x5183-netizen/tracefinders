@@ -81,39 +81,59 @@ body {
 .brand {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
   padding: 10px 14px;
-  background: #040406 !important;
+  background: #040408 !important;
   border: 1px solid #222538 !important;
-  border-radius: 8px;
+  border-radius: 10px;
   margin: 12px 14px 16px 14px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.brand img {
+.brand:hover {
+  border-color: #ff6b00 !important;
+  box-shadow: 0 4px 18px rgba(255, 107, 0, 0.25);
+}
+
+.brand img, .brand-logo-emblem {
   height: 38px;
   width: auto;
-  max-width: 100%;
+  max-width: 48px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 6px rgba(249, 115, 22, 0.4));
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 8px rgba(255, 107, 0, 0.6));
 }
 
-.brand-text {
+.brand-text-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.brand-text, .brand-title {
+  font-weight: 900;
+  font-size: 21px;
+  letter-spacing: 1.8px;
+  color: #ffffff !important;
+  line-height: 1.1;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body.dark-mode .brand-text, body.dark-mode .brand-title {
+  color: #ffffff !important;
+}
+
+.sih-badge, .brand-subtitle {
+  font-size: 8.5px;
+  color: #ff6b00 !important;
   font-weight: 800;
-  font-size: 17px;
-  letter-spacing: 0.5px;
-  color: #1e3a8a;
-}
-
-body.dark-mode .brand-text {
-  color: #f8fafc;
-}
-
-.sih-badge {
-  font-size: 10px;
-  color: var(--accent-blue);
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-top: 3px;
+  white-space: nowrap;
 }
 
 .nav-list {

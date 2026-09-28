@@ -240,6 +240,8 @@ async function loadOverviewData() {
     } catch (err) {
         console.error(err);
     }
+}
+
 // DEDICATED SAMPARK AI RISK THREAT INTELLIGENCE VIEW
 async function loadRiskViewData(personId = currentPersonId) {
     const container = document.getElementById('risk-view-container');
