@@ -43,7 +43,7 @@
 
 ## 🌟 System Overview
 
-**SAMPARK** is a state-of-the-art criminal network analysis workstation engineered for law enforcement agencies, cybercrime investigation cells, and forensic intelligence teams under **Smart India Hackathon (SIH 2026 - Problem Statement SIH26189)**.
+**SAMPARK** is a state-of-the-art criminal network analysis workstation engineered for law enforcement agencies, cybercrime investigation cells, and forensic intelligence teams under **Smart India Hackathon (SIH 2026 - Problem Statement SIH26211)**.
 
 Traditional investigative tools suffer from context bleeding, static visualizations, and fragmented evidence data across isolated silos (CDR logs, bank wire ledgers, CCTV DVR streams, blockchain wallets, and social media OSINT). **SAMPARK** resolves this by establishing a **100% Person-Scoped Investigation Data Engine**, correlated through **Multi-Hop Cross-Domain Evidence Fusion** and **Explainable AI (XAI)** decision support.
 
